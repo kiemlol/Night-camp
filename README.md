@@ -33,6 +33,11 @@ The client build's baked `meta[name=nc-online-servers]` must contain the same
 HTTPS origin. Use a deployment-specific replacement before publishing; do not
 commit a production key.
 
+For the current smoke-test server, the key form accepts any 20-character
+beta-key-shaped value (for example `12345678901234567890`). This is a
+development convenience, not production authentication; replace it with a
+real account/key service before opening the server publicly.
+
 ## Current server scope
 
 Implemented: device/custom/email-shaped authentication, refresh sessions,
