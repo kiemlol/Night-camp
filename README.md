@@ -50,3 +50,18 @@ Still intentionally prototype-level: authoritative formulas, anti-cheat,
 multi-process coordination, production database migrations, payment, and
 complete dungeon/PvP/guild-war rules. Replace the JSON store with PostgreSQL
 and add rate limits/auth hardening before exposing it to the public internet.
+
+## Reverse-engineering notes and asset recovery
+
+- `docs/game-systems-catalog.md` records the recovered progression, combat,
+  jobs, skills, items, gear, refine, crafting, quest, map, dungeon, life-skill,
+  social and online contracts.
+- `docs/online-feature-ledger.md` records the HTTP/WebSocket and authoritative
+  state boundary.
+- `tools/survey-original.mjs`, `tools/audit-assets.mjs` and
+  `tools/download-runtime-assets.mjs` reproduce the public resource audit.
+
+The complete local research snapshot is about 540 MB. The GitHub `dist/`
+folder remains the smaller boot bundle so the repository is practical to
+clone; use the recovery tools against the public build to rebuild the full
+runtime asset tree.
