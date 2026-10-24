@@ -1,0 +1,263 @@
+/* resultfx.css — the result popup (js/resultfx.js), look C the user picked (assets/gen/nightcamp_resultfx_c_raw.png): a
+   painted band across the whole screen, the item in a painted medallion on its left, the words in the middle. Every
+   picture is painted (assets/resultfx/, tools/resultfx_cut.py); this file only places, moves, fades and tints them. */
+#rfx {
+  position: fixed; inset: 0; z-index: 80; pointer-events: auto; cursor: pointer; user-select: none; overflow: hidden;
+  --bh: min(36vh, 24vw);                 /* the band's height (the mockup: 24% of the width / 37% of the height) */
+  --ink: #1b1430;
+  font-family: 'Mitr', sans-serif;
+}
+#rfx[hidden] { display: none; }
+#rfx.rfx-small { --bh: min(24vh, 16vw); }
+#rfx img { display: block; pointer-events: none; -webkit-user-drag: none; }
+
+/* the dim over the crafting window */
+.rfx-dim { position: absolute; inset: 0; background: rgba(8, 6, 22, 0.42); opacity: 0; transition: opacity .15s; }
+#rfx.in .rfx-dim { opacity: 1; }
+#rfx.out .rfx-dim { opacity: 0; }
+#rfx.rfx-small .rfx-dim { background: rgba(8, 6, 22, 0.25); }
+
+/* the stage: everything is placed from the band's middle line */
+.rfx-stage { position: absolute; left: 0; right: 0; top: 48%; height: var(--bh); transform: translateY(-50%); }
+#rfx.out .rfx-stage { animation: rfx-out .2s ease-in forwards; }
+@keyframes rfx-out { to { transform: translateY(-50%) scaleY(0.02); opacity: 0; } }
+
+/* the band */
+.rfx-band { position: absolute; left: -2%; right: -2%; top: 0; bottom: 0; background: center / 100% 100% no-repeat; transform: scaleY(0); }
+#rfx.in .rfx-band { animation: rfx-open .3s cubic-bezier(.2, 1.4, .4, 1) forwards; }
+#rfx.s-fail.in .rfx-band, #rfx.s-drop.in .rfx-band, #rfx.s-saved.in .rfx-band { animation: rfx-open .34s cubic-bezier(.25, .9, .35, 1) forwards; }
+#rfx.s-broke.in .rfx-band { animation: rfx-open .22s cubic-bezier(.2, 1.6, .4, 1) forwards, rfx-shake .42s .18s linear; }
+@keyframes rfx-open { 0% { transform: scaleY(0); opacity: .4; } 100% { transform: scaleY(1); opacity: 1; } }
+@keyframes rfx-shake { 0%, 100% { translate: 0 0; } 15% { translate: -1.2% .6%; } 30% { translate: 1% -.5%; } 45% { translate: -.8% .3%; } 60% { translate: .6% -.2%; } 80% { translate: -.3% 0; } }
+
+/* light lines sweeping along the band's rims */
+.rfx-rim { position: absolute; left: -30%; width: 60%; height: calc(var(--bh) * 0.36); opacity: 0; }
+.rfx-rim.t { top: calc(var(--bh) * -0.17); }
+.rfx-rim.b { bottom: calc(var(--bh) * -0.17); }
+.rfx-rim img { width: 100%; height: 100%; }
+#rfx.in .rfx-rim { animation: rfx-sweep .75s .06s cubic-bezier(.3, .6, .4, 1) forwards; }
+#rfx.in .rfx-rim.b { animation-delay: .14s; }
+@keyframes rfx-sweep { 0% { transform: translateX(0); opacity: 0; } 15% { opacity: 1; } 80% { opacity: .9; } 100% { transform: translateX(190%); opacity: 0; } }
+/* the rims keep a soft glow after the sweep (the mockup's gold edge light) */
+.rfx-edge { position: absolute; left: 0; right: 0; height: calc(var(--bh) * 0.3); opacity: 0; background: center / 100% 100% no-repeat; }
+.rfx-edge.t { top: calc(var(--bh) * -0.15); }
+.rfx-edge.b { bottom: calc(var(--bh) * -0.15); }
+#rfx.in .rfx-edge { animation: rfx-fadein .4s .35s forwards, rfx-pulse 1.6s .75s ease-in-out infinite; }
+@keyframes rfx-fadein { to { opacity: .85; } }
+@keyframes rfx-pulse { 0%, 100% { opacity: .85; } 50% { opacity: .55; } }
+
+/* the medallion on the left (x = 25% of the screen, as in the mockup) */
+.rfx-med { position: absolute; left: 25%; top: 50%; width: calc(var(--bh) * 1.1); height: calc(var(--bh) * 1.1); transform: translate(-50%, -50%) scale(0); }
+#rfx.in .rfx-med { animation: rfx-pop .42s .08s cubic-bezier(.2, 1.5, .4, 1) forwards; }
+#rfx.s-fail.in .rfx-med, #rfx.s-drop.in .rfx-med, #rfx.s-saved.in .rfx-med { animation: rfx-thud .4s .1s cubic-bezier(.3, 1.2, .5, 1) forwards; }
+@keyframes rfx-pop { 0% { transform: translate(-50%, -50%) scale(.2) rotate(-25deg); } 100% { transform: translate(-50%, -50%) scale(1) rotate(0); } }
+@keyframes rfx-thud { 0% { transform: translate(-50%, -80%) scale(.9); opacity: 0; } 60% { transform: translate(-50%, -47%) scale(1.04, .94); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1); } }
+.rfx-med > * { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.rfx-burst { width: 260%; height: 260%; opacity: 0; }
+.rfx-burst img { width: 100%; height: 100%; }
+#rfx.in .rfx-burst { animation: rfx-burstin .5s .1s ease-out forwards; }
+.rfx-burst img { animation: rfx-spin 9s linear infinite; }
+#rfx.s-great .rfx-burst { width: 280%; height: 280%; }
+#rfx.s-broke .rfx-burst img { animation: rfx-throb .5s ease-in-out infinite alternate; }
+@keyframes rfx-burstin { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.2); } 40% { opacity: 1; } 100% { opacity: .9; transform: translate(-50%, -50%) scale(1); } }
+@keyframes rfx-spin { to { transform: rotate(360deg); } }
+@keyframes rfx-throb { from { transform: scale(.94); } to { transform: scale(1.06); } }
+.rfx-halo { width: 150%; height: 150%; opacity: 0; }
+#rfx.in .rfx-halo { animation: rfx-fadein .3s .2s forwards, rfx-pulse 1.2s .5s ease-in-out infinite; }
+#rfx.s-saved .rfx-halo { filter: hue-rotate(170deg) saturate(1.6); }
+.rfx-ring { width: 100%; height: 100%; }
+.rfx-ring img { width: 100%; height: 100%; object-fit: contain; }
+.rfx-item { width: 62%; height: 62%; }
+.rfx-item img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 calc(var(--bh) * .04) rgba(255, 255, 255, .55)); }
+#rfx.in .rfx-item { animation: rfx-drop .36s .16s cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes rfx-drop { 0% { transform: translate(-50%, -95%) scale(1.5); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+#rfx.s-fail .rfx-item img, #rfx.s-drop .rfx-item img { filter: grayscale(.75) brightness(.8); }
+#rfx.s-saved .rfx-item img { filter: drop-shadow(0 0 calc(var(--bh) * .05) rgba(140, 200, 255, .8)); }
+#rfx.s-great .rfx-item img { filter: drop-shadow(0 0 calc(var(--bh) * .06) rgba(230, 200, 255, .9)); }
+/* the item breaking: pieces of its own picture fly apart (code moves them) */
+#rfx.s-broke .rfx-item { animation: none; opacity: 1; }
+#rfx.s-broke.in .rfx-item > img { animation: rfx-gone .05s .3s forwards; }
+@keyframes rfx-gone { to { opacity: 0; } }
+.rfx-bit { position: absolute; inset: 0; background: center / contain no-repeat; opacity: 0; }
+#rfx.in .rfx-bit { animation: rfx-bit 1.5s .3s cubic-bezier(.12, .8, .35, 1) forwards; }
+@keyframes rfx-bit { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--r)); } }
+
+/* flying pieces: painted shards, stone chunks, sparkles, smoke, flares */
+.rfx-fly { position: absolute; left: var(--x); top: var(--y); width: var(--w); transform: translate(-50%, -50%); opacity: 0; }
+.rfx-fly img { width: 100%; height: auto; }
+#rfx.in .rfx-fly.shard { animation: rfx-shard var(--t, .9s) var(--d, .3s) cubic-bezier(.12, .75, .35, 1) forwards; }
+@keyframes rfx-shard { 0% { opacity: 1; transform: translate(-50%, -50%) scale(.4) rotate(0); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(var(--r)); } }
+#rfx.in .rfx-fly.chunk { animation: rfx-fall var(--t, 1.1s) var(--d, .25s) cubic-bezier(.5, 0, .9, .6) forwards; }
+@keyframes rfx-fall { 0% { opacity: 1; transform: translate(-50%, -50%) rotate(0); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--r)); } }
+#rfx.in .rfx-fly.star { animation: rfx-twinkle var(--t, 1.1s) var(--d, .3s) ease-in-out infinite; }
+@keyframes rfx-twinkle { 0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(.2) rotate(0); } 45% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(25deg); } }
+#rfx.in .rfx-fly.smoke { animation: rfx-smoke var(--t, 2.2s) var(--d, .15s) ease-out forwards; }
+@keyframes rfx-smoke { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.7); } 30% { opacity: var(--o, .75); } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.25); } }
+#rfx.in .rfx-fly.flare { animation: rfx-flare .7s var(--d, .08s) cubic-bezier(.2, 1.3, .4, 1) forwards, rfx-pulse 1.4s 1s ease-in-out infinite; }
+@keyframes rfx-flare { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.1) rotate(-20deg); } 30% { opacity: 1; } 100% { opacity: var(--o, .85); transform: translate(-50%, -50%) scale(1) rotate(0); } }
+#rfx.in .rfx-fly.flash { animation: rfx-flash .55s var(--d, .05s) ease-out forwards; }
+@keyframes rfx-flash { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); } }
+
+/* the words (the game's own Thai text) */
+.rfx-text { position: absolute; left: 61%; top: 50%; transform: translate(-50%, -50%); width: 58%; text-align: center; color: #fff; line-height: 1.12; }
+.rfx-title { position: relative; display: inline-block; font-weight: 700; font-size: calc(var(--bh) * 0.36); line-height: .98; letter-spacing: .01em; white-space: nowrap; }
+.rfx-title span { display: block; padding: 0 .08em; }
+.rfx-title .bk { color: var(--tk, #3a1c06); -webkit-text-stroke: .16em var(--tk, #3a1c06); text-shadow: 0 .07em 0 var(--tk, #3a1c06), 0 .1em .12em rgba(0, 0, 0, .5); }
+.rfx-title .fr { position: absolute; inset: 0; background: var(--tf, linear-gradient(#fffbe0 8%, #ffe066 38%, #ffb42a 62%, #ffd96a 92%)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+#rfx.in .rfx-title { animation: rfx-slam .38s .16s cubic-bezier(.2, 1.5, .45, 1) both; }
+@keyframes rfx-slam { 0% { transform: scale(2.4); opacity: 0; } 55% { opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+#rfx.s-fail.in .rfx-title, #rfx.s-drop.in .rfx-title { animation: rfx-sink .45s .18s ease-out both; }
+@keyframes rfx-sink { 0% { transform: translateY(-35%); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+#rfx.s-broke.in .rfx-title { animation: rfx-slam .3s .14s cubic-bezier(.2, 1.6, .45, 1) both, rfx-shake .4s .44s linear; }
+#rfx.s-great { --tk: #2b0e4a; --tf: linear-gradient(#fffbe8 6%, #ffe36e 34%, #ffb12a 60%, #ffe28a 92%); }
+#rfx.s-fail, #rfx.s-drop { --tk: #161a2c; --tf: linear-gradient(#ffffff 10%, #e2e8f2 45%, #9aa6ba 70%, #dfe5ef 95%); }
+#rfx.s-saved { --tk: #0d2142; --tf: linear-gradient(#ffffff 10%, #bfe4ff 45%, #5fb0ff 70%, #cfeaff 95%); }
+#rfx.s-broke { --tk: #2a0306; --tf: linear-gradient(#ffd2c2 6%, #ff5a3e 40%, #c8101e 70%, #ff7a5a 95%); }
+#rfx.s-plain { --tk: #1e2240; --tf: linear-gradient(#ffffff 10%, #fff3d6 50%, #e3d2a8 90%); }
+.rfx-kick { font-weight: 600; font-size: calc(var(--bh) * 0.085); color: #ffe7a6; opacity: .95; text-shadow: 0 .1em 0 var(--ink), 0 0 .3em rgba(0, 0, 0, .6); margin-bottom: .1em; }
+#rfx.s-fail .rfx-kick, #rfx.s-drop .rfx-kick, #rfx.s-saved .rfx-kick { color: #c9d2e4; }
+#rfx.s-broke .rfx-kick { color: #ffb3a3; }
+.rfx-name { font-weight: 600; font-size: calc(var(--bh) * 0.12); line-height: 1.08; text-shadow: 0 .09em 0 var(--ink), 0 0 .25em rgba(0, 0, 0, .7); margin-top: .1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rfx-step { font-weight: 700; font-size: calc(var(--bh) * 0.27); line-height: 1; white-space: nowrap; -webkit-text-stroke: .1em var(--ink); paint-order: stroke fill; text-shadow: 0 .06em 0 var(--ink); }
+.rfx-step .a { color: #fff; }
+.rfx-step .ar { font-style: normal; color: #fff; font-size: .7em; margin: 0 .2em; vertical-align: .08em; }
+.rfx-step .b { color: #ffbb33; display: inline-block; }
+.rfx-step .ar.down, .rfx-step .b.down { color: #ff6b5a; }
+.rfx-step .b.bad { color: #ff7a6a; font-size: .55em; }
+.rfx-step .gp { display: inline-block; font-size: .6em; color: var(--c); }
+#rfx.in .rfx-step .b { animation: rfx-punch .4s .42s cubic-bezier(.2, 1.6, .4, 1) both; }
+@keyframes rfx-punch { 0% { transform: scale(2); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.rfx-lines { list-style: none; margin: .05em 0 0; padding: 0; font-weight: 600; font-size: calc(var(--bh) * 0.1); text-shadow: 0 .1em 0 var(--ink), 0 0 .25em rgba(0, 0, 0, .7); }
+.rfx-lines li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rfx-lines li .up { color: #7dff7a; }
+.rfx-lines li.l-big { font-size: 1.2em; }
+.rfx-lines li.l-bad, .rfx-sub.l-bad { color: #ff7462; }
+.rfx-lines li.l-blue, .rfx-sub.l-blue { color: #9fd4ff; }
+.rfx-lines li.l-dim { color: #dfe4f2; }
+#rfx.in .rfx-name, #rfx.in .rfx-step, #rfx.in .rfx-lines, #rfx.in .rfx-kick { animation: rfx-up .35s both; }
+#rfx.in .rfx-kick { animation-delay: .12s; }
+#rfx.in .rfx-name { animation-delay: .28s; }
+#rfx.in .rfx-step { animation-delay: .34s; }
+#rfx.in .rfx-lines { animation-delay: .5s; }
+@keyframes rfx-up { 0% { transform: translateY(40%); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+
+/* the second line (the pity, what comes next) just under the band, dimmer */
+.rfx-sub { position: absolute; left: 61%; top: calc(100% + var(--bh) * 0.07); transform: translateX(-50%); padding: .12em .9em .18em; border-radius: 1em; background: rgba(10, 8, 26, .72); font-weight: 600; font-size: calc(var(--bh) * 0.075); color: #dfe4f2; white-space: nowrap; opacity: 0; text-shadow: 0 .08em 0 var(--ink); }
+#rfx.in .rfx-sub { animation: rfx-hint .4s .6s forwards; }
+#rfx.rfx-small .rfx-sub { display: none; }
+html.mob-port #rfx .rfx-sub { left: 50%; }
+
+/* "click to go on" under the band */
+.rfx-hint { position: absolute; left: 50%; top: calc(100% + var(--bh) * 0.24); transform: translateX(-50%); font-weight: 500; font-size: calc(var(--bh) * 0.075); color: #fff; opacity: 0; white-space: nowrap; text-shadow: 0 .1em 0 var(--ink), 0 0 .3em rgba(0, 0, 0, .8); }
+#rfx.in .rfx-hint { animation: rfx-hint .4s .7s forwards; }
+@keyframes rfx-hint { to { opacity: .8; } }
+#rfx.rfx-small .rfx-hint { display: none; }
+
+/* phones held upright: the band is narrow, so the words get more room */
+html.mob-port #rfx { --bh: min(30vh, 40vw); }
+html.mob-port #rfx .rfx-med { left: 23%; width: var(--bh); height: var(--bh); }
+html.mob-port #rfx .rfx-title { font-size: calc(var(--bh) * 0.3); }
+html.mob-port #rfx .rfx-text { left: 64%; width: 66%; }
+
+@media (prefers-reduced-motion: reduce) {
+  #rfx.in * { animation-duration: .01s !important; animation-delay: 0s !important; }
+}
+/* what was done, before the item's name ("ตีอาวุธ · ดาบ…") on the pages other than ตีบวก */
+.rfx-kk { color: #ffe08a; font-size: .82em; }
+.rfx-kk::after { content: ' · '; color: #fff; }
+#rfx.s-fail .rfx-kk, #rfx.s-drop .rfx-kk, #rfx.s-saved .rfx-kk { color: #c9d2e4; }
+/* a longer step (an option row, a grade) in smaller letters */
+.rfx-step .b.sm { font-size: .62em; vertical-align: .12em; }
+
+/* ---------------- look A, small (the default since 2026-10-17: "แบบนิดเดียวก็พอ ให้มันกดง่ายๆ มันมือหน่อย"): a stamp on the
+   item's own picture of the page; nothing darkens and nothing catches the mouse, so the next try clicks straight through */
+#rfa { position: fixed; z-index: 80; pointer-events: none; user-select: none; font-family: 'Mitr', sans-serif; --ink: #1b1430; }
+#rfa[hidden] { display: none; }
+#rfa img { display: block; -webkit-user-drag: none; }
+#rfa.out { opacity: 0; transform: translateY(-8px); transition: opacity .15s ease-in, transform .15s ease-in; }
+#craftgo.rfa-cover .rw-item, #craftgo.rfa-cover .fm-spot img, #craftgo.rfa-cover .cg-scene .cg-dish { visibility: hidden; } /* (the page's soft item, while the sharp one stands on it) */
+#craftgo.rfa-cover .rw-flash { visibility: hidden; }
+/* the page's own picture tinted the result's colour while the stamp shows (mockup A: the anvil glows gold, violet, grey, red) */
+#craftgo .rw-stage, #craftgo .fm-spot, #craftgo .cg-scene { transition: filter .25s ease-out; }
+#craftgo.rfa-t-ok :is(.rw-stage, .fm-spot, .cg-scene) { filter: sepia(.4) saturate(1.5) brightness(1.08); }
+#craftgo.rfa-t-plain :is(.rw-stage, .fm-spot, .cg-scene) { filter: sepia(.3) saturate(1.2) brightness(1.04); }
+#craftgo.rfa-t-great :is(.rw-stage, .fm-spot, .cg-scene) { filter: saturate(1.25) brightness(1.08); }
+#craftgo:is(.rfa-t-fail, .rfa-t-drop) :is(.rw-stage, .fm-spot, .cg-scene) { filter: saturate(.75) brightness(.86); }
+#craftgo.rfa-t-saved :is(.rw-stage, .fm-spot, .cg-scene) { filter: grayscale(.5) sepia(.35) hue-rotate(170deg) brightness(.9); }
+#craftgo.rfa-t-broke :is(.rw-stage, .fm-spot, .cg-scene) { filter: sepia(.7) hue-rotate(-28deg) saturate(2.4) brightness(.92); } /* (the refine page's own result line would print the same words under the stamp) */
+
+/* the light, kept inside the picture */
+#rfa .rfa-clip { position: absolute; inset: 0; border-radius: var(--rad, 0); overflow: hidden; }
+#rfa:not(.pic) .rfa-clip { overflow: visible; }
+#rfa .rfa-light { --L: calc(var(--s) * 1.25); position: absolute; left: var(--ix); top: var(--iy); width: var(--L); height: var(--L); margin: calc(var(--L) * -.5) 0 0 calc(var(--L) * -.5); opacity: 0; transform: scale(.3); }
+#rfa:not(.pic) .rfa-light { --L: calc(var(--is) * 2.6); }
+#rfa.in .rfa-light { animation: rfa-light .32s ease-out forwards, rfa-spin 7s linear infinite; }
+#rfa.s-broke.in .rfa-light { animation: rfa-light .25s .12s ease-out forwards; }
+#rfa .rfa-light.halo { filter: hue-rotate(170deg) saturate(1.5); }
+@keyframes rfa-light { 0% { opacity: 0; transform: scale(.3); } 45% { opacity: 1; } 100% { opacity: .82; transform: scale(1); } }
+@keyframes rfa-spin { from { rotate: 0deg; } to { rotate: 360deg; } }
+
+/* the item, drawn sharp */
+#rfa .rfa-item { position: absolute; left: var(--ix); top: var(--iy); width: var(--is); height: var(--is); transform: translate(-50%, -50%); }
+#rfa .rfa-item > img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .35)); }
+#rfa.in .rfa-item { animation: rfa-hop .38s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes rfa-hop { 0% { transform: translate(-50%, -50%) scale(.82); filter: brightness(2.2); } 50% { transform: translate(-50%, -50%) scale(1.14); } 100% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); } }
+#rfa.s-great .rfa-item > img { filter: drop-shadow(0 0 6px rgba(225, 190, 255, .95)) drop-shadow(0 3px 0 rgba(0, 0, 0, .35)); }
+#rfa.s-fail .rfa-item > img, #rfa.s-drop .rfa-item > img { filter: grayscale(.25) brightness(.9) drop-shadow(0 3px 0 rgba(0, 0, 0, .35)); }
+#rfa.s-fail.in .rfa-item, #rfa.s-drop.in .rfa-item { animation: rfa-shake .34s linear; }
+@keyframes rfa-shake { 0%, 100% { transform: translate(-50%, -50%); } 20% { transform: translate(-56%, -50%) rotate(-4deg); } 45% { transform: translate(-44%, -50%) rotate(3deg); } 70% { transform: translate(-53%, -50%) rotate(-2deg); } }
+#rfa.s-saved .rfa-item > img { filter: drop-shadow(0 0 7px rgba(140, 200, 255, .95)); }
+/* broken: the picture cut in wedges flying apart (pieces of its own picture, moved by code) */
+#rfa.s-broke .rfa-item { animation: none; }
+#rfa.s-broke.in .rfa-item > img { animation: rfx-gone .05s .14s forwards; }
+#rfa .rfx-bit { position: absolute; inset: 0; background: center / contain no-repeat; opacity: 0; }
+#rfa.in .rfx-bit { animation: rfa-bit .9s .14s cubic-bezier(.15, .75, .4, 1) forwards; }
+@keyframes rfa-bit { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(var(--dx) * .55), calc(var(--dy) * .55)) rotate(var(--r)); } }
+
+/* twinkles, smoke, shards */
+#rfa .rfa-star { position: absolute; left: var(--x); top: var(--y); width: calc(var(--s) * .19 * var(--z)); opacity: 0; transform: translate(-50%, -50%); }
+#rfa.in .rfa-star { animation: rfx-twinkle .9s var(--d) ease-in-out infinite; }
+#rfa .rfa-smoke { position: absolute; top: calc(var(--iy) + 6%); width: calc(var(--s) * 1.05); opacity: 0; transform: translate(-50%, -50%); }
+#rfa .rfa-smoke.l { left: calc(var(--ix) - 20%); }
+#rfa .rfa-smoke.r { left: calc(var(--ix) + 22%); }
+#rfa.in .rfa-smoke.l { animation: rfa-smokeL 1.2s ease-out forwards; }
+#rfa.in .rfa-smoke.r { animation: rfa-smokeR 1.2s .05s ease-out forwards; }
+@keyframes rfa-smokeL { 0% { opacity: 0; transform: translate(-40%, -40%) scale(.5); } 22% { opacity: 1; } 80% { opacity: .9; } 100% { opacity: 0; transform: translate(-58%, -58%) scale(1.08); } }
+@keyframes rfa-smokeR { 0% { opacity: 0; transform: translate(-60%, -40%) scale(.5); } 22% { opacity: 1; } 80% { opacity: .9; } 100% { opacity: 0; transform: translate(-42%, -60%) scale(1.08); } }
+#rfa .rfa-shard { position: absolute; left: var(--ix); top: var(--iy); width: calc(var(--s) * .11); opacity: 0; transform: translate(-50%, -50%); }
+#rfa.in .rfa-shard { animation: rfa-shard .8s .14s cubic-bezier(.12, .75, .35, 1) forwards; }
+@keyframes rfa-shard { 0% { opacity: 1; transform: translate(-50%, -50%) scale(.5); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx) * 2.4), calc(-50% + var(--dy) * 2.4)) scale(1) rotate(var(--r)); } }
+
+/* the ribbon with the word (mockup A: the ribbon crosses just above the anvil, the word big and golden fills its face) */
+#rfa .rfa-rib { position: absolute; left: 50%; top: var(--ry); width: var(--rw); transform: translate(-50%, -50%); opacity: 0; }
+#rfa .rfa-rib img { width: 100%; height: auto; }
+#rfa.in .rfa-rib { animation: rfa-stamp .3s .05s cubic-bezier(.25, 1.5, .45, 1) forwards; }
+@keyframes rfa-stamp { 0% { opacity: 0; transform: translate(-50%, -50%) scale(1.9) rotate(-8deg); } 60% { opacity: 1; } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); } }
+/* the golden outlined letters: a dark stroked copy behind, the gradient fill in front (as the big look's title) */
+#rfa .rfa-w, #rfa .rfa-n { position: absolute; left: 50%; transform: translate(-50%, -50%); display: inline-block; white-space: nowrap; font-weight: 700; line-height: 1.1;
+  font-size: var(--fs); --tk: #3a1c06; --tf: linear-gradient(#fffbe0 8%, #ffe066 38%, #ffb42a 64%, #ffd96a 92%); }
+#rfa .rfa-w { top: 44%; }
+#rfa .rfa-w span, #rfa .rfa-n > span { display: block; padding: 0 .06em; }
+#rfa .bk { color: var(--tk); -webkit-text-stroke: .17em var(--tk); text-shadow: 0 .08em 0 var(--tk), 0 .1em .14em rgba(0, 0, 0, .45); }
+#rfa .bk * { color: var(--tk) !important; }
+#rfa .fr { position: absolute; inset: 0; background: var(--tf); -webkit-background-clip: text; background-clip: text; color: transparent; }
+#rfa.s-great .rfa-w, #rfa.s-great .rfa-n { --tk: #2b0e4a; --tf: linear-gradient(#fffbe8 6%, #ffe36e 34%, #ffb12a 60%, #ffe28a 92%); }
+#rfa.s-fail .rfa-w, #rfa.s-drop .rfa-w, #rfa.s-fail .rfa-n, #rfa.s-drop .rfa-n { --tk: #161a2c; --tf: linear-gradient(#ffffff 10%, #e2e8f2 45%, #9aa6ba 72%, #dfe5ef 95%); }
+#rfa.s-saved .rfa-w, #rfa.s-saved .rfa-n { --tk: #0d2142; --tf: linear-gradient(#ffffff 10%, #bfe4ff 45%, #5fb0ff 72%, #cfeaff 95%); }
+#rfa.s-broke .rfa-w, #rfa.s-broke .rfa-n { --tk: #2a0306; --tf: linear-gradient(#ffd2c2 6%, #ff5a3e 40%, #c8101e 70%, #ff7a5a 95%); }
+#rfa.s-plain .rfa-w, #rfa.s-plain .rfa-n { --tk: #1e2240; --tf: linear-gradient(#ffffff 10%, #fff3d6 50%, #e3d2a8 90%); }
+
+/* the number, as big as the word, under the ribbon over its lower edge */
+#rfa .rfa-num { position: absolute; left: 50%; top: calc(var(--ry) + var(--rw) * .155); width: 0; height: 0; opacity: 0; }
+#rfa .rfa-n { top: 0; }
+#rfa .fr .a, #rfa .fr .ar { color: #fff; -webkit-text-fill-color: #fff; }
+#rfa .rfa-n .a { font-size: .6em; }
+#rfa .rfa-n .ar { font-style: normal; font-size: .6em; margin: 0 .12em; }
+#rfa .fr .ar.down, #rfa .fr .b.down, #rfa .fr .b.bad { color: #ff6b5a; -webkit-text-fill-color: #ff6b5a; }
+#rfa .rfa-n .sm { font-size: .62em; }
+#rfa .fr .gp { color: var(--c); -webkit-text-fill-color: var(--c); }
+#rfa .rfa-n .gp { font-size: .7em; }
+#rfa .fr [style*="color"] { -webkit-text-fill-color: currentColor; }
+#rfa.in .rfa-num { animation: rfa-punch .32s .16s cubic-bezier(.2, 1.6, .4, 1) forwards; }
+@keyframes rfa-punch { 0% { opacity: 0; transform: scale(2); } 100% { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { #rfa.in * { animation-duration: .01s !important; animation-delay: 0s !important; } }

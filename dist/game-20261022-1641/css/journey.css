@@ -1,0 +1,111 @@
+/* journey.css — the guided journey, layout B the user picked (assets/gen/nightcamp_journey_b_raw.png, 2026-10-12): the
+   stage tabs + the step bar across the top centre, the ember spirit's speech bubble beside the hero (the current step,
+   the reward, AUTO), the spotlight on a HUD button. Sizes measured on the mockup (its screen 1536 x 1024 ~ 1 u a pixel). */
+#journey { position: fixed; inset: 0; pointer-events: none; z-index: 30; font-family: 'Mitr', sans-serif; }
+#journey[hidden] { display: none; }
+/* the stage bar: one slim pill across the top centre (the user, after the first build: "ทำ uxui ให้อย่ารกนะ") */
+.jn-top { position: absolute; left: 50%; top: calc(12 * var(--u)); transform: translateX(-50%); pointer-events: auto; }
+.jn-bar { display: flex; align-items: center; gap: calc(14 * var(--u)); height: calc(46 * var(--u)); padding: 0 calc(8 * var(--u)) 0 calc(8 * var(--u)); box-sizing: border-box;
+  border: calc(3.5 * var(--u)) solid var(--ink); border-radius: 99px; background: rgba(255, 250, 240, 0.94); box-shadow: 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.25); }
+.jn-stg { display: flex; align-items: center; gap: calc(8 * var(--u)); font: 700 calc(16 * var(--u)) / 1 'Mitr', sans-serif; color: var(--ink); white-space: nowrap; }
+.jn-stg i { width: calc(26 * var(--u)); height: calc(26 * var(--u)); display: grid; place-items: center; border-radius: 50%; border: calc(2.5 * var(--u)) solid var(--ink); background: linear-gradient(#7fcaf8, #3b8fdc);
+  color: #fff; font: 800 normal calc(14 * var(--u)) / 1 'Mitr', sans-serif; }
+.jn-stg small { font: 500 calc(12.5 * var(--u)) / 1 'Mitr', sans-serif; color: #6a6278; }
+.jn-dots { position: relative; display: flex; align-items: center; gap: calc(7 * var(--u)); }
+.jn-dots::before { content: ''; position: absolute; left: calc(4 * var(--u)); right: calc(4 * var(--u)); top: 50%; height: calc(3 * var(--u)); margin-top: calc(-1.5 * var(--u)); background: #c3c5d2; border-radius: 99px; }
+/* each dot carries its step's number (a tick once done): the names were only on hover, which phones don't have */
+.jn-dots i { position: relative; display: grid; place-items: center; width: calc(21 * var(--u)); height: calc(21 * var(--u)); box-sizing: border-box; border-radius: 50%;
+  border: calc(2 * var(--u)) solid #8d90a4; background: #eceef3; font: 700 normal calc(11.5 * var(--u)) / 1 'Mitr', sans-serif; color: #6a6e86; }
+.jn-dots i.done { border-color: #1d5fb4; background: #3b8fdc; color: #fff; }
+.jn-dots i.cur { width: calc(27 * var(--u)); height: calc(27 * var(--u)); border: calc(2.5 * var(--u)) solid #c98a00; background: radial-gradient(#fff6b0, #ffc928); color: var(--ink);
+  font-size: calc(14 * var(--u)); box-shadow: 0 0 calc(8 * var(--u)) #ffd84a; animation: jn-pulse 1.2s ease-in-out infinite; }
+@keyframes jn-pulse { 50% { transform: scale(1.18); } }
+.jn-chest { flex: none; width: calc(40 * var(--u)); height: calc(34 * var(--u)); background: center / contain no-repeat; cursor: pointer; }
+.jn-chest.ready { animation: jn-bob 0.9s ease-in-out infinite; filter: drop-shadow(0 0 calc(8 * var(--u)) #ffd84a); }
+@keyframes jn-bob { 50% { transform: translateY(calc(-4 * var(--u))) rotate(-4deg); } }
+/* the spirit's speech bubble (placed beside the hero every frame) */
+.jn-say { position: absolute; left: 0; top: 0; width: calc(360 * var(--u)); box-sizing: border-box; padding: calc(12 * var(--u)) calc(18 * var(--u)) calc(15 * var(--u)); pointer-events: auto;
+  border: calc(4 * var(--u)) solid var(--ink); border-radius: calc(22 * var(--u)); background: linear-gradient(#fffaf0, #f6ecd8); box-shadow: 0 calc(5 * var(--u)) 0 rgba(0, 0, 0, 0.3); color: var(--ink); }
+/* the tail points at the spirit: tl (on the left), tr (on the right), .low (near the bottom, the bubble raised beside the
+   spirit), tb (under the bubble, pointing down), tt (over it, pointing up); js/journey.js picks the side that covers least */
+.jn-say::before, .jn-say::after { content: ''; position: absolute; border-style: solid; border-color: transparent; }
+.jn-say::before { left: calc(-25 * var(--u)); top: calc(50% - 16 * var(--u)); border-width: calc(16 * var(--u)) calc(25 * var(--u)) calc(16 * var(--u)) 0; border-right-color: var(--ink); }
+.jn-say::after { left: calc(-17 * var(--u)); top: calc(50% - 12 * var(--u)); border-width: calc(12 * var(--u)) calc(19 * var(--u)) calc(12 * var(--u)) 0; border-right-color: #f9f1e1; }
+.jn-say.tr::before { left: auto; right: calc(-25 * var(--u)); border-width: calc(16 * var(--u)) 0 calc(16 * var(--u)) calc(25 * var(--u)); border-color: transparent; border-left-color: var(--ink); }
+.jn-say.tr::after { left: auto; right: calc(-17 * var(--u)); border-width: calc(12 * var(--u)) 0 calc(12 * var(--u)) calc(19 * var(--u)); border-color: transparent; border-left-color: #f9f1e1; }
+.jn-say.low::before { top: auto; bottom: calc(14 * var(--u)); }
+.jn-say.low::after { top: auto; bottom: calc(18 * var(--u)); }
+.jn-say.tb::before { left: calc(var(--tx, 50%) - 16 * var(--u)); right: auto; top: 100%; bottom: auto; border-width: calc(24 * var(--u)) calc(16 * var(--u)) 0; border-color: transparent; border-top-color: var(--ink); }
+.jn-say.tb::after { left: calc(var(--tx, 50%) - 12 * var(--u)); right: auto; top: calc(100% - 5 * var(--u)); bottom: auto; border-width: calc(18 * var(--u)) calc(12 * var(--u)) 0; border-color: transparent; border-top-color: #f6ecd8; }
+.jn-say.tt::before { left: calc(var(--tx, 50%) - 16 * var(--u)); right: auto; top: auto; bottom: 100%; border-width: 0 calc(16 * var(--u)) calc(24 * var(--u)); border-color: transparent; border-bottom-color: var(--ink); }
+.jn-say.tt::after { left: calc(var(--tx, 50%) - 12 * var(--u)); right: auto; top: auto; bottom: calc(100% - 5 * var(--u)); border-width: 0 calc(12 * var(--u)) calc(18 * var(--u)); border-color: transparent; border-bottom-color: #fffaf0; }
+.jn-step { display: inline-block; padding: calc(3 * var(--u)) calc(12 * var(--u)); border-radius: 99px; border: calc(2.5 * var(--u)) solid #d6c8a8; background: #fff; font: 700 calc(17 * var(--u)) / 1.2 'Mitr', sans-serif; }
+.jn-step em { font-style: normal; font-weight: 500; font-size: calc(14 * var(--u)); color: #6a6278; }
+.jn-say h3 { margin: calc(7 * var(--u)) 0 calc(3 * var(--u)); font: 700 calc(21 * var(--u)) / 1.25 'Mitr', sans-serif; }
+.jn-where { display: flex; align-items: center; gap: calc(6 * var(--u)); font: 500 calc(16 * var(--u)) / 1.3 'Mitr', sans-serif; color: #4a4258; }
+.jn-where::before { content: ''; flex: none; width: calc(12 * var(--u)); height: calc(16 * var(--u)); background: #6a6278; clip-path: path('M6 0C2.7 0 0 2.6 0 5.8 0 10 6 16 6 16s6-6 6-10.2C12 2.6 9.3 0 6 0zm0 8.2A2.4 2.4 0 1 1 6 3.4a2.4 2.4 0 0 1 0 4.8z'); }
+.jn-prog { position: relative; height: calc(20 * var(--u)); margin: calc(7 * var(--u)) 0; border-radius: 99px; border: calc(2.5 * var(--u)) solid #8a90a8; background: #e3e6ee; overflow: hidden; }
+.jn-prog i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(#8fd0ff, #3b8fdc); }
+.jn-prog span { position: relative; display: block; text-align: center; font: 700 calc(15 * var(--u)) / calc(17 * var(--u)) 'Mitr', sans-serif; }
+.jn-rew { display: flex; align-items: center; gap: calc(6 * var(--u)); font: 600 calc(16.5 * var(--u)) / 1.3 'Mitr', sans-serif; }
+.jn-act .jn-rew { margin-left: auto; }
+.jn-rew img { width: calc(26 * var(--u)); height: calc(26 * var(--u)); object-fit: contain; }
+.jn-hint { margin-top: calc(6 * var(--u)); font: 500 calc(15.5 * var(--u)) / 1.4 'Mitr', sans-serif; color: #4f475e; }
+.jn-hint kbd { display: inline-block; min-width: calc(22 * var(--u)); padding: 0 calc(5 * var(--u)); border-radius: calc(5 * var(--u)); border: calc(2 * var(--u)) solid var(--ink); background: #fff; font: 700 calc(14 * var(--u)) / calc(20 * var(--u)) 'Mitr', sans-serif; text-align: center; color: #2f6fc2; }
+.jn-act { display: flex; align-items: center; gap: calc(14 * var(--u)); margin-top: calc(10 * var(--u)); }
+.jn-auto { display: flex; align-items: center; justify-content: center; gap: calc(8 * var(--u)); width: calc(160 * var(--u)); height: calc(46 * var(--u)); border-radius: calc(14 * var(--u)); border: calc(4 * var(--u)) solid var(--ink);
+  background: linear-gradient(#ffe384, #f2b632); box-shadow: inset 0 calc(-4 * var(--u)) 0 rgba(0, 0, 0, 0.15); cursor: pointer; font: 800 calc(20 * var(--u)) / 1 'Mitr', sans-serif; color: #fff; -webkit-text-stroke: calc(4 * var(--u)) var(--ink); paint-order: stroke fill; }
+.jn-auto img { width: calc(30 * var(--u)); height: calc(30 * var(--u)); object-fit: contain; }
+.jn-auto.on { background: linear-gradient(#9fe08a, #4fae3a); }
+.jn-auto:disabled { filter: grayscale(0.7); opacity: 0.6; cursor: default; }
+.jn-skip { border: 0; background: none; padding: calc(6 * var(--u)) calc(4 * var(--u)); cursor: pointer; font: 600 calc(16 * var(--u)) / 1 'Mitr', sans-serif; color: #3a3650; text-decoration: underline; }
+.jn-hide { position: absolute; right: calc(10 * var(--u)); top: calc(8 * var(--u)); border: 0; background: none; cursor: pointer; font: 700 calc(16 * var(--u)) / 1 'Mitr', sans-serif; color: #8a8094; }
+/* small: one line beside the spirit (the default after a step's first 8 s; the spirit or the line opens it in full) */
+.jn-say.mini { width: auto; max-width: calc(420 * var(--u)); display: flex; align-items: center; gap: calc(10 * var(--u)); padding: calc(6 * var(--u)) calc(8 * var(--u)) calc(6 * var(--u)) calc(6 * var(--u)); border-radius: calc(18 * var(--u)); }
+.jn-mauto { flex: none; width: calc(48 * var(--u)); height: calc(48 * var(--u)); display: grid; place-items: center; padding: 0; border-radius: 50%; border: calc(3 * var(--u)) solid var(--ink); background: linear-gradient(#ffe384, #f2b632); cursor: pointer; }
+.jn-mauto img { width: calc(32 * var(--u)); height: calc(32 * var(--u)); object-fit: contain; }
+.jn-mauto.on { background: linear-gradient(#9fe08a, #4fae3a); animation: jn-pulse 1.4s ease-in-out infinite; }
+.jn-mtxt { min-width: 0; display: grid; gap: calc(2 * var(--u)); cursor: pointer; }
+.jn-mtxt b { font: 700 calc(18 * var(--u)) / 1.25 'Mitr', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jn-mtxt b em { font-style: normal; display: inline-block; margin-right: calc(7 * var(--u)); padding: 0 calc(7 * var(--u)); border-radius: 99px; background: #3b8fdc; color: #fff;
+  font: 700 calc(13.5 * var(--u)) / calc(21 * var(--u)) 'Mitr', sans-serif; vertical-align: calc(2 * var(--u)); }
+.jn-mtxt small { font: 500 calc(14.5 * var(--u)) / 1.25 'Mitr', sans-serif; color: #5f5772; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jn-mbar { display: block; height: calc(6 * var(--u)); border-radius: 99px; background: #e0e2ea; overflow: hidden; }
+.jn-mbar i { display: block; height: 100%; background: linear-gradient(90deg, #8fd0ff, #3b8fdc); }
+.jn-x { flex: none; align-self: flex-start; border: 0; background: none; padding: calc(2 * var(--u)) calc(4 * var(--u)); cursor: pointer; font: 700 calc(19 * var(--u)) / 1 'Mitr', sans-serif; color: #9a92a8; }
+/* a step done: the reward line pops */
+.jn-say.done { animation: jn-done 0.6s ease-out; }
+@keyframes jn-done { 30% { transform: scale(1.05); } }
+/* the HUD hint: a ring + a bouncing arrow over a button, a short line above it */
+.jn-spot { position: absolute; pointer-events: none; border-radius: calc(16 * var(--u)); box-shadow: 0 0 0 calc(4 * var(--u)) #ffd84a, 0 0 calc(22 * var(--u)) calc(6 * var(--u)) rgba(255, 216, 74, 0.6); animation: jn-ring 1.1s ease-in-out infinite; }
+@keyframes jn-ring { 50% { box-shadow: 0 0 0 calc(6 * var(--u)) #ffe98a, 0 0 calc(30 * var(--u)) calc(10 * var(--u)) rgba(255, 216, 74, 0.75); } }
+.jn-spot img { position: absolute; left: 50%; bottom: 100%; width: calc(46 * var(--u)); margin-left: calc(-23 * var(--u)); animation: jn-arrow 0.8s ease-in-out infinite; }
+@keyframes jn-arrow { 50% { transform: translateY(calc(-10 * var(--u))); } }
+.jn-spot b { position: absolute; left: 50%; bottom: calc(100% + 64 * var(--u)); transform: translateX(-50%); padding: calc(8 * var(--u)) calc(16 * var(--u)); white-space: nowrap; border-radius: calc(14 * var(--u));
+  border: calc(3.5 * var(--u)) solid var(--ink); background: #fffaf0; font: 600 calc(17 * var(--u)) / 1.2 'Mitr', sans-serif; color: var(--ink); }
+.jn-spot b kbd { display: inline-block; padding: 0 calc(6 * var(--u)); margin: 0 calc(3 * var(--u)); border-radius: calc(5 * var(--u)); border: calc(2 * var(--u)) solid var(--ink); font: 700 calc(15 * var(--u)) / 1.3 'Mitr', sans-serif; color: #2f6fc2; background: #fff; }
+/* the stage's chest opened */
+.jn-reward { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); pointer-events: auto; width: calc(420 * var(--u)); padding: calc(20 * var(--u)); box-sizing: border-box; text-align: center;
+  border: calc(4 * var(--u)) solid var(--ink); border-radius: calc(22 * var(--u)); background: linear-gradient(#fffaf0, #f3e8d2); color: var(--ink); box-shadow: 0 calc(6 * var(--u)) 0 rgba(0, 0, 0, 0.3); }
+.jn-reward img.ch { width: calc(150 * var(--u)); }
+.jn-reward h3 { margin: calc(6 * var(--u)) 0; font: 700 calc(22 * var(--u)) / 1.2 'Mitr', sans-serif; }
+.jn-reward p { margin: calc(4 * var(--u)) 0; font: 500 calc(16 * var(--u)) / 1.4 'Mitr', sans-serif; }
+.jn-reward .kw-btn { margin-top: calc(12 * var(--u)); min-width: calc(160 * var(--u)); }
+/* one guide at a time: the story quest's box waits while the journey shows (js/journey.js sets html.jn-on; × brings it back) */
+html.jn-on #hud .qt-box { display: none !important; }
+/* the ring on a window's button (the talk's "รับเควส"): over the windows, so outside #journey */
+.jn-spot.jn-dlg { position: fixed; z-index: 60; }
+/* (under the button, pointing up: above it sits the quest's text) */
+.jn-spot.jn-dlg img { bottom: auto; top: calc(100% + 4 * var(--u)); animation: jn-arrow-up 0.8s ease-in-out infinite; }
+.jn-spot.jn-dlg b { bottom: auto; top: calc(100% + 54 * var(--u)); }
+@keyframes jn-arrow-up { 0%, 100% { transform: rotate(180deg); } 50% { transform: rotate(180deg) translateY(calc(10 * var(--u))); } }
+/* phones: the HUD's --u is tiny there (0.4-0.46 px), so the journey gets its own size; the bar's numbers give way to plain
+   dots (the one-line view says "2/12") and the bar sits under the hero's frame (js/journey.js placeBar) */
+html.mob-port #journey { --u: 0.76px; }
+html.mob-land #journey { --u: 0.7px; }
+html.mob .jn-dots i { width: calc(13 * var(--u)); height: calc(13 * var(--u)); font-size: 0; }
+html.mob .jn-dots i.cur { width: calc(19 * var(--u)); height: calc(19 * var(--u)); font-size: 0; }
+html.mob .jn-stg small { display: none; }
+html.mob-port .jn-top { --u: 0.6px; left: calc(env(safe-area-inset-left) + 8px); transform: none; }
+html.mob-land .jn-top { --u: 0.58px; }
+html.mob .jn-say { width: calc(340 * var(--u)); }

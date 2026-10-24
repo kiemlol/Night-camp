@@ -1,0 +1,170 @@
+/* online.css — the online game's lobby (js/online/lobby.js) and its HUD bits (js/online/world.js), in the K look
+   (css/kui.css: cream body, sky title bar, ink outlines). Sizes in --u like the rest of the HUD. */
+.ol-lobby { z-index: 60; display: grid; place-items: center; background: rgba(10, 8, 24, 0.72); }
+.ol-lobby[hidden] { display: none; }
+.ol-win { width: min(calc(1080 * var(--u)), 94vw); max-height: 92vh; display: flex; flex-direction: column; }
+.ol-body { padding: calc(18 * var(--u)) calc(22 * var(--u)) calc(14 * var(--u)); display: flex; flex-direction: column; gap: calc(14 * var(--u)); overflow: auto; }
+.ol-status.bad { background: linear-gradient(#5a2433, #3a1622); }
+.ol-status.bad .i { background: linear-gradient(#ff9d9d, #e0525e); }
+.ol-acct { padding: calc(10 * var(--u)) calc(14 * var(--u)); }
+.ol-acct[hidden] { display: none; }
+.ol-acct-row { display: flex; align-items: center; justify-content: space-between; gap: calc(10 * var(--u)); flex-wrap: wrap; }
+.ol-acct-name b { font-weight: 600; }
+.ol-acct-btns { display: flex; gap: calc(8 * var(--u)); flex-wrap: wrap; }
+.ol-acct-btns [hidden] { display: none; }
+.ol-form { margin-top: calc(10 * var(--u)); display: grid; gap: calc(8 * var(--u)); }
+.ol-form[hidden], .ol-form [hidden] { display: none; }
+.ol-form-title { font-weight: 600; }
+.ol-form input {
+  font: 400 calc(18 * var(--u)) / 1.3 'Mitr', sans-serif; padding: calc(8 * var(--u)) calc(12 * var(--u)); color: var(--ink);
+  border: calc(3 * var(--u)) solid var(--ink); border-radius: calc(12 * var(--u)); background: #fffaf0;
+}
+.ol-form-btns { display: flex; gap: calc(8 * var(--u)); flex-wrap: wrap; }
+.ol-err { color: #c23a4a; min-height: 1.2em; }
+.ol-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(14 * var(--u)); }
+.ol-slot { display: flex; flex-direction: column; align-items: center; gap: calc(4 * var(--u)); padding: calc(12 * var(--u)); min-height: calc(330 * var(--u)); justify-content: flex-end; }
+.ol-slot.active { border-color: #3b8fdc; box-shadow: 0 0 0 calc(3 * var(--u)) #7fcaf8; }
+.ol-slot.empty { justify-content: center; }
+.ol-slot-hero { width: calc(180 * var(--u)); height: calc(200 * var(--u)); }
+.ol-slot-name { font-weight: 700; font-size: calc(22 * var(--u)); }
+.ol-slot-sub, .ol-slot-map { font-size: calc(16 * var(--u)); opacity: 0.85; }
+.ol-slot-n { font-weight: 600; opacity: 0.7; }
+.ol-slot-empty { font-size: calc(26 * var(--u)); opacity: 0.45; margin: calc(20 * var(--u)) 0; }
+.ol-slot .kw-btn { margin-top: calc(8 * var(--u)); }
+.ol-foot { display: flex; justify-content: space-between; font-size: calc(15 * var(--u)); opacity: 0.75; }
+.ol-foot a { color: #3b6fb0; }
+@media (max-width: 760px) { .ol-slots { grid-template-columns: 1fr; } .ol-slot { min-height: 0; } }
+
+/* the connection badge over the minimap (world.js) */
+.ol-badge {
+  position: fixed; right: calc(14 * var(--u)); bottom: calc(10 * var(--u)); z-index: 4; pointer-events: none; /* (under the windows) */
+  font: 500 calc(15 * var(--u)) / 1 'Mitr', sans-serif; color: #e8ecff; padding: calc(5 * var(--u)) calc(10 * var(--u));
+  border-radius: calc(10 * var(--u)); background: rgba(20, 22, 40, 0.72); border: calc(2 * var(--u)) solid rgba(255, 255, 255, 0.15);
+}
+.ol-badge i { display: inline-block; width: 0.6em; height: 0.6em; border-radius: 50%; background: #6ad36a; margin-right: 0.4em; }
+.ol-badge.bad i { background: #ee5a5a; }
+
+/* "ระหว่างที่คุณไม่อยู่": the offline farm's result (extras.js), in the journey's chest card (css/journey.css .jn-reward) */
+.ol-away { position: fixed; z-index: 55; }
+
+/* (put back 2026-10-22 with js/online/hud.js: the owner, "ตัวแสดงผล fps หายไปไหนอ่ะ"; the channel picker stays gone, js/online/chwin.js has the CH chip) */
+/* Status strip: FPS, signal, channel, server-wide and per-map counts (online/hud.js).
+   Touch uses Unity's safe-area top-left row ABOVE the hero; PC keeps the minimap corner. */
+html.nc-online #hud .netlist { display: none; }
+.ol-hud, #hud > .ol-meta {
+  --ol-cream: #fff3cf; --ol-muted: #d4cdbf; --ol-gold: #ffd873; --ol-good: #8fe08a; --ol-fair: #ffd166; --ol-poor: #ff6b66;
+  color: var(--ol-cream); pointer-events: auto;
+  font: 400 clamp(11px, calc(16 * var(--u)), 18px) / 1.5 'Mitr', sans-serif;
+  text-shadow: 0 1px 2px var(--ink), 1px 0 2px var(--ink), -1px 0 2px var(--ink);
+}
+.ol-hud { position: absolute; z-index: 7; right: calc(14 * var(--u)); top: calc(360 * var(--u)); width: max(calc(262 * var(--u)), 190px); max-width: calc(100vw - 24px); }
+/* (PC: the machine's line is #hud's own child on the top edge, placed by online/hud.js place()) */
+#hud > .ol-meta { position: absolute; z-index: 7; top: 6px; right: 300px; }
+.ol-hud[hidden], .ol-meta[hidden] { display: none; }
+.ol-server, .ol-meta { display: flex; align-items: center; justify-content: flex-end; gap: .5em; white-space: nowrap; }
+.ol-server { min-height: 1.7em; }
+.ol-total { color: var(--ol-gold); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ol-dot { width: .45em; height: .45em; border-radius: 50%; background: var(--ol-good); box-shadow: 0 1px 3px var(--ink); flex-shrink: 0; }
+.ol-hud.disconnected .ol-dot { background: var(--ol-poor); }
+.ol-hud.disconnected .ol-state { color: var(--ol-poor); }
+.ol-meta { color: var(--ol-muted); font-size: .9em; gap: .8em; }
+.ol-channel, .ol-ping, .ol-fps { font-family: 'Baloo 2', 'Mitr', sans-serif; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ol-fps { color: var(--ol-cream); }
+.ol-channel {
+  display: inline-flex; align-items: center; justify-content: center; gap: .25em; min-height: 24px; padding: 1px 6px;
+  border: 1px solid #fff3cf66; border-radius: 6px; background: #2a2435b8; color: var(--ol-cream);
+  font-size: inherit; line-height: 1; text-shadow: inherit; cursor: pointer; pointer-events: auto;
+}
+.ol-channel::after { content: '⌄'; font: 600 .9em / 1 sans-serif; }
+.ol-channel:hover:not(:disabled), .ol-channel[aria-expanded="true"] { background: #5d536b; border-color: var(--ol-gold); }
+.ol-channel:focus-visible { outline: 2px solid var(--ol-gold); outline-offset: 2px; }
+.ol-channel:disabled { cursor: default; opacity: .6; }
+.ol-channel[hidden] { display: none; }
+.ol-latency { display: inline-flex; align-items: center; gap: .3em; color: var(--ol-muted); }
+.ol-latency[data-quality="good"] { color: var(--ol-good); }
+.ol-latency[data-quality="fair"] { color: var(--ol-fair); }
+.ol-latency[data-quality="poor"] { color: var(--ol-poor); }
+.ol-signal { display: inline-flex; align-items: flex-end; gap: 2px; height: .8em; filter: drop-shadow(0 1px 1px var(--ink)); }
+.ol-signal i { width: 2px; height: 35%; border-radius: 1px; background: currentColor; opacity: .3; }
+.ol-signal i:nth-child(2) { height: 65%; }
+.ol-signal i:nth-child(3) { height: 100%; }
+[data-quality="good"] .ol-signal i, [data-quality="fair"] .ol-signal i:nth-child(-n+2), [data-quality="poor"] .ol-signal i:first-child { opacity: 1; }
+/* Unity StatusBar: x12/y3, height15; the portrait starts below it at y21. Reserve the web row's
+   measured height as well, so phone and tablet text can stay readable without overlapping the hero. */
+html.nc-online.mob #hud { --ol-card-top: max(calc(21 * var(--m)), calc(var(--ol-status-height, 0px) + 6 * var(--m))); }
+html.mob .ol-hud {
+  display: flex; flex-direction: column; align-items: stretch; gap: 2px;
+  left: calc(env(safe-area-inset-left) + 12 * var(--m)); right: auto; top: calc(env(safe-area-inset-top) + 3 * var(--m));
+  width: max-content; max-width: calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right) - 24 * var(--m));
+  min-height: calc(15 * var(--m)); font-size: clamp(10px, calc(11 * var(--m)), 16px);
+}
+html.mob .ol-hud[hidden] { display: none; }
+html.mob .ol-meta { display: flex; justify-content: space-between; font-size: inherit; }
+html.mob .ol-server { justify-content: flex-start; gap: .35em; }
+html.mob .ol-dot { display: none; }
+html.mob .ol-channel { min-width: 44px; min-height: 44px; padding: 0 6px; }
+html.nc-online.mob #hud .cframe { top: calc(env(safe-area-inset-top) + var(--ol-card-top)); }
+html.nc-online.mob #hud .buffs { top: calc(env(safe-area-inset-top) + var(--ol-card-top) + 10 * var(--u)); }
+html.nc-online.mob #hud .partybox { top: calc(env(safe-area-inset-top) + var(--ol-card-top) + 205 * var(--u)); }
+html.nc-online.mob-port #hud .tframe { top: calc(env(safe-area-inset-top) + var(--ol-card-top) + 188 * var(--u)); }
+html.nc-online.mob-port.mb-party #hud .tframe { top: calc(env(safe-area-inset-top) + var(--ol-card-top) + 204 * var(--m)); }
+
+/* Both counts share one server sample. The map detail is opened on demand. */
+.ol-population { position: relative; display: grid; gap: 2px; width: 100%; min-height: 44px; padding: 5px 10px; border: 1px solid #87c7ef70; border-radius: 9px; background: #192437bf; color: inherit; font: inherit; text-shadow: inherit; cursor: pointer; }
+.ol-population:hover, .ol-population[aria-expanded="true"] { background: #2c3c57; border-color: #9edcff; }
+.ol-population:focus-visible { outline: 2px solid #9edcff; outline-offset: 2px; }
+.ol-current-map { display: flex; align-items: center; justify-content: flex-end; gap: .5em; color: #d8efff; white-space: nowrap; }
+.ol-map-total { color: #a3e7ff; font-weight: 600; font-variant-numeric: tabular-nums; }
+.ol-caret { display: inline-block; width: .42em; height: .42em; margin-top: -.2em; border: solid currentColor; border-width: 0 2px 2px 0; transform: rotate(45deg); opacity: .8; }
+.ol-pop-panel { position: absolute; top: calc(100% + 6px); right: 0; width: min(330px, calc(100vw - 24px)); box-sizing: border-box; padding: 0 10px 10px; border: 2px solid #2a2435; border-radius: 12px; background: #f7efdc; color: #2a2435; text-shadow: none; box-shadow: 0 5px 20px #0005; font: 400 13px / 1.5 'Mitr', sans-serif; }
+.ol-pop-panel[hidden] { display: none; }
+.ol-pop-panel header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 -10px 6px; padding: 0 6px 0 12px; border-radius: 10px 10px 0 0; background: linear-gradient(#8fd3fb, #3b8fdc); color: #192b46; }
+.ol-pop-close { width: 44px; height: 44px; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+.ol-pop-close:focus-visible { outline: 2px solid currentColor; outline-offset: -4px; }
+.ol-map-list { overflow-y: auto; overscroll-behavior: contain; max-height: min(42vh, 300px); }
+.ol-map-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 8px; border-radius: 6px; }
+.ol-map-row.here { background: #dceeff; }
+.ol-map-row strong { flex: none; font-variant-numeric: tabular-nums; }
+.ol-pop-panel > small { display: block; margin-top: 8px; color: #6a6078; font-size: 10px; }
+html.mob .ol-population { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2px 10px; min-height: 36px; padding: 4px 8px; }
+html.mob .ol-clock { display: none; }
+html.mob .ol-pop-panel { left: 0; right: auto; width: min(330px, calc(100vw - 32px)); background: #29223e; border-color: #65547f; color: #f9f4ff; }
+html.mob .ol-pop-panel header { background: linear-gradient(#755494, #50376e); color: #f9f4ff; }
+html.mob .ol-map-row.here { background: #493565; }
+html.mob .ol-pop-panel > small { color: #c6b8dc; }
+
+/* PC: Unity's desktop strip (unity GameHud.MobileTopRight.cs DesktopStatusStrip, the owner 2026-10-01 "เอา ปิง เวลา fps
+   มาใส่"; Unity's look, the owner 2026-10-18): outlined words straight on the map, no plate, in two places (the owner's
+   pick of four placements, 2026-10-18): the machine's line on the screen's top edge left of the clock dial (the frame
+   rate against the one picked, the signal and ping, green / amber / red at 90% / 60% and 120 / 250 ms, the device's
+   time), and one row under the map's name: everyone online and this map's players, a click away from each map's count. */
+html:not(.mob) .ol-hud { display: grid; justify-items: end; gap: 0; width: max-content; }
+html:not(.mob) .ol-hud[hidden] { display: none; }
+html:not(.mob) .ol-meta { gap: .7em; color: var(--ol-cream); font-size: 1em; }
+html:not(.mob) .ol-clock { color: var(--ol-cream); font-family: 'Baloo 2', 'Mitr', sans-serif; font-weight: 700; font-variant-numeric: tabular-nums; }
+html:not(.mob) .ol-fps[data-quality="good"] { color: var(--ol-good); }
+html:not(.mob) .ol-fps[data-quality="fair"] { color: var(--ol-fair); }
+html:not(.mob) .ol-fps[data-quality="poor"] { color: var(--ol-poor); }
+html:not(.mob) .ol-fps[data-quality="unknown"], html:not(.mob) .ol-latency[data-quality="unknown"] { color: var(--ol-muted); }
+html:not(.mob) .ol-signal { height: .85em; gap: 2px; }
+html:not(.mob) .ol-signal i { width: 3px; }
+html:not(.mob) .ol-population {
+  display: inline-flex; align-items: center; justify-content: flex-end; gap: .55em; width: auto; min-height: 30px;
+  margin-right: -8px; padding: 0 8px; border: 0; border-radius: 999px; background: none; font-size: .95em;
+}
+html:not(.mob) .ol-population:hover, html:not(.mob) .ol-population[aria-expanded="true"] { background: #0e0c1e8c; }
+html:not(.mob) .ol-population:focus-visible { outline: 2px solid var(--ol-gold); outline-offset: 0; }
+html:not(.mob) .ol-server { min-height: 0; gap: .4em; }
+html:not(.mob) .ol-state { color: var(--ol-cream); }
+html:not(.mob) .ol-total, html:not(.mob) .ol-map-total { font-family: 'Baloo 2', 'Mitr', sans-serif; font-weight: 700; }
+html:not(.mob) .ol-current-map { gap: .4em; color: var(--ol-cream); }
+html:not(.mob) .ol-current-map::before { content: ''; width: 1px; height: .95em; margin-right: .15em; background: #fff3cf73; box-shadow: 0 0 2px var(--ink); }
+html:not(.mob) .ol-caret { margin: -.25em 0 0 .1em; filter: drop-shadow(0 1px 1px var(--ink)); }
+/* (a person, as Unity's PersonGlyph: green while connected, red when the line drops) */
+html:not(.mob) .ol-dot { position: relative; width: .62em; height: .78em; border-radius: 0; background: none; box-shadow: none; color: var(--ol-good); filter: drop-shadow(0 1px 1px var(--ink)); }
+html:not(.mob) .ol-dot::before { content: ''; position: absolute; left: 50%; top: 0; width: .36em; height: .36em; margin-left: -.18em; border-radius: 50%; background: currentColor; }
+html:not(.mob) .ol-dot::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: .36em; border-radius: .3em .3em .08em .08em; background: currentColor; }
+html:not(.mob) .ol-hud.disconnected .ol-dot { background: none; color: var(--ol-poor); }
+/* (no line: the state alone, amber, as Unity's; the counts come back with the server's next sample) */
+html:not(.mob) .ol-hud.disconnected .ol-state { color: var(--ol-fair); }
+html:not(.mob) .ol-hud.disconnected .ol-total, html:not(.mob) .ol-hud.disconnected .ol-current-map { display: none; }

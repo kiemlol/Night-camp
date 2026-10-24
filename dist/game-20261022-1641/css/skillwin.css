@@ -1,0 +1,195 @@
+/* skillwin.css — the skill window (js/skillwin.js), page 3 layout "B" (assets/gen/nightcamp_pg_skills_b_raw.png): the
+   skills by line on the left, the picked skill's dark card on the right, the skill bar along the bottom. Sizes are the
+   mockup's, measured at the same window width (1 mockup px = 1.066u). The window's look is css/kui.css. */
+.skw-wrap { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); transform-origin: 50% 50%; }
+.skw-win { width: calc(1200 * var(--u)); }
+.skw-sub { padding: calc(10 * var(--u)) 0 calc(4 * var(--u)); text-align: center; font: 600 calc(23 * var(--u)) / 1.35 'Mitr', sans-serif; }
+.skw-sub b { margin-left: calc(6 * var(--u)); font: 800 calc(28 * var(--u)) / 1 'Baloo 2', sans-serif; color: #6a6078; }
+.skw-sub b.some { color: #2f7fd6; }
+.skw-point-detail { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(4 * var(--u)) calc(16 * var(--u)); padding: calc(3 * var(--u)) calc(10 * var(--u)) 0; font: 500 calc(16 * var(--u)) / 1.4 'Mitr', sans-serif; }
+.skw-point-detail > span { white-space: nowrap; }
+.skw-tabs { flex-wrap: nowrap; overflow: hidden; padding-top: calc(6 * var(--u)); }
+.skw-tabs .kw-tab { flex: none; min-width: calc(232 * var(--u)); padding: calc(4 * var(--u)) calc(24 * var(--u)); font-size: calc(23 * var(--u)); }
+.skw-dot {
+  position: absolute; top: calc(-8 * var(--u)); right: calc(-8 * var(--u)); width: calc(18 * var(--u)); height: calc(18 * var(--u));
+  border-radius: 50%; background: #ff4d5e; border: calc(3 * var(--u)) solid var(--ink); animation: skw-pulse 1.2s ease-in-out infinite;
+}
+@keyframes skw-pulse { 50% { transform: scale(1.25); } }
+
+/* ---------- body: list | card (or the job cards over both) ---------- */
+.skw-body { display: grid; grid-template-columns: calc(568 * var(--u)) minmax(0, 1fr); gap: calc(34 * var(--u)); height: calc(600 * var(--u)); padding: calc(16 * var(--u)) calc(18 * var(--u)) 0; }
+.skw-body.jobs-on { grid-template-columns: minmax(0, 1fr); }
+.skw-body.jobs-on .skw-list, .skw-body.jobs-on .skw-card, .skw-body:not(.jobs-on) .skw-jobs { display: none; }
+.skw-list {
+  min-height: 0; padding: calc(6 * var(--u)) calc(8 * var(--u)) calc(10 * var(--u)) calc(12 * var(--u));
+  background: #efe4c9; border: calc(3 * var(--u)) solid #d4c6a6; border-radius: calc(18 * var(--u));
+}
+
+.skw-line { display: flex; align-items: center; gap: calc(10 * var(--u)); margin: calc(10 * var(--u)) calc(2 * var(--u)) calc(6 * var(--u)); }
+.skw-lic {
+  flex: none; width: calc(42 * var(--u)); height: calc(42 * var(--u)); overflow: hidden; border-radius: calc(10 * var(--u));
+  border: calc(3 * var(--u)) solid var(--ink); box-shadow: 0 calc(2 * var(--u)) 0 rgba(0, 0, 0, 0.2); background: #2a2f4d;
+}
+.skw-lic img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.skw-line b { font: 700 calc(25 * var(--u)) / 1.2 'Mitr', sans-serif; white-space: nowrap; }
+.skw-line .kw-tag.skw-auto { background: #f08a3c; }
+.skw-res {
+  flex: 1; max-width: calc(190 * var(--u)); height: calc(18 * var(--u)); margin-left: auto; overflow: hidden;
+  border-radius: calc(9 * var(--u)); border: calc(3 * var(--u)) solid var(--ink); background: #fffaf0;
+}
+.skw-res i { display: block; height: 100%; background: linear-gradient(#8fd4ff, #3b8fdc); border-right: calc(2 * var(--u)) solid var(--ink); box-sizing: border-box; }
+.skw-resn { flex: none; font: 500 calc(16 * var(--u)) / 1 'Mitr', sans-serif; color: #3f3850; }
+.skw-tier { flex: none; padding: calc(1 * var(--u)) calc(8 * var(--u)); border-radius: calc(9 * var(--u)); border: calc(2.5 * var(--u)) solid var(--ink); background: linear-gradient(#ffe384, #f2b632); font: 600 calc(14 * var(--u)) / 1.35 'Mitr', sans-serif; }
+
+.skw-rows { display: grid; padding: calc(3 * var(--u)) calc(6 * var(--u)); border-radius: calc(16 * var(--u)); background: #fffaf0; border: calc(3 * var(--u)) solid #dccfaf; }
+.skw-row {
+  display: grid; grid-template-columns: calc(58 * var(--u)) minmax(0, 1fr) calc(86 * var(--u)) calc(90 * var(--u)) calc(76 * var(--u));
+  grid-template-rows: 1fr auto; column-gap: calc(12 * var(--u)); align-items: center; min-height: calc(62 * var(--u));
+  padding: calc(4 * var(--u)) calc(8 * var(--u)); margin: 0 calc(-4 * var(--u)); border-radius: calc(12 * var(--u)); cursor: pointer;
+}
+.skw-row + .skw-row { box-shadow: inset 0 calc(2 * var(--u)) 0 #efe6d2; }
+.skw-row:hover { background: #fff; }
+.skw-row.sel { background: linear-gradient(#e8f5ff, #cfe7fd); box-shadow: inset 0 0 0 calc(3 * var(--u)) #3b8fdc; }
+.skw-row.armed { box-shadow: inset 0 0 0 calc(3 * var(--u)) #f2b632; }
+.skw-ic {
+  grid-row: 1 / span 2; position: relative; width: calc(56 * var(--u)); height: calc(56 * var(--u)); border-radius: calc(12 * var(--u)); overflow: hidden;
+  border: calc(3 * var(--u)) solid var(--ink); background: #2a2f4d; box-shadow: 0 calc(2 * var(--u)) 0 rgba(0, 0, 0, 0.2);
+}
+.skw-ic img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.skw-ic.drag { cursor: grab; }
+.skw-ic em {
+  position: absolute; right: 0; bottom: 0; min-width: calc(19 * var(--u)); padding: 0 calc(3 * var(--u)); border-radius: calc(7 * var(--u)) 0 0 0;
+  background: #ffd873; border-left: calc(2 * var(--u)) solid var(--ink); border-top: calc(2 * var(--u)) solid var(--ink);
+  font: 800 normal calc(13 * var(--u)) / 1.3 'Baloo 2', sans-serif; text-align: center; color: var(--ink);
+}
+.skw-row.none .skw-ic img { filter: saturate(0.6) brightness(0.95); }
+.skw-row.wlock .skw-ic img { filter: grayscale(1) brightness(0.75); }
+.skw-name { grid-column: 2; min-width: 0; }
+.skw-name b { display: block; font: 600 calc(20 * var(--u)) / 1.3 'Mitr', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.skw-row.none .skw-name b { color: #5d5470; }
+.skw-lv { grid-column: 3; font: 700 calc(20 * var(--u)) / 1 'Baloo 2', 'Mitr', sans-serif; white-space: nowrap; }
+.skw-lv small { font-size: calc(20 * var(--u)); color: #3f3850; }
+.skw-row .kw-tag { grid-column: 4; justify-self: start; min-width: calc(84 * var(--u)); box-sizing: border-box; text-align: center; padding: calc(2 * var(--u)) calc(12 * var(--u)); border: 0; border-radius: calc(14 * var(--u)); font: 600 calc(16 * var(--u)) / 1.45 'Mitr', sans-serif; box-shadow: inset 0 calc(-2 * var(--u)) 0 rgba(0, 0, 0, 0.14); }
+.kw-tag.k-active { background: #3f9be6; }
+.kw-tag.k-buff { background: #4cb95c; }
+.kw-tag.k-passive { background: #9a62e6; }
+.kw-tag.k-ult { background: linear-gradient(#ffe384, #f5b43a); color: var(--ink); }
+.skw-plus {
+  grid-column: 5; grid-row: 1 / span 2; cursor: pointer; width: calc(74 * var(--u)); height: calc(46 * var(--u)); padding: 0; border-radius: calc(14 * var(--u));
+  border: calc(3.5 * var(--u)) solid var(--ink); background: linear-gradient(#7fcaf8, #3b8fdc); color: #fff;
+  font: 800 calc(22 * var(--u)) / 1 'Baloo 2', sans-serif; letter-spacing: 0.03em; -webkit-text-stroke: calc(3 * var(--u)) var(--ink); paint-order: stroke fill;
+  box-shadow: inset 0 calc(-3 * var(--u)) 0 rgba(0, 0, 0, 0.18), 0 calc(2 * var(--u)) 0 rgba(0, 0, 0, 0.2);
+}
+.skw-plus:not(:disabled):hover { filter: brightness(1.1); transform: scale(1.05); }
+.skw-plus:not(:disabled):active { transform: scale(0.95); }
+.skw-plus:disabled { cursor: default; background: linear-gradient(#bcbac6, #94919f); box-shadow: inset 0 calc(-3 * var(--u)) 0 rgba(0, 0, 0, 0.15); }
+.skw-need1 { grid-column: 2 / span 3; grid-row: 2; display: flex; align-items: center; gap: calc(6 * var(--u)); min-width: 0; font: 500 calc(14.5 * var(--u)) / 1.35 'Mitr', sans-serif; color: #4a4258; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.skw-need1.w { color: #b0561f; }
+.skw-lock { flex: none; width: calc(15 * var(--u)); height: calc(17 * var(--u)); color: var(--ink); }
+
+/* ---------- the picked skill's card ---------- */
+.skw-card {
+  display: flex; flex-direction: column; min-height: 0; padding: calc(22 * var(--u)) calc(26 * var(--u)) calc(22 * var(--u)); overflow-y: auto;
+  background: linear-gradient(#232a45, #1c2136); box-shadow: inset 0 0 0 calc(3 * var(--u)) #333b60; scrollbar-width: thin; scrollbar-color: #4a5288 transparent;
+}
+.skw-ch { display: flex; align-items: center; gap: calc(22 * var(--u)); padding-bottom: calc(16 * var(--u)); }
+.skw-big {
+  flex: none; width: calc(128 * var(--u)); height: calc(128 * var(--u)); border-radius: calc(20 * var(--u)); overflow: hidden;
+  border: calc(4 * var(--u)) solid #e9e4f0; box-shadow: 0 0 0 calc(3 * var(--u)) #0f1226, 0 calc(5 * var(--u)) 0 calc(3 * var(--u)) rgba(0, 0, 0, 0.35); background: #11142a;
+}
+.skw-big img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.skw-big.drag { cursor: grab; }
+.skw-chd { min-width: 0; }
+.skw-cn { font: 700 calc(29 * var(--u)) / 1.25 'Mitr', sans-serif; color: #fff; }
+.skw-clv { margin-left: calc(6 * var(--u)); font: 800 calc(28 * var(--u)) / 1 'Baloo 2', 'Mitr', sans-serif; color: #ffd060; white-space: nowrap; }
+.skw-tags { display: flex; flex-wrap: wrap; gap: calc(8 * var(--u)); margin-top: calc(10 * var(--u)); }
+.skw-card .kw-tag { border: 0; padding: calc(2 * var(--u)) calc(16 * var(--u)); border-radius: calc(16 * var(--u)); font: 600 calc(16 * var(--u)) / 1.6 'Mitr', sans-serif; }
+.skw-card .kw-tag.k-active { background: #7cc4f7; color: #10304d; }
+.skw-card .kw-tag.k-buff { background: #86dd8f; color: #12401a; }
+.skw-card .kw-tag.k-passive { background: #c2a2f7; color: #2e1a52; }
+.skw-chip {
+  padding: calc(2 * var(--u)) calc(14 * var(--u)); border-radius: calc(16 * var(--u)); border: calc(2.5 * var(--u)) solid #6a7196;
+  background: #262c47; font: 500 calc(16 * var(--u)) / 1.45 'Mitr', sans-serif; color: #eef0ff; white-space: nowrap;
+}
+.skw-chip.on { background: #ffd873; border-color: #ffd873; color: var(--ink); font-weight: 600; }
+.skw-chip.dm { background: #7a4a3b; border-color: #9a6452; color: #ffe9df; }
+.skw-sec { padding: calc(14 * var(--u)) 0; border-top: calc(2 * var(--u)) solid #3a4268; }
+.skw-now { font: 400 calc(20 * var(--u)) / 1.5 'Mitr', sans-serif; color: #eef0ff; }
+.skw-next { font: 400 calc(19 * var(--u)) / 1.5 'Mitr', sans-serif; color: #7ee38a; }
+.skw-next b { font-weight: 600; }
+.skw-need { display: flex; flex-wrap: wrap; gap: calc(4 * var(--u)) calc(14 * var(--u)); font: 400 calc(17 * var(--u)) / 1.45 'Mitr', sans-serif; }
+.skw-need + .skw-need { margin-top: calc(4 * var(--u)); }
+.skw-need span { width: 100%; color: #b9c0e0; }
+.skw-need i { font-style: normal; }
+.skw-need i.ok, .skw-wpn.ok { color: #9fe3a0; }
+.skw-need i.no, .skw-wpn.no { color: #ff9f8c; }
+.skw-wpn { margin-top: calc(4 * var(--u)); font: 400 calc(18 * var(--u)) / 1.45 'Mitr', sans-serif; }
+.skw-wpn.bo { color: #c9a24a; }
+.skw-wpn.bo.on { color: #ffcf4a; }
+.skw-btns { display: flex; gap: calc(16 * var(--u)); margin-top: auto; padding-top: calc(12 * var(--u)); }
+.skw-btns .kw-btn { flex: 1; height: calc(64 * var(--u)); border-radius: calc(16 * var(--u)); font-size: calc(23 * var(--u)); }
+.skw-btns .kw-btn:disabled { filter: none; opacity: 1; background: linear-gradient(#c9c7d2, #9d9aab); }
+.skw-btns .kw-btn.skw-off { flex: 0 0 auto; padding: 0 calc(16 * var(--u)); font-size: calc(19 * var(--u)); }
+.skw-why { margin-top: calc(8 * var(--u)); text-align: center; font: 400 calc(14 * var(--u)) / 1.3 'Mitr', sans-serif; color: #b9c0e0; }
+.skw-empty { margin: auto; color: #b9c0e0; }
+
+/* ---------- the skill bar ---------- */
+.skw-bar {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; column-gap: calc(26 * var(--u));
+  margin: calc(16 * var(--u)) calc(18 * var(--u)) calc(18 * var(--u)); padding: calc(10 * var(--u)) calc(22 * var(--u)) calc(16 * var(--u));
+}
+.skw-bar-h { grid-column: 1; grid-row: 1; font: 700 calc(21 * var(--u)) / 1.2 'Mitr', sans-serif; }
+.skw-slots { grid-column: 1; grid-row: 2; display: flex; gap: calc(18 * var(--u)); margin-top: calc(24 * var(--u)); }
+.skw-slot {
+  position: relative; display: grid; place-items: center; width: calc(88 * var(--u)); height: calc(88 * var(--u)); cursor: pointer;
+  border-radius: calc(16 * var(--u)); border: calc(4 * var(--u)) solid var(--ink); background: linear-gradient(#f3ecdc, #dcd0b8);
+  box-shadow: inset 0 calc(-4 * var(--u)) 0 rgba(0, 0, 0, 0.1), 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.2);
+}
+.skw-slot img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: calc(12 * var(--u)); }
+.skw-slot img[draggable="true"] { cursor: grab; }
+.skw-slot i { font: 700 normal calc(40 * var(--u)) / 1 'Baloo 2', sans-serif; color: #b3a888; }
+.skw-slot .key {
+  position: absolute; z-index: 1; top: calc(-24 * var(--u)); left: 50%; transform: translateX(-50%); display: grid; place-items: center;
+  min-width: calc(32 * var(--u)); height: calc(30 * var(--u)); padding: 0 calc(3 * var(--u)); border-radius: calc(8 * var(--u)); box-sizing: border-box;
+  background: #fff; border: calc(3 * var(--u)) solid var(--ink); font: 800 calc(18 * var(--u)) / 1 'Baloo 2', sans-serif; color: var(--ink);
+}
+.skw-slot.ult { box-shadow: 0 0 0 calc(3 * var(--u)) #f2b632, 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.2); }
+.skw-slot.sel { box-shadow: 0 0 0 calc(4 * var(--u)) #3b8fdc; }
+.skw-slot.armed { animation: skw-glow 1s ease-in-out infinite; }
+.skw-slot.over { box-shadow: 0 0 0 calc(5 * var(--u)) #3b8fdc; transform: scale(1.05); }
+@keyframes skw-glow { 50% { box-shadow: 0 0 0 calc(5 * var(--u)) #ffd873; } }
+.skw-hint {
+  grid-column: 2; grid-row: 1 / span 2; align-self: center; padding: calc(10 * var(--u)) 0 calc(10 * var(--u)) calc(26 * var(--u));
+  border-left: calc(3 * var(--u)) solid #d4c6a6; font: 600 calc(19 * var(--u)) / 1.4 'Mitr', sans-serif; color: #4a4258;
+}
+.skw-hint small { display: block; margin-top: calc(4 * var(--u)); font: 400 calc(14 * var(--u)) / 1.4 'Mitr', sans-serif; color: #6a6078; }
+
+/* ---------- the job change cards (skillui.js HUD.renderJobs) in the K look ---------- */
+#skillwin .skw-jobs { min-height: 0; padding: calc(2 * var(--u)) calc(8 * var(--u)) calc(8 * var(--u)) calc(2 * var(--u)); }
+#skillwin .jobs-h { margin: calc(2 * var(--u)) calc(4 * var(--u)) calc(12 * var(--u)); font: 600 calc(19 * var(--u)) / 1.45 'Mitr', sans-serif; color: var(--ink); }
+#skillwin .jobs { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: calc(14 * var(--u)); margin: 0; }
+#skillwin .jobs.two { grid-template-columns: repeat(2, minmax(0, calc(320 * var(--u)))); justify-content: center; }
+#skillwin .job {
+  gap: calc(6 * var(--u)); padding: calc(12 * var(--u)); border-radius: calc(18 * var(--u)); background: #fffaf0;
+  border: calc(4 * var(--u)) solid var(--ink); box-shadow: inset 0 calc(-4 * var(--u)) 0 rgba(0, 0, 0, 0.06);
+}
+#skillwin .job.locked { opacity: 1; }
+#skillwin .job canvas {
+  width: calc(150 * var(--u)); height: calc(178 * var(--u)); border-radius: calc(14 * var(--u)); border: calc(3 * var(--u)) solid #d4c6a6;
+  background: radial-gradient(ellipse at 50% 70%, #fffbf2 0%, #f3e9d3 60%, #e5d7b9 100%);
+}
+#skillwin .job-name { font: 700 calc(22 * var(--u)) / 1.3 'Mitr', sans-serif; color: var(--ink); }
+#skillwin .job-desc { font: 400 calc(14 * var(--u)) / 1.45 'Mitr', sans-serif; color: #5d5470; }
+#skillwin .job-sk img { width: calc(36 * var(--u)); height: calc(36 * var(--u)); border-radius: calc(8 * var(--u)); border: calc(2 * var(--u)) solid var(--ink); object-fit: cover; }
+#skillwin .big.job-go {
+  margin: auto 0 0; width: 100%; height: calc(46 * var(--u)); padding: 0 calc(10 * var(--u)); border-radius: calc(14 * var(--u));
+  border: calc(4 * var(--u)) solid var(--ink); background: linear-gradient(#7fcaf8, #3b8fdc); color: #fff;
+  font: 700 calc(18 * var(--u)) / 1 'Mitr', sans-serif; -webkit-text-stroke: calc(4 * var(--u)) var(--ink); paint-order: stroke fill;
+  box-shadow: inset 0 calc(-4 * var(--u)) 0 rgba(0, 0, 0, 0.18), 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.25);
+}
+#skillwin .big.job-go[data-armed] { background: linear-gradient(#ffe384, #f2b632); color: var(--ink); -webkit-text-stroke: 0; }
+#skillwin .big.job-go:disabled { background: linear-gradient(#e4e1ea, #c3bfcd); color: #6a6078; -webkit-text-stroke: 0; opacity: 1; }
+
+/* A long branch name plus resonance/tier badges may need a second line on phones. */
+html.mob-port #skillwin .skw-line { flex-wrap: wrap; }
+html.mob-port #skillwin .skw-line .skw-res { min-width: calc(40 * var(--u)); }

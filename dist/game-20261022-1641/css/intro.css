@@ -1,0 +1,156 @@
+/* intro.css — the title intro (js/intro.js): the WebGL film, then the logo and the start button over the Dark Tree */
+#intro {
+  position: fixed; inset: 0; z-index: 300; overflow: hidden; background: #050309; user-select: none; cursor: pointer;
+  color: #fff3dc; font-family: 'Mitr', system-ui, sans-serif; transition: opacity 0.9s ease;
+}
+#intro.out { opacity: 0; pointer-events: none; }
+#intro .in-gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 0.3s; }
+#intro.on .in-gl { opacity: 1; }
+
+/* the logo comes down out of a violet glow */
+#intro .in-logo {
+  position: absolute; left: 50%; top: 2.5vh; width: min(30vw, 40vh, 500px); transform: translate(-50%, -1.5vh) scale(1.06);
+  opacity: 0; transition: opacity 1.3s ease, transform 1.6s cubic-bezier(.2, .8, .2, 1), filter 1.6s ease;
+  filter: drop-shadow(0 0 0 rgba(200, 90, 255, 0)) brightness(1.6); pointer-events: none;
+}
+#intro.logo .in-logo {
+  opacity: 1; transform: translate(-50%, 0) scale(1);
+  filter: drop-shadow(0 0 2.2vmin rgba(190, 80, 255, 0.55)) drop-shadow(0 0.6vmin 1vmin rgba(0, 0, 0, 0.6)) brightness(1);
+}
+
+.in-bottom {
+  position: absolute; left: 50%; bottom: 3vh; transform: translateX(-50%); width: min(560px, 86vw);
+  display: flex; flex-direction: column; align-items: center; gap: clamp(8px, 1.4vmin, 14px);
+}
+/* the start button: only once the game is ready */
+.in-start {
+  font: 600 clamp(20px, 3.3vmin, 34px) / 1 'Mitr', sans-serif; color: #fff3dc; letter-spacing: 0.04em; cursor: pointer;
+  padding: clamp(12px, 1.8vmin, 18px) clamp(34px, 6vmin, 64px); border-radius: 999px;
+  border: clamp(3px, 0.45vmin, 4px) solid #1d1029;
+  background: linear-gradient(#5a2a86, #2c1147 70%);
+  box-shadow: inset 0 0 0 2px rgba(225, 170, 255, 0.45), 0 0 2.4vmin rgba(225, 80, 255, 0.55), 0 0.6vmin 0 rgba(0, 0, 0, 0.45);
+  -webkit-text-stroke: clamp(3px, 0.5vmin, 5px) #1d1029; paint-order: stroke fill;
+  opacity: 0; transform: translateY(1.2vh) scale(0.96); pointer-events: none;
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(.2, .8, .2, 1), filter 0.2s;
+}
+.in-start::before { content: '▶ '; font-size: 0.8em; color: #ffb6f0; }
+#intro.ready .in-start { opacity: 1; transform: none; pointer-events: auto; animation: in-pulse 2.4s ease-in-out 0.8s infinite; }
+.in-start:hover { filter: brightness(1.18); }
+.in-start:active { transform: translateY(2px) scale(0.98); }
+@keyframes in-pulse {
+  0%, 100% { box-shadow: inset 0 0 0 2px rgba(225, 170, 255, 0.45), 0 0 2.4vmin rgba(225, 80, 255, 0.55), 0 0.6vmin 0 rgba(0, 0, 0, 0.45); }
+  50% { box-shadow: inset 0 0 0 2px rgba(240, 200, 255, 0.7), 0 0 4.4vmin rgba(240, 100, 255, 0.85), 0 0.6vmin 0 rgba(0, 0, 0, 0.45); }
+}
+.in-hint {
+  font: 400 clamp(12px, 1.7vmin, 16px) 'Mitr', sans-serif; color: rgba(240, 220, 255, 0.7); opacity: 0; transition: opacity 0.8s 0.6s;
+  -webkit-text-stroke: 3px #120a1c; paint-order: stroke fill;
+}
+#intro.ready .in-hint { opacity: 1; }
+/* still loading when the film ends: a thin violet line */
+.in-load { width: 100%; display: none; flex-direction: column; align-items: center; gap: 8px; }
+#intro.title:not(.ready) .in-load { display: flex; }
+.in-load span {
+  font: 400 clamp(13px, 1.9vmin, 18px) 'Mitr', sans-serif; color: #eadcff; -webkit-text-stroke: 3px #120a1c; paint-order: stroke fill;
+}
+.in-bar { width: 100%; height: 6px; border-radius: 99px; background: rgba(30, 14, 48, 0.85); box-shadow: 0 0 0 2px #1d1029; overflow: hidden; }
+.in-bar i { display: block; height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, #8a3cff, #ff6ad5); box-shadow: 0 0 10px #ff6ad5; transition: width 0.3s; }
+
+/* skip, during the film only */
+.in-skip {
+  position: absolute; right: clamp(12px, 2.4vmin, 28px); top: clamp(12px, 2.4vmin, 28px); cursor: pointer;
+  font: 500 clamp(13px, 1.8vmin, 17px) 'Mitr', sans-serif; color: rgba(255, 240, 255, 0.75); background: rgba(10, 4, 18, 0.45);
+  border: 1px solid rgba(220, 170, 255, 0.35); border-radius: 999px; padding: 6px 16px; opacity: 0; transition: opacity 0.4s;
+}
+#intro.on.film .in-skip { opacity: 1; }
+#intro:not(.film) .in-skip { pointer-events: none; }
+.in-skip:hover { color: #fff; border-color: rgba(240, 190, 255, 0.7); }
+
+/* ---------- the story film after "เริ่มเกม" (js/prologue.js) ---------- */
+#intro.story { cursor: default; }
+#intro.story .in-logo, #intro.story .in-bottom { display: none; }
+.pr-ui { position: absolute; inset: 0; pointer-events: none; transition: opacity 0.5s; }
+.pr-ui.gone { opacity: 0; }
+/* the narration: quiet film subtitles */
+.pr-cap {
+  position: absolute; left: 50%; bottom: 7vh; transform: translateX(-50%); width: min(1100px, 90vw); text-align: center;
+  font: 400 clamp(17px, 3vmin, 32px) / 1.5 'Mitr', sans-serif; color: #f3ecdf; opacity: 0;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95), 0 0 3px rgba(0, 0, 0, 0.9);
+}
+/* a general's name card, in their colour (--c) */
+.pr-card {
+  position: absolute; top: 34vh; display: flex; flex-direction: column; gap: 0.4vh; opacity: 0; --c: #fff;
+  max-width: 44vw;
+}
+.pr-card.side-L { left: 6vw; align-items: flex-start; text-align: left; }
+.pr-card.side-R { right: 6vw; align-items: flex-end; text-align: right; }
+.pr-card.side-B { left: 50%; top: auto; bottom: 9vh; align-items: center; text-align: center; max-width: 90vw; }
+.pr-card b {
+  font: 700 clamp(40px, 9vmin, 104px) / 1.05 'Mitr', sans-serif; color: #fff; letter-spacing: 0.01em;
+  -webkit-text-stroke: clamp(2px, 0.35vmin, 4px) rgba(10, 6, 16, 0.85); paint-order: stroke fill;
+  text-shadow: 0 0 2.4vmin var(--c), 0 0 0.6vmin var(--c);
+}
+.pr-card.side-B b { font-size: clamp(30px, 6.5vmin, 76px); }
+.pr-card i {
+  font: 500 clamp(18px, 3.3vmin, 38px) / 1.2 'Mitr', sans-serif; font-style: normal; color: var(--c);
+  -webkit-text-stroke: clamp(2px, 0.3vmin, 3px) rgba(10, 6, 16, 0.9); paint-order: stroke fill;
+}
+.pr-card em {
+  font: italic 600 clamp(10px, 1.5vmin, 16px) 'Baloo 2', sans-serif; letter-spacing: 0.22em; color: rgba(255, 255, 255, 0.78);
+  border-top: 2px solid var(--c); padding-top: 0.6vh; margin-top: 0.4vh;
+}
+.pr-hint {
+  position: absolute; right: clamp(12px, 2.4vmin, 28px); bottom: clamp(10px, 2vmin, 22px);
+  font: 400 clamp(11px, 1.5vmin, 14px) 'Mitr', sans-serif; color: rgba(255, 245, 255, 0.45);
+}
+/* a title card on black: "สามร้อยปีก่อน" / "สามร้อยปีต่อมา" */
+.pr-title {
+  position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; opacity: 0;
+  font: 300 clamp(26px, 5.4vmin, 64px) / 1.2 'Mitr', sans-serif; letter-spacing: 0.18em; color: #efe6f4;
+  text-shadow: 0 0 2vmin rgba(200, 40, 50, 0.45), 0 2px 10px #000;
+}
+
+/* the patch "DARK TREE" with a "NEW PATCH" sticker (so it reads as an update, not the game's subtitle), and the Meow-wat
+   logo bottom-left (title only). Two layouts to choose from: stacked under the game's logo (default), or a badge in the
+   top-right corner (#intro.pcorner, ?patchpos=corner) */
+#intro .in-patch {
+  position: absolute; left: 50%; top: calc(2.5vh + min(30vw, 40vh, 500px) * 0.6); width: min(32vw, 44vh, 540px);
+  transform: translate(-50%, 1.2vh) scale(0.9); opacity: 0; pointer-events: none;
+  transition: opacity 1s ease 0.55s, transform 1.2s cubic-bezier(.2, .8, .2, 1) 0.55s;
+}
+#intro .in-patch img {
+  display: block; width: 100%;
+  /* the dark bark letters sit on the tree's dark crown: lift them, ring them with a pale violet rim and a glow */
+  filter: brightness(1.35) saturate(1.15) drop-shadow(0 0 0.22vmin rgba(255, 214, 255, 0.95))
+    drop-shadow(0 0 1.5vmin rgba(200, 60, 255, 0.75)) drop-shadow(0 0.4vmin 0.8vmin rgba(0, 0, 0, 0.7));
+}
+#intro.logo .in-patch { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.in-ptag {
+  position: absolute; left: 1%; top: -1.1em; z-index: 1; transform: rotate(-7deg);
+  font: 800 clamp(12px, 2vmin, 21px) / 1 'Baloo 2', sans-serif; letter-spacing: 0.1em; color: #fff7e2; white-space: nowrap;
+  padding: 0.38em 0.75em 0.28em; border-radius: 0.5em; border: clamp(2px, 0.35vmin, 3px) solid #1d1029;
+  background: linear-gradient(#ff6f93, #d4245a 60%, #a8124a);
+  box-shadow: inset 0 0 0 2px rgba(255, 220, 230, 0.45), 0 0.4vmin 0 rgba(0, 0, 0, 0.45), 0 0 1.6vmin rgba(255, 80, 140, 0.55);
+  -webkit-text-stroke: clamp(2px, 0.3vmin, 3px) #4a0a26; paint-order: stroke fill;
+}
+/* the corner layout: the game's logo alone over the tree, the patch as an event badge top-right */
+#intro.pcorner .in-patch { left: auto; right: clamp(14px, 2.6vmin, 30px); top: clamp(26px, 5vmin, 54px); width: min(24vw, 33vh, 400px); transform: translate(0, 1.2vh) scale(0.9); }
+#intro.pcorner.logo .in-patch { transform: none; }
+.in-credit {
+  position: absolute; left: clamp(12px, 2.2vmin, 26px); bottom: clamp(10px, 2vmin, 24px);
+  opacity: 0; transition: opacity 1s ease 0.9s; pointer-events: none;
+}
+.in-credit img { display: block; height: clamp(40px, 8vmin, 78px); width: auto; filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.7)); }
+#intro.logo .in-credit { opacity: 1; }
+/* the copyright line, bottom right, with the logo */
+.in-copy {
+  position: absolute; right: clamp(12px, 2.2vmin, 26px); bottom: clamp(10px, 2vmin, 24px); pointer-events: none; white-space: nowrap;
+  font: 400 clamp(10px, 1.45vmin, 14px) 'Mitr', sans-serif; color: rgba(240, 225, 255, 0.72);
+  -webkit-text-stroke: 3px #120a1c; paint-order: stroke fill; opacity: 0; transition: opacity 1s ease 0.9s;
+}
+#intro.logo .in-copy { opacity: 1; }
+/* an upright phone: two lines, right of the Meow-wat logo */
+@media (max-aspect-ratio: 3/4) {
+  .in-copy { text-align: right; font-size: 10px; line-height: 1.35; } .in-copy span { display: block; }
+  .in-bottom { bottom: calc(3vh + 26px); } /* (the start button and its hint sit above it) */
+}
+#intro.story .in-patch, #intro.story .in-credit, #intro.story .in-copy { display: none; }

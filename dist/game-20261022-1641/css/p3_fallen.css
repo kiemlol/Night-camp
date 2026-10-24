@@ -1,0 +1,156 @@
+/* p3_fallen.css — หมดแรง, the knocked-out screen (js/p3_fallen.js) from the picked mockup B
+   (assets/gen/nightcamp_p3_fallen_b_raw.png): a night-blue veil with a vignette over the real world, ประกาย glowing over
+   the fallen hero with a bubble, หมดแรง big at the top on a ribbon, a tip card and the bottom strip. Sizes in --u
+   (1080 tall = 1080u); the mockup's 1024 px tall screen -> 1 px = 1.05u. Above the HUD (z 24), under the K windows (30). */
+#p3fall { position: fixed; inset: 0; z-index: 24; pointer-events: none; font-family: 'Mitr', sans-serif; color: var(--ink); animation: p3f-in 0.45s ease both; }
+#p3fall[hidden] { display: none; }
+#p3fall.out { opacity: 0; transition: opacity 0.35s ease; }
+@keyframes p3f-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- the night and the ember's warm light ---------- */
+.p3f-veil {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse calc(820 * var(--u)) calc(560 * var(--u)) at var(--hx, 50%) var(--hy, 56%), rgba(20, 30, 86, 0.04) 0%, rgba(16, 22, 70, 0.36) 50%, rgba(8, 10, 36, 0.82) 100%),
+    linear-gradient(rgba(14, 22, 72, 0.24), rgba(14, 22, 72, 0.24));
+}
+.p3f-warm {
+  position: absolute; left: 50%; top: 56%; width: calc(520 * var(--u)); height: calc(300 * var(--u)); transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(255, 180, 92, 0.55), rgba(255, 150, 64, 0.2) 55%, rgba(255, 140, 60, 0)); mix-blend-mode: screen;
+}
+
+.p3f-hero { position: absolute; left: 0; top: 0; filter: brightness(0.92) saturate(0.95) drop-shadow(0 0 calc(10 * var(--u)) rgba(255, 170, 80, 0.35)); }
+
+/* ---------- the title and the ribbon ---------- */
+.p3f-top { position: absolute; left: 0; right: 0; top: calc(34 * var(--u)); display: flex; flex-direction: column; align-items: center; }
+.p3f-title {
+  position: relative; margin: 0; font: 700 calc(166 * var(--u)) / 1.05 'Mitr', sans-serif; color: transparent; letter-spacing: 0.01em;
+  padding: 0 calc(20 * var(--u)); user-select: none;
+}
+.p3f-title::before, .p3f-title::after { content: attr(data-t); position: absolute; inset: 0; padding: inherit; }
+.p3f-title::before {
+  color: #2a2435; -webkit-text-stroke: calc(22 * var(--u)) #2a2435;
+  text-shadow: 0 calc(10 * var(--u)) 0 rgba(4, 6, 22, 0.55), 0 0 calc(30 * var(--u)) rgba(120, 170, 255, 0.35);
+}
+.p3f-title::after {
+  background: linear-gradient(#fffcea 18%, #fff0b6 52%, #ffd468 88%); -webkit-background-clip: text; background-clip: text; color: transparent;
+  -webkit-text-stroke: calc(2 * var(--u)) rgba(255, 255, 255, 0.25);
+}
+.p3f-ribbon {
+  display: flex; align-items: center; gap: calc(12 * var(--u)); margin-top: calc(4 * var(--u)); padding: calc(6 * var(--u)) calc(12 * var(--u));
+  min-width: calc(1000 * var(--u)); max-width: calc(1240 * var(--u)); box-sizing: border-box; border: calc(4 * var(--u)) solid #2a2435; border-radius: calc(36 * var(--u));
+  background: linear-gradient(#9ad6fb, #3f93de); box-shadow: 0 calc(6 * var(--u)) 0 rgba(4, 6, 22, 0.4);
+}
+.p3f-ribbon i {
+  flex: none; width: calc(22 * var(--u)); height: calc(22 * var(--u)); border-radius: 50%; box-sizing: border-box;
+  border: calc(3.5 * var(--u)) solid #2a2435; background: radial-gradient(circle at 35% 35%, #f4f8ff, #9fb6cf);
+}
+.p3f-ribbon span {
+  flex: 1; min-width: 0; padding: calc(6 * var(--u)) calc(42 * var(--u)); border-radius: calc(26 * var(--u)); border: calc(3 * var(--u)) solid #2a2435;
+  background: linear-gradient(#fffaf0, #f3e8cf); font: 600 calc(33 * var(--u)) / 1.3 'Mitr', sans-serif; color: #2a2435; text-align: center;
+}
+.p3f-ribbon b { font-weight: 700; }
+/* the EXP card: what the fall cost (js/p3_fallen.js expCard): lost (red number), saved by a feather (gold), free (blue) */
+.p3f-exp {
+  display: flex; align-items: center; gap: calc(12 * var(--u)); margin-top: calc(12 * var(--u));
+  padding: calc(8 * var(--u)) calc(26 * var(--u)); border-radius: calc(22 * var(--u)); box-sizing: border-box;
+  border: calc(3 * var(--u)) solid #2a2435; background: rgba(16, 14, 42, 0.88); box-shadow: 0 calc(5 * var(--u)) 0 rgba(4, 6, 22, 0.4);
+  color: #fff3d6; text-align: center; animation: p3f-exp-in 0.5s 0.25s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+.p3f-exp[hidden] { display: none; }
+.p3f-exp > span { display: flex; flex-direction: column; align-items: center; }
+.p3f-exp b { font: 600 calc(32 * var(--u)) / 1.3 'Mitr', sans-serif; }
+.p3f-exp em { font: 700 calc(44 * var(--u)) / 1 'Mitr', sans-serif; font-style: normal; color: #ff8f73; text-shadow: 0 0 calc(12 * var(--u)) rgba(255, 90, 70, 0.55); }
+.p3f-exp b small { font: 500 calc(22 * var(--u)) / 1 'Mitr', sans-serif; color: #d9cdb6; }
+.p3f-exp > span > small { font: 400 calc(22 * var(--u)) / 1.35 'Mitr', sans-serif; color: #c9c3e6; }
+.p3f-exp img { flex: none; width: calc(54 * var(--u)); height: auto; filter: drop-shadow(0 0 calc(8 * var(--u)) rgba(255, 200, 110, 0.7)); }
+.p3f-exp.lost { border-color: #5a2230; box-shadow: 0 calc(5 * var(--u)) 0 rgba(4, 6, 22, 0.4), 0 0 calc(22 * var(--u)) rgba(255, 80, 60, 0.28); }
+.p3f-exp.saved b { color: #ffd98a; }
+.p3f-exp.free b { color: #a9dcff; }
+@keyframes p3f-exp-in { from { opacity: 0; transform: translateY(calc(-10 * var(--u))) scale(0.9); } to { opacity: 1; transform: none; } }
+
+/* ---------- ประกาย, the ember spirit (its bottom centre at left/top: js/p3_fallen.js) ---------- */
+.p3f-spark { position: absolute; left: 46%; top: 52%; width: calc(156 * var(--u)); transform: translate(-50%, -100%); }
+.p3f-spark img {
+  position: relative; display: block; width: 100%; height: auto; animation: p3f-bob 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 calc(16 * var(--u)) rgba(255, 170, 70, 0.9)) drop-shadow(0 0 calc(40 * var(--u)) rgba(255, 140, 40, 0.45));
+}
+.p3f-glow {
+  position: absolute; left: 50%; top: 52%; width: calc(360 * var(--u)); height: calc(360 * var(--u)); transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(255, 196, 100, 0.55), rgba(255, 140, 50, 0.16) 58%, rgba(255, 140, 50, 0)); mix-blend-mode: screen;
+  animation: p3f-pulse 2.4s ease-in-out infinite;
+}
+@keyframes p3f-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(calc(-12 * var(--u))); } }
+@keyframes p3f-pulse { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
+.p3f-bubble {
+  position: absolute; left: calc(100% + 16px); bottom: 58%; width: max-content; max-width: calc(440 * var(--u)); box-sizing: border-box;
+  padding: calc(20 * var(--u)) calc(36 * var(--u)); border: calc(4 * var(--u)) solid #2a2435; border-radius: calc(34 * var(--u));
+  background: #fbf6ea; font: 700 calc(36 * var(--u)) / 1.3 'Mitr', sans-serif; color: #2a2435; text-align: center;
+  box-shadow: 0 calc(6 * var(--u)) 0 rgba(4, 6, 22, 0.35); animation: p3f-bob 2.4s ease-in-out infinite;
+}
+.p3f-bubble span { white-space: nowrap; }
+.p3f-bubble.l { left: auto; right: calc(100% + 16px); }
+.p3f-bubble.l::before, .p3f-bubble.l::after { left: auto; right: calc(18 * var(--u)); transform: scaleX(-1) skewX(-30deg); }
+.p3f-bubble.l::after { right: calc(23 * var(--u)); }
+.p3f-bubble::before, .p3f-bubble::after { content: ''; position: absolute; left: calc(18 * var(--u)); border-style: solid; border-color: transparent; }
+.p3f-bubble::before { bottom: calc(-30 * var(--u)); border-width: calc(30 * var(--u)) calc(30 * var(--u)) 0 0; border-top-color: #2a2435; transform: skewX(-30deg); }
+.p3f-bubble::after { bottom: calc(-21 * var(--u)); left: calc(23 * var(--u)); border-width: calc(22 * var(--u)) calc(22 * var(--u)) 0 0; border-top-color: #fbf6ea; transform: skewX(-30deg); }
+
+/* ---------- the tip and the strip ---------- */
+.p3f-bot { position: absolute; left: 0; right: 0; bottom: calc(52 * var(--u)); display: flex; flex-direction: column; align-items: center; gap: calc(26 * var(--u)); }
+.p3f-tip {
+  display: flex; align-items: center; gap: calc(18 * var(--u)); width: calc(1040 * var(--u)); min-height: calc(104 * var(--u)); box-sizing: border-box;
+  padding: calc(8 * var(--u)) calc(30 * var(--u)) calc(8 * var(--u)) calc(22 * var(--u)); border: calc(4 * var(--u)) solid #2a2435; border-radius: calc(22 * var(--u));
+  background: linear-gradient(#fffaf0, #f2e7cd); box-shadow: inset 0 0 0 calc(3 * var(--u)) #fffdf6, 0 calc(6 * var(--u)) 0 rgba(4, 6, 22, 0.4);
+}
+.p3f-tip img { flex: none; width: calc(66 * var(--u)); height: auto; }
+.p3f-tip p { margin: 0; font: 500 calc(29 * var(--u)) / 1.3 'Mitr', sans-serif; color: #2a2435; }
+.p3f-tip b { font-weight: 700; }
+.p3f-tip p span { white-space: nowrap; }
+.p3f-btns { display: flex; gap: calc(26 * var(--u)); width: calc(1040 * var(--u)); }
+.p3f-btns button { pointer-events: auto; cursor: pointer; height: calc(108 * var(--u)); box-sizing: border-box; border-radius: calc(28 * var(--u)); font-family: 'Mitr', sans-serif; }
+.p3f-go {
+  flex: 1.75 1 0; display: flex; align-items: center; justify-content: center; gap: calc(34 * var(--u)); padding: 0 calc(24 * var(--u));
+  border: calc(5 * var(--u)) solid #2a2435; background: linear-gradient(#ffe98f, #f6c442 55%, #eeaa22);
+  box-shadow: 0 0 0 calc(5 * var(--u)) #7fc6f6, 0 0 0 calc(9 * var(--u)) #2a2435, inset 0 calc(-6 * var(--u)) 0 rgba(150, 80, 0, 0.25), 0 calc(10 * var(--u)) calc(6 * var(--u)) rgba(4, 6, 22, 0.45);
+  font-weight: 700; font-size: calc(44 * var(--u)); color: #2a2435;
+}
+.p3f-go b {
+  display: grid; place-items: center; min-width: calc(84 * var(--u)); height: calc(68 * var(--u)); border-radius: calc(20 * var(--u));
+  background: linear-gradient(#323a66, #232846); border: calc(3 * var(--u)) solid #2a2435; color: #ffe9a0; font: 800 calc(46 * var(--u)) / 1 'Baloo 2', 'Mitr', sans-serif;
+}
+.p3f-go:hover { filter: brightness(1.06); }
+.p3f-go:active, .p3f-go.now { transform: translateY(calc(3 * var(--u))); }
+.p3f-wait {
+  flex: 1 1 0; padding: 0 calc(16 * var(--u)); border: calc(5 * var(--u)) solid #2a2435; background: linear-gradient(#b7bbc9, #858a9c);
+  box-shadow: 0 0 0 calc(4 * var(--u)) #4a4f6a, inset 0 calc(-5 * var(--u)) 0 rgba(0, 0, 0, 0.18), 0 calc(10 * var(--u)) calc(6 * var(--u)) rgba(4, 6, 22, 0.45);
+  font-weight: 700; font-size: calc(34 * var(--u)); color: #fff; -webkit-text-stroke: calc(5 * var(--u)) #2a2435; paint-order: stroke fill;
+}
+.p3f-wait[hidden] { display: none; }
+.p3f-wait:hover { filter: brightness(1.06); }
+.p3f-wait.on { background: linear-gradient(#7fcaf8, #3b8fdc); }
+
+/* ---------- a phone held upright: 500u across, the strip above the bottom edge ---------- */
+html.mob-port #p3fall { --u: calc(100vw / 500); }
+html.mob-port .p3f-veil::after { content: ''; position: absolute; inset: 0; background: linear-gradient(rgba(8, 10, 36, 0) 52%, rgba(8, 10, 36, 0.8) 74%, rgba(8, 10, 36, 0.92)); }
+html.mob-port .p3f-top { top: calc(30 * var(--u) + env(safe-area-inset-top)); }
+html.mob-port .p3f-title { font-size: calc(118 * var(--u)); }
+html.mob-port .p3f-ribbon { min-width: 0; max-width: calc(478 * var(--u)); margin-top: calc(2 * var(--u)); padding: calc(5 * var(--u)) calc(8 * var(--u)); gap: calc(6 * var(--u)); }
+html.mob-port .p3f-ribbon i { width: calc(16 * var(--u)); height: calc(16 * var(--u)); border-width: calc(3 * var(--u)); }
+html.mob-port .p3f-ribbon span { padding: calc(4 * var(--u)) calc(14 * var(--u)); font-size: calc(21 * var(--u)); }
+html.mob-port .p3f-exp { max-width: 92vw; padding: calc(6 * var(--u)) calc(16 * var(--u)); }
+html.mob-port .p3f-exp b { font-size: calc(24 * var(--u)); }
+html.mob-port .p3f-exp em { font-size: calc(30 * var(--u)); }
+html.mob-port .p3f-exp > span > small { font-size: calc(17 * var(--u)); }
+html.mob-port .p3f-spark { width: calc(124 * var(--u)); }
+html.mob-port .p3f-glow { width: calc(280 * var(--u)); height: calc(280 * var(--u)); }
+html.mob-port .p3f-bubble { left: calc(100% + 16px); max-width: calc(220 * var(--u)); font-size: calc(23 * var(--u)); padding: calc(12 * var(--u)) calc(18 * var(--u)); }
+html.mob-port .p3f-bot { bottom: calc(40 * var(--u) + env(safe-area-inset-bottom)); gap: calc(18 * var(--u)); }
+html.mob-port .p3f-tip { width: calc(470 * var(--u)); padding: calc(10 * var(--u)) calc(16 * var(--u)) calc(10 * var(--u)) calc(12 * var(--u)); gap: calc(10 * var(--u)); }
+html.mob-port .p3f-tip img { width: calc(46 * var(--u)); }
+html.mob-port .p3f-tip p { font-size: calc(20 * var(--u)); }
+html.mob-port .p3f-btns { width: calc(470 * var(--u)); gap: calc(14 * var(--u)); }
+html.mob-port .p3f-btns button { height: calc(84 * var(--u)); border-radius: calc(22 * var(--u)); }
+html.mob-port .p3f-go { font-size: calc(29 * var(--u)); gap: calc(16 * var(--u)); }
+html.mob-port .p3f-go b { min-width: calc(58 * var(--u)); height: calc(50 * var(--u)); font-size: calc(32 * var(--u)); }
+html.mob-port .p3f-wait { font-size: calc(23 * var(--u)); }

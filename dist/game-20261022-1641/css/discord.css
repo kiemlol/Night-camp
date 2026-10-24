@@ -1,0 +1,107 @@
+/* discord.css — Discord · แจ้งบัค / เสนอแนะ (js/discord.js): the card in the K look (css/kui.css), the pill left of the coins,
+   the phone menu grid's cell, the pill on the server / character select screens. Discord's colour #5865f2. Sizes in --u
+   (the card in --d: bigger on a phone). */
+
+/* ---------- the card ---------- */
+.dc-over { --d: var(--u); z-index: 64; display: grid; place-items: center; } /* (over the ESC menu and the front door, z 60-62) */
+html.mob:not(.mob-port) .dc-over { --d: calc(var(--u) * 1.5); } /* (a phone on its side; held upright, css/portrait.css gives
+   every K window --u = 1/500 of the width and makes it a full-width sheet) */
+html.mob-port .dc-over { display: flex; align-items: center; }
+html.mob-port .dc-over .kw-win.dc-win { width: 100% !important; flex: none; max-height: 100%; }
+.dc-over[hidden] { display: none; }
+.dc-win { display: flex; flex-direction: column; width: min(calc(100vw - 24px), calc(640 * var(--d))); max-height: calc(100vh - 24px); font-size: calc(18 * var(--d)); }
+.dc-win .kw-title { flex: none; height: calc(58 * var(--d)); font-size: calc(32 * var(--d)); -webkit-text-stroke-width: calc(6 * var(--d)); border-bottom-width: calc(4 * var(--d)); }
+.dc-win .kw-x { width: calc(40 * var(--d)); height: calc(40 * var(--d)); font-size: calc(20 * var(--d)); border-width: calc(4 * var(--d)); }
+.dc-body { display: flex; flex-direction: column; gap: calc(12 * var(--d)); padding: calc(18 * var(--d)) calc(22 * var(--d)) calc(14 * var(--d)); overflow: auto; }
+.dc-body > * { flex-shrink: 0; } /* (a short screen scrolls the body instead of squashing its parts) */
+
+.dc-badge {
+  flex: none; display: grid; place-items: center; width: calc(64 * var(--d)); height: calc(64 * var(--d)); border-radius: calc(18 * var(--d));
+  background: #fff; color: #5865f2; border: calc(4 * var(--d)) solid var(--ink); box-shadow: inset 0 calc(-4 * var(--d)) 0 rgba(0, 0, 0, 0.1);
+}
+.dc-badge svg { width: 66%; height: 66%; }
+.dc-top {
+  display: flex; align-items: center; gap: calc(14 * var(--d)); padding: calc(12 * var(--d)) calc(16 * var(--d));
+  border-radius: calc(18 * var(--d)); background: linear-gradient(#7480f7, #4b55d8); border: calc(4 * var(--d)) solid var(--ink);
+  box-shadow: inset 0 0 0 calc(3 * var(--d)) rgba(255, 255, 255, 0.18);
+}
+.dc-top h3 {
+  margin: 0; font: 800 calc(27 * var(--d)) / 1.15 'Baloo 2', 'Mitr', sans-serif; color: #fff;
+  -webkit-text-stroke: calc(5 * var(--d)) var(--ink); paint-order: stroke fill;
+}
+.dc-top p { margin: calc(3 * var(--d)) 0 0; font: 400 calc(16 * var(--d)) / 1.45 'Mitr', sans-serif; color: #eef0ff; }
+.dc-top p b { color: #ffd873; font-weight: 600; }
+
+.dc-ways { display: flex; flex-direction: column; gap: calc(8 * var(--d)); }
+.dc-way {
+  display: flex; align-items: center; gap: calc(14 * var(--d)); width: 100%; padding: calc(8 * var(--d)) calc(16 * var(--d)) calc(8 * var(--d)) calc(10 * var(--d));
+  cursor: pointer; text-align: left; color: var(--ink); font-family: 'Mitr', sans-serif;
+  background: #efe4c9; border: calc(3 * var(--d)) solid #d4c6a6; border-radius: calc(18 * var(--d));
+  box-shadow: 0 calc(3 * var(--d)) 0 rgba(42, 36, 53, 0.12);
+}
+.dc-way:hover { background: #fff6df; border-color: #a88a55; }
+.dc-way:active { transform: translateY(calc(2 * var(--d))); box-shadow: none; }
+.dc-pic { flex: none; display: grid; place-items: center; width: calc(58 * var(--d)); height: calc(56 * var(--d)); }
+.dc-pic img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 calc(2 * var(--d)) 0 rgba(0, 0, 0, 0.18)); }
+.dc-way.idea .dc-pic img { height: 90%; } /* (the lantern is tall: kept inside its row) */
+.dc-way.server .dc-badge { width: calc(54 * var(--d)); height: calc(54 * var(--d)); border-radius: calc(16 * var(--d)); background: #5865f2; color: #fff; }
+.dc-wt { display: flex; flex-direction: column; min-width: 0; }
+.dc-wt b { font: 700 calc(21 * var(--d)) / 1.3 'Mitr', sans-serif; }
+.dc-wt small { font: 400 calc(15 * var(--d)) / 1.4 'Mitr', sans-serif; color: #6a6078; }
+.dc-go { margin-left: auto; padding-left: calc(8 * var(--d)); font: 800 calc(34 * var(--d)) / 1 'Baloo 2', sans-serif; color: #a88a55; }
+.dc-way:hover .dc-go { color: var(--ink); }
+
+.dc-info { align-items: flex-start; gap: calc(12 * var(--d)); padding: calc(10 * var(--d)) calc(12 * var(--d)) calc(10 * var(--d)) calc(14 * var(--d)); border-radius: calc(16 * var(--d)); border-width: calc(4 * var(--d)); font-size: calc(15 * var(--d)); }
+.dc-info .i { width: calc(30 * var(--d)); height: calc(30 * var(--d)); font-size: calc(17 * var(--d)); border-width: calc(3 * var(--d)); }
+.dc-rows {
+  flex: 1; min-width: 0; display: grid; grid-template-columns: auto 1fr; gap: calc(1 * var(--d)) calc(12 * var(--d));
+  font: 400 calc(15 * var(--d)) / 1.45 'Mitr', sans-serif; user-select: text; -webkit-user-select: text;
+}
+.dc-rows .k { color: #9fb6cf; white-space: nowrap; }
+.dc-rows .v { color: #fff; overflow-wrap: anywhere; }
+.dc-copy { flex: none; align-self: center; height: calc(40 * var(--d)); padding: 0 calc(14 * var(--d)); font-size: calc(16 * var(--d)); border-width: calc(4 * var(--d)); border-radius: calc(12 * var(--d)); -webkit-text-stroke-width: calc(4 * var(--d)); }
+.dc-how { margin: 0; text-align: center; font: 400 calc(15 * var(--d)) / 1.45 'Mitr', sans-serif; color: #6a6078; }
+.dc-how b { color: var(--ink); font-weight: 600; }
+.dc-how span { white-space: nowrap; }
+.dc-said { min-height: calc(22 * var(--d)); margin: calc(-4 * var(--d)) 0 0; text-align: center; font: 600 calc(16 * var(--d)) / 1.35 'Mitr', sans-serif; }
+.dc-said.ok { color: #2f8f46; }
+.dc-said.bad { color: #c0473f; }
+.dc-said.pop { animation: dc-pop 0.3s ease; }
+@keyframes dc-pop { from { opacity: 0; transform: translateY(calc(4 * var(--d))); } }
+
+/* ---------- the main screen: a pill left of the coins (desktop) ---------- */
+#hud .hud-br > .dc-hud {
+  position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: calc(8 * var(--u)); cursor: pointer; pointer-events: auto;
+  height: calc(52 * var(--u)); padding: 0 calc(16 * var(--u)) 0 calc(8 * var(--u)); border-radius: calc(16 * var(--u));
+  background: linear-gradient(#7480f7, #4b55d8); border: calc(4 * var(--u)) solid var(--ink);
+  box-shadow: inset 0 0 0 calc(3 * var(--u)) #a88a55, 0 calc(5 * var(--u)) 0 rgba(0, 0, 0, 0.25);
+}
+#hud .hud-br > .dc-hud[hidden] { display: none; }
+#hud .hud-br > .dc-hud:hover { filter: brightness(1.1); }
+#hud .hud-br > .dc-hud:active { transform: translateY(calc(2 * var(--u))); }
+#hud .hud-br > .dc-hud .dc-mk { display: grid; place-items: center; width: calc(34 * var(--u)); height: calc(34 * var(--u)); color: #fff; filter: drop-shadow(0 calc(2 * var(--u)) 0 var(--ink)); }
+#hud .hud-br > .dc-hud .dc-mk svg { width: 100%; height: 100%; }
+#hud .hud-br > .dc-hud b {
+  font: 800 calc(24 * var(--u)) / 1 'Baloo 2', sans-serif; color: #fff; letter-spacing: 0.01em;
+  -webkit-text-stroke: calc(4 * var(--u)) var(--ink); paint-order: stroke fill;
+}
+
+/* ---------- the phone's menu grid: a cell (the desktop tray is full: hidden there) ---------- */
+html:not(.mob) .menubar .dc-mbtn { display: none; }
+.menubar .dc-mbtn .dc-cell {
+  position: absolute; left: 12%; top: 10%; width: 76%; height: 76%; display: grid; place-items: center; border-radius: 26%;
+  background: linear-gradient(#7480f7, #4b55d8); color: #fff; border: calc(2.5 * var(--m, 1px)) solid var(--ink);
+}
+.menubar .dc-mbtn .dc-cell svg { width: 66%; height: 66%; }
+
+/* ---------- the server and character select screens: a pill above the version (css/update.css) ---------- */
+.dc-door {
+  display: none; position: fixed; z-index: 63; left: max(12px, env(safe-area-inset-left)); bottom: calc(max(8px, env(safe-area-inset-bottom)) + 26px);
+  align-items: center; gap: 8px; height: 36px; padding: 0 14px 0 6px; cursor: pointer; border-radius: 12px;
+  background: linear-gradient(#7480f7, #4b55d8); border: 3px solid #2a2435; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+  font: 600 15px / 1 'Mitr', sans-serif; color: #fff; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+.dc-door:hover { filter: brightness(1.1); }
+.dc-door .dc-mk { display: grid; place-items: center; width: 24px; height: 24px; }
+.dc-door .dc-mk svg { width: 100%; height: 100%; }
+body:has(.ss-root:not([hidden])) .dc-door, body:has(.cs-root:not([hidden])) .dc-door { display: flex; }

@@ -1,0 +1,10 @@
+services:
+  nightcamp:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "7350:7350"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data

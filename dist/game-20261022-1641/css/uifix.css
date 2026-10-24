@@ -1,0 +1,81 @@
+/* uifix.css — fixes from the UI audit of 2026-10-17 (https://claude.ai/artifact/AJEv8iquGFwJNg6K4y1zk6, group ข: built
+   windows that were crooked, cut or overlapping). The user: "ทำเลย ux ต้องดีมากๆนะเกมเรา". One file so the fixes stay
+   apart from the windows' own stylesheets (other chats work on them); loaded after every other stylesheet.
+   The hotbar's fit on wide screens needs a measurement: js/uifix.js. */
+
+/* ---------- skills (K): the picked skill's buttons always in sight ----------
+   The card scrolls; its "+1 เรียน / ย้ายช่อง / เอาออก" sat under the fold at every screen size. They stick to its bottom. */
+.skw-card .skw-btns {
+  position: sticky; bottom: calc(-22 * var(--u)); z-index: 2; margin: auto calc(-26 * var(--u)) calc(-22 * var(--u));
+  padding: calc(14 * var(--u)) calc(26 * var(--u)) calc(20 * var(--u)); background: linear-gradient(rgba(28, 33, 54, 0), #1c2136 calc(14 * var(--u)));
+}
+html.mob-port .skw-card .skw-btns { position: static; margin: auto 0 0; padding: calc(12 * var(--u)) 0 0; background: none; }
+
+/* ---------- guild (O): "ยังไม่มีกิลด์" on the top-guilds sign was brown on brown ---------- */
+.gw-mini .gw-empty { color: #fff3cf; font-weight: 500; }
+
+/* ---------- Esc menu, controls: the keys other files add get columns by the length of their word (js/menuwin.js),
+   so "สมุดนักเดินทาง" / "ตารางอันดับ" no longer break mid-word; nothing more here ---------- */
+
+/* ---------- life skills (H): where a log is found, on two lines instead of cut with "…" ---------- */
+.lb-cwhere { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; line-height: 1.25; }
+
+/* ---------- my shop (V): the fourth tab fits, "ไม่มีของ" on one line ---------- */
+#vend .vd-wrap { grid-template-columns: calc(460 * var(--u)) minmax(0, 1fr); }
+#vend .sh-tabs { gap: calc(6 * var(--u)); }
+#vend .sh-tabs button { padding-left: calc(14 * var(--u)); padding-right: calc(14 * var(--u)); }
+#vend .vd-empty { grid-column: 1 / -1; white-space: nowrap; }
+#vend .sh-tabs .sh-where { display: none; } /* (its hint was cut off after the tabs; the shelf on the right says the same) */
+html.mob-port #vend .vd-wrap { grid-template-columns: minmax(0, 1fr); }
+html.mob-port #vend .sh-tabs { flex-wrap: wrap; row-gap: calc(6 * var(--u)); }
+
+/* ---------- Uncle Coco's shop / the pouch (B): the item card ----------
+   Its column is 352u but a line inside wouldn't wrap, so the card grew to ~900 px and ran under the window's right edge:
+   the edge looked cut and the item's picture (centred in the too-wide card) sat outside the window, an empty dark box.
+   (The tabs' dead clicks were fixed by the crafting chat in js/shopwin.js + css/craftgo.css.) */
+.sp-sell > * { min-width: 0; }
+#shopwin .sp-card { min-width: 0; max-width: 100%; overflow-x: hidden; overflow-wrap: anywhere; }
+#shopwin .sp-card > * { max-width: 100%; }
+#shopwin .sp-cempty { color: #c9cdea; text-align: center; padding: calc(30 * var(--u)) calc(10 * var(--u)); font: 500 calc(17 * var(--u)) / 1.5 'Mitr', sans-serif; }
+
+/* ---------- the journal (J) on a phone held upright: a full-screen sheet like the other windows ----------
+   (it stayed a floating window with its page cut off: portrait.css had no rule for it) the page list becomes a strip of
+   icon tabs across the top, the page scrolls under it */
+html.mob-port #journal .hb-win {
+  position: fixed; inset: 0; left: 0; top: 0; transform: none !important; width: auto !important; height: auto; border-radius: 0;
+  border-left-width: 0; border-right-width: 0; overflow: hidden !important; display: flex; flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+html.mob-port #journal .hb-body { flex: 1; min-height: 0; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+html.mob-port #journal .hb-tabs {
+  flex-direction: row; gap: calc(6 * var(--u)); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; padding: calc(8 * var(--u)) calc(10 * var(--u));
+  border-right: 0; border-bottom: calc(4 * var(--u)) solid var(--ink);
+}
+html.mob-port #journal .hb-tabs::-webkit-scrollbar { display: none; }
+html.mob-port #journal .hb-tabs button {
+  flex: none; flex-direction: column; justify-content: center; gap: calc(2 * var(--u)); width: calc(84 * var(--u)); padding: calc(6 * var(--u)) calc(2 * var(--u));
+  text-align: center; font-size: calc(15 * var(--u)); line-height: 1.15;
+}
+html.mob-port #journal .hb-tabs button img { width: calc(44 * var(--u)); height: calc(44 * var(--u)); }
+html.mob-port #journal .hb-page { padding: calc(12 * var(--u)) calc(12 * var(--u)) calc(24 * var(--u)); }
+html.mob-port #journal .bb-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+html.mob-port #journal .bb-h { font-size: calc(26 * var(--u)); }
+html.mob-port #journal .bb-sub, html.mob-port #journal .bb-tile span { font-size: calc(16 * var(--u)); }
+
+/* ---------- the leaderboard (N) on a phone held upright: the tabs and the job filter wrap instead of running off ---------- */
+html.mob-port #rankwin .kw-tabs { flex-wrap: wrap; row-gap: calc(6 * var(--u)); overflow: visible; }
+html.mob-port #rankwin .kw-tab { flex: 1 1 22%; }
+html.mob-port #rankwin .rk-filter { flex-wrap: wrap; height: auto; padding: calc(8 * var(--u)); row-gap: calc(8 * var(--u)); }
+
+/* ---------- small screens (1280 × 720 and less): the smallest labels stop at 11 px ----------
+   (--u is 0.67 px there, so 12–14u labels came out at 8–9 px) */
+#statwin .sw-card .t .l, #statwin .sw-card .v small { font-size: max(11px, calc(13 * var(--u))); }
+#skillwin .skw-ic em, #skillwin .skw-hint small { font-size: max(11px, calc(13 * var(--u))); }
+#inv .iv-slot .lbl, #inv .iv-wset i, #inv .iv-cell .iv-lv, #inv .iv-cell .iv-e, #inv .iv-tag, #inv .iv-hint { font-size: max(11px, calc(13 * var(--u))); }
+#inv .iv-cell .gt-star { font-size: max(11px, calc(14 * var(--u))); }
+#partywin .pw-bh small, #partywin .pw-rnote { font-size: max(11px, calc(14 * var(--u))); }
+#journal .t small, #journal .bb-sub, #journal .bb-chip { font-size: max(11px, calc(15 * var(--u))); }
+#guildwin .gw-note, #guildwin .gw-h2 small { font-size: max(11px, calc(14.5 * var(--u))); }
+#rankwin .rk-plate i { font-size: max(11px, calc(13.5 * var(--u))); }
+#lifebook .lb-cwhere { font-size: max(11px, calc(14.5 * var(--u))); }
+#menuwin .mn-sname small, #menuwin small { font-size: max(11px, calc(12.5 * var(--u))); }

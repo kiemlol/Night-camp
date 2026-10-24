@@ -1,0 +1,168 @@
+/* p3_arts.css — สมุดวิชามอน (#blarts, js/p3_arts.js) from the picked mockup A (assets/gen/nightcamp_p3_arts_a_raw.png):
+   sizes follow the mockup at the same window width (1 mockup px = 1.12u; the window 1183 x 875 px -> 1325 x 980u).
+   bl_arts.js's old card stays in the window, hidden (its render() still writes there). */
+#blarts.p3a-panel { display: block; place-items: initial; }
+#blarts.p3a-panel[hidden] { display: none; } /* (the rule above beat [hidden]: ✕ / Esc set hidden and the book stayed on screen, bug report v0.5.3) */
+#blarts > .card.p3a-old { display: none !important; }
+.p3a-wrap { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.p3a-win { width: calc(1325 * var(--u)); display: flex; flex-direction: column; }
+.p3a-win > .kw-title { flex: none; height: calc(66 * var(--u)); font-size: calc(50 * var(--u)); -webkit-text-stroke-width: calc(8 * var(--u)); border-radius: calc(19 * var(--u)) calc(19 * var(--u)) 0 0; }
+.p3a-win > .kw-title::before { left: calc(20 * var(--u)); width: calc(22 * var(--u)); height: calc(22 * var(--u)); margin-top: calc(-11 * var(--u)); }
+.p3a-win .p3a-x { right: calc(14 * var(--u)); width: calc(54 * var(--u)); height: calc(54 * var(--u)); font-size: calc(26 * var(--u)); }
+
+/* ---------- the rule line, the tabs ---------- */
+.p3a-rule {
+  flex: none; height: calc(59 * var(--u)); display: flex; align-items: center; justify-content: center; padding: 0 calc(20 * var(--u));
+  font: 600 calc(27 * var(--u)) / 1.2 'Mitr', sans-serif; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.p3a-rule b { font-weight: 700; }
+.p3a-tabs { flex: none; height: calc(50 * var(--u)); box-sizing: border-box; padding: 0 calc(22 * var(--u)); gap: calc(11 * var(--u)); align-items: flex-end; }
+.p3a-tabs .kw-tab { height: calc(50 * var(--u)); box-sizing: border-box; min-width: calc(166 * var(--u)); padding: 0 calc(24 * var(--u)); font-size: calc(30 * var(--u)); font-weight: 700; line-height: calc(42 * var(--u)); text-align: center; }
+
+/* ---------- the two slots (keys 7 and 8) ---------- */
+.p3a-slots { flex: none; display: grid; grid-template-columns: 1fr 1fr; gap: calc(15 * var(--u)); margin: calc(15 * var(--u)) calc(22 * var(--u)) 0; height: calc(139 * var(--u)); }
+.p3a-slot {
+  position: relative; display: flex; align-items: center; min-width: 0; box-sizing: border-box; cursor: pointer;
+  border-radius: calc(18 * var(--u)); border: calc(4 * var(--u)) solid var(--ink); color: #eef0ff;
+  background: linear-gradient(#272b47, #1b1e33); box-shadow: inset 0 0 0 calc(3 * var(--u)) #3a4170, 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.18);
+}
+.p3a-slot.on { box-shadow: inset 0 0 0 calc(3 * var(--u)) #6fb6f2, 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.18); }
+.p3a-slot.empty { cursor: default; }
+.p3a-key {
+  flex: none; display: grid; place-items: center; width: calc(90 * var(--u)); height: calc(94 * var(--u)); margin-left: calc(19 * var(--u)); box-sizing: border-box;
+  border: calc(4 * var(--u)) solid var(--ink); border-radius: calc(16 * var(--u)); background: linear-gradient(#fffdf7, #e4dccb);
+  box-shadow: inset 0 calc(-7 * var(--u)) 0 #bfb5a1, 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.35);
+  font: 800 calc(62 * var(--u)) / 1 'Baloo 2', sans-serif; color: var(--ink); padding-bottom: calc(6 * var(--u));
+}
+.p3a-sport { flex: none; width: calc(157 * var(--u)); height: calc(131 * var(--u)); margin-left: calc(6 * var(--u)); display: grid; place-items: center; }
+.p3a-sport img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.35)); }
+.p3a-slot.empty .p3a-sport img { width: 62%; height: 62%; opacity: 0.55; }
+.p3a-stxt { flex: 1; min-width: 0; align-self: stretch; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; padding: calc(20 * var(--u)) calc(14 * var(--u)) calc(12 * var(--u)) calc(4 * var(--u)); }
+.p3a-stxt b { max-width: 100%; font: 600 calc(22 * var(--u)) / 1.25 'Mitr', sans-serif; color: #fff; text-align: right; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.p3a-stxt small { font: 400 calc(19 * var(--u)) / 1.3 'Mitr', sans-serif; color: #b9c0e6; text-align: right; margin-bottom: auto; margin-top: calc(10 * var(--u)); }
+.p3a-off.kw-btn { flex: none; width: calc(161 * var(--u)); height: calc(50 * var(--u)); font-size: calc(26 * var(--u)); }
+
+/* ---------- the grid and the details ---------- */
+.p3a-main { flex: none; display: grid; grid-template-columns: calc(840 * var(--u)) minmax(0, 1fr); gap: calc(11 * var(--u)); height: calc(610 * var(--u)); margin: calc(9 * var(--u)) calc(22 * var(--u)) calc(22 * var(--u)); }
+.p3a-gridbox { min-height: 0; box-sizing: border-box; padding: calc(3 * var(--u)) calc(4 * var(--u)) calc(3 * var(--u)) 0; display: flex; }
+.p3a-grid {
+  flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: calc(190 * var(--u)); overflow-x: hidden;
+  gap: calc(11 * var(--u)); align-content: start; padding: calc(9 * var(--u)) calc(6 * var(--u)) calc(9 * var(--u)) calc(9 * var(--u));
+}
+.p3a-grid::-webkit-scrollbar { width: calc(12 * var(--u)); }
+.p3a-grid::-webkit-scrollbar-thumb { border-radius: calc(6 * var(--u)); }
+.p3a-card {
+  position: relative; display: block; padding: 0; box-sizing: border-box; cursor: pointer; overflow: hidden;
+  border: calc(4 * var(--u)) solid var(--ink); border-radius: calc(16 * var(--u)); background: linear-gradient(#fbf5e8, #efe2c4);
+  box-shadow: inset 0 calc(-4 * var(--u)) 0 rgba(0, 0, 0, 0.08), 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.16); font-family: 'Mitr', sans-serif;
+}
+.p3a-card:hover { filter: brightness(1.05); }
+.p3a-card.on { overflow: visible; box-shadow: 0 0 0 calc(3 * var(--u)) #fff, 0 0 0 calc(8 * var(--u)) #2f95ec, 0 0 calc(14 * var(--u)) calc(8 * var(--u)) rgba(47, 149, 236, 0.45); z-index: 1; }
+.p3a-card img { position: absolute; left: 3%; top: 9%; width: 94%; height: 73%; object-fit: contain; filter: drop-shadow(0 calc(3 * var(--u)) 0 rgba(42, 36, 53, 0.25)); }
+.p3a-card b {
+  position: absolute; left: calc(9 * var(--u)); right: calc(9 * var(--u)); bottom: calc(6 * var(--u)); height: calc(32 * var(--u)); box-sizing: border-box;
+  display: block; padding: 0 calc(6 * var(--u)); border: calc(3 * var(--u)) solid var(--ink); border-radius: calc(10 * var(--u)); background: #fffaf0;
+  font: 700 calc(21 * var(--u)) / calc(26 * var(--u)) 'Mitr', sans-serif; color: var(--ink); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.p3a-pips { position: absolute; right: calc(7 * var(--u)); top: calc(7 * var(--u)); display: flex; gap: calc(3 * var(--u)); z-index: 1; }
+.p3a-pips i {
+  width: calc(25 * var(--u)); height: calc(25 * var(--u)); box-sizing: border-box; border-radius: 50%; border: calc(3 * var(--u)) solid var(--ink);
+  background: radial-gradient(circle at 35% 35%, #e9ebf2, #9ea2b3);
+}
+.p3a-pips i.on { background: radial-gradient(circle at 35% 35%, #bfe6ff, #3b8fdc); }
+.p3a-pips.max i.on { background: radial-gradient(circle at 35% 35%, #fff2b0, #f2b632); }
+.p3a-in {
+  position: absolute; left: calc(7 * var(--u)); top: calc(7 * var(--u)); z-index: 1; display: grid; place-items: center; width: calc(30 * var(--u)); height: calc(30 * var(--u));
+  box-sizing: border-box; border: calc(3 * var(--u)) solid var(--ink); border-radius: calc(8 * var(--u)); background: linear-gradient(#fffdf7, #e4dccb);
+  font: 800 calc(19 * var(--u)) / 1 'Baloo 2', sans-serif; color: var(--ink); box-shadow: inset 0 calc(-3 * var(--u)) 0 #bfb5a1;
+}
+/* the backdrop: the art's element */
+.p3a-card.el-water { background: linear-gradient(#e2f2ff, #a9d4fb); }
+.p3a-card.el-earth { background: linear-gradient(#fff0c2, #f5c564); }
+.p3a-card.el-fire { background: linear-gradient(#ffd3c4, #f2897a); }
+.p3a-card.el-wind { background: linear-gradient(#e2faec, #a6e4c3); }
+.p3a-card.el-poison { background: linear-gradient(#eaf8d2, #bde397); }
+.p3a-card.el-holy { background: linear-gradient(#fff8d6, #ffe08f); }
+.p3a-card.el-shadow { background: linear-gradient(#efe6ff, #c6aef3); }
+.p3a-card.el-ghost { background: linear-gradient(#dcf8f5, #9fe0d8); }
+.p3a-card.el-undead { background: linear-gradient(#eceee4, #c5cab4); }
+/* not collected yet: a plain round "?" token */
+.p3a-qt {
+  display: grid; place-items: center; border-radius: 50%; box-sizing: border-box; border: calc(4 * var(--u)) solid var(--ink);
+  background: radial-gradient(circle at 38% 32%, #fbf8f0, #d9d2c2); color: #7d7590; font: 800 calc(56 * var(--u)) / 1 'Baloo 2', sans-serif;
+}
+.p3a-card .p3a-qt { position: absolute; left: 50%; top: 45%; width: calc(92 * var(--u)); height: calc(92 * var(--u)); transform: translate(-50%, -50%); }
+.p3a-card.q b { color: #7d7590; }
+.p3a-empty { grid-column: 1 / -1; padding: calc(30 * var(--u)); text-align: center; color: #6a6078; font-size: calc(20 * var(--u)); }
+
+.p3a-detbox { min-height: 0; display: flex; }
+.p3a-det {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: stretch; padding: calc(22 * var(--u)) calc(22 * var(--u)) calc(20 * var(--u));
+  background: radial-gradient(circle at 50% 38%, #2f3760 0, #232846 45%, #1b1e33 100%);
+}
+.p3a-det h3 {
+  margin: 0; text-align: center; font: 700 calc(42 * var(--u)) / 1.15 'Mitr', sans-serif; color: #fff; -webkit-text-stroke: calc(5 * var(--u)) var(--ink); paint-order: stroke fill;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.p3a-det h3 .p3a-boss { vertical-align: middle; -webkit-text-stroke: 0; background: #d8434f; font-size: calc(17 * var(--u)); }
+.p3a-big { position: relative; flex: 1 1 0; min-height: calc(120 * var(--u)); display: grid; place-items: center; margin: calc(8 * var(--u)) 0 calc(10 * var(--u)); }
+.p3a-big img { position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 100%; max-width: calc(320 * var(--u)); height: 100%; object-fit: contain; filter: drop-shadow(0 calc(6 * var(--u)) calc(6 * var(--u)) rgba(0, 0, 0, 0.45)); }
+.p3a-big .p3a-qt { width: calc(170 * var(--u)); height: calc(170 * var(--u)); font-size: calc(100 * var(--u)); }
+.p3a-meta { margin: 0; font: 400 calc(23 * var(--u)) / 1.32 'Mitr', sans-serif; color: #e4e8ff; }
+.p3a-meta span { white-space: nowrap; }
+.p3a-det hr { width: 100%; margin: calc(12 * var(--u)) 0; border: 0; border-top: calc(2 * var(--u)) solid #4b5384; }
+.p3a-desc { margin: 0; font: 600 calc(26 * var(--u)) / 1.32 'Mitr', sans-serif; color: #fff; }
+.p3a-rates { margin: calc(10 * var(--u)) 0 0; font: 400 calc(19 * var(--u)) / 1.35 'Mitr', sans-serif; color: #b9c0e6; }
+.p3a-btns { display: grid; grid-template-columns: 1fr 1fr; gap: calc(14 * var(--u)); margin-top: calc(16 * var(--u)); }
+.p3a-btns .kw-btn { height: calc(69 * var(--u)); padding: 0 calc(8 * var(--u)); font-size: calc(29 * var(--u)); border-radius: calc(16 * var(--u)); white-space: normal; line-height: 1.1; text-align: center; }
+.p3a-btns .kw-btn.off { font-size: calc(25 * var(--u)); }
+.p3a-det.none .p3a-desc { margin-top: calc(20 * var(--u)); }
+
+/* ---------- small screens: the smallest labels stop at 11 px ---------- */
+.p3a-card b { font-size: max(11px, calc(21 * var(--u))); }
+.p3a-stxt small { font-size: max(11px, calc(19 * var(--u))); }
+
+/* ---------- a phone held upright: a full-screen sheet, one column, the picked art's card stuck to the bottom ---------- */
+html.mob-port #blarts.p3a-panel { --u: calc(100vw / 500); background: rgba(14, 12, 30, 0.6); }
+html.mob-port .p3a-wrap {
+  position: fixed; inset: 0; transform: none; display: flex; flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+html.mob-port .p3a-win { flex: 1; min-height: 0; width: auto; border-radius: 0; border-left-width: 0; border-right-width: 0; overflow: hidden; }
+html.mob-port .p3a-win > .kw-title { border-radius: 0; height: calc(64 * var(--u)); font-size: calc(36 * var(--u)); }
+html.mob-port .p3a-rule { height: auto; padding: calc(8 * var(--u)) calc(12 * var(--u)); white-space: normal; text-align: center; font-size: calc(18 * var(--u)); line-height: 1.35; }
+html.mob-port .p3a-tabs { padding: 0 calc(12 * var(--u)); height: calc(46 * var(--u)); }
+html.mob-port .p3a-tabs .kw-tab { flex: 1; min-width: 0; height: calc(46 * var(--u)); line-height: calc(38 * var(--u)); font-size: calc(22 * var(--u)); padding: 0 calc(8 * var(--u)); }
+html.mob-port .p3a-slots { grid-template-columns: 1fr; gap: calc(8 * var(--u)); height: auto; margin: calc(10 * var(--u)) calc(12 * var(--u)) 0; }
+html.mob-port .p3a-slot { height: calc(96 * var(--u)); }
+html.mob-port .p3a-key { width: calc(62 * var(--u)); height: calc(66 * var(--u)); margin-left: calc(12 * var(--u)); font-size: calc(42 * var(--u)); border-radius: calc(12 * var(--u)); }
+html.mob-port .p3a-sport { width: calc(104 * var(--u)); height: calc(88 * var(--u)); }
+html.mob-port .p3a-stxt { padding: calc(8 * var(--u)) calc(10 * var(--u)); }
+html.mob-port .p3a-stxt b { font-size: calc(19 * var(--u)); }
+html.mob-port .p3a-stxt small { font-size: calc(16 * var(--u)); margin-top: calc(4 * var(--u)); }
+html.mob-port .p3a-off.kw-btn { width: calc(120 * var(--u)); height: calc(40 * var(--u)); font-size: calc(19 * var(--u)); }
+html.mob-port .p3a-main { flex: 1; min-height: 0; height: auto; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: calc(8 * var(--u)); margin: calc(10 * var(--u)) calc(12 * var(--u)) calc(12 * var(--u)); }
+html.mob-port .p3a-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: calc(146 * var(--u)); gap: calc(9 * var(--u)); }
+html.mob-port .p3a-card b { font-size: calc(17 * var(--u)); height: calc(29 * var(--u)); line-height: calc(23 * var(--u)); left: calc(6 * var(--u)); right: calc(6 * var(--u)); }
+html.mob-port .p3a-pips i { width: calc(18 * var(--u)); height: calc(18 * var(--u)); }
+html.mob-port .p3a-card .p3a-qt { width: calc(70 * var(--u)); height: calc(70 * var(--u)); font-size: calc(42 * var(--u)); }
+html.mob-port .p3a-det {
+  display: grid; grid-template-columns: calc(120 * var(--u)) minmax(0, 1fr); grid-template-areas: 'h h' 'img meta' 'img desc' 'hr hr' 'btn btn';
+  column-gap: calc(12 * var(--u)); padding: calc(10 * var(--u)) calc(14 * var(--u)) calc(12 * var(--u));
+}
+html.mob-port .p3a-det h3 { grid-area: h; font-size: calc(28 * var(--u)); }
+html.mob-port .p3a-big { grid-area: img; min-height: 0; margin: calc(4 * var(--u)) 0; }
+html.mob-port .p3a-big { min-height: calc(110 * var(--u)); }
+html.mob-port .p3a-big img { max-width: calc(120 * var(--u)); }
+html.mob-port .p3a-big .p3a-qt { width: calc(96 * var(--u)); height: calc(96 * var(--u)); font-size: calc(56 * var(--u)); }
+html.mob-port .p3a-meta { grid-area: meta; font-size: calc(17 * var(--u)); align-self: end; }
+html.mob-port .p3a-desc { grid-area: desc; font-size: calc(18 * var(--u)); margin-top: calc(4 * var(--u)); }
+html.mob-port .p3a-rates { grid-column: 1 / -1; font-size: calc(15 * var(--u)); }
+html.mob-port .p3a-det hr { grid-area: hr; margin: calc(8 * var(--u)) 0 0; }
+html.mob-port .p3a-btns { grid-area: btn; margin-top: calc(8 * var(--u)); }
+html.mob-port .p3a-btns .kw-btn { height: calc(52 * var(--u)); font-size: calc(22 * var(--u)); }
+
+/* the two art slots on the hotbar take the mouse on a PC too (#hud is pointer-events: none, so their right-click /
+   shift-click "open the book" and click "use" from bl_arts.js never fired off a phone) */
+#hud .hotbar .hslot.blart { pointer-events: auto; cursor: pointer; }
+html.mob-port .p3a-stxt b { -webkit-line-clamp: 1; }

@@ -1,0 +1,251 @@
+/* mobile.css — the HUD for phones (js/mobile.js puts html.mob and .mob-port / .mob-land on the page). Landscape follows
+   assets/gen/nightcamp_mob_hud1_raw.png (the menu grid: mob_hud2), portrait nightcamp_mob_port_a_raw.png: the hero's
+   frame top left, the minimap top right with the menu button, a floating joystick bottom left, ATTACK bottom right with
+   four skill buttons in an arc round it, potions + AUTO over them, the EXP bars along the bottom.
+   Sizes: --m is 1px on a phone 390 px across (mobile.js); the pieces of the PC HUD keep their --u sizes (mobile.js
+   gives --u a phone value). env(safe-area-inset-*) keeps clear of the notch and the home bar. Load it last. */
+#mb { display: none; }
+html.mob #mb { display: block; position: absolute; inset: 0; pointer-events: none; }
+html.mob, html.mob body { overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+html.mob #view { touch-action: none; }
+html.mob #mb button { font-family: 'Mitr', sans-serif; -webkit-tap-highlight-color: transparent; }
+html.mob #mb button, html.mob #mb .hslot, html.mob #mb .mb-zone { pointer-events: auto; touch-action: none; }
+
+/* ---------- the PC pieces not used on a phone, and the ones moved ---------- */
+html.mob #hud .hotbar, html.mob #hud .log { display: none; }
+html.mob #hud .chatwin { display: none; }
+html.mob #mb .hslot .key, html.mob #mb .hslot .slv, html.mob #mb .af-set, html.mob #mb .af-state { display: none; }
+
+/* ---------- the top: the hero's frame, the target, the minimap, the menu ---------- */
+html.mob #hud .cframe { left: calc(env(safe-area-inset-left) + 8 * var(--m)); top: calc(env(safe-area-inset-top) + 8 * var(--m)); }
+html.mob #hud .buffs { left: calc(env(safe-area-inset-left) + 8 * var(--m) + 540 * var(--u)); top: calc(env(safe-area-inset-top) + 8 * var(--m) + 10 * var(--u)); }
+html.mob #hud .partybox { left: calc(env(safe-area-inset-left) + 8 * var(--m)); top: calc(env(safe-area-inset-top) + 8 * var(--m) + 205 * var(--u)); }
+html.mob #hud .tr { right: calc(env(safe-area-inset-right) + 4 * var(--m)); top: calc(env(safe-area-inset-top) + 2 * var(--m)); transform-origin: 100% 0; }
+html.mob #hud .hud-br { right: calc(env(safe-area-inset-right) + 10 * var(--m)); bottom: auto; top: calc(env(safe-area-inset-top) + 200 * var(--m)); }
+.mb-menu {
+  position: absolute; display: grid; place-content: center; gap: calc(4 * var(--m)); width: calc(48 * var(--m)); height: calc(48 * var(--m)); padding: 0;
+  border-radius: 50%; border: calc(3.5 * var(--m)) solid #2a2435; background: radial-gradient(circle at 50% 35%, #3d4670, #232a45);
+  box-shadow: 0 0 0 calc(3 * var(--m)) #f3e3b8, 0 0 0 calc(5.5 * var(--m)) #2a2435, 0 calc(4 * var(--m)) 0 calc(5 * var(--m)) rgba(0, 0, 0, 0.3); cursor: pointer;
+}
+.mb-menu i { display: block; width: calc(20 * var(--m)); height: calc(3.5 * var(--m)); border-radius: calc(2 * var(--m)); background: #fff3cf; }
+.mb-menu:active { transform: scale(0.92); }
+
+/* ---------- the joystick ---------- */
+.mb-zone { position: absolute; left: 0; bottom: 0; }
+.mb-stick {
+  position: absolute; width: calc(136 * var(--m)); height: calc(136 * var(--m)); border-radius: 50%; box-sizing: border-box;
+  background: radial-gradient(circle, rgba(24, 28, 50, 0.32) 38%, rgba(24, 28, 50, 0.62) 100%);
+  border: calc(4.5 * var(--m)) solid rgba(255, 246, 225, 0.85); box-shadow: 0 0 0 calc(2.5 * var(--m)) rgba(42, 36, 53, 0.8), inset 0 0 0 calc(2.5 * var(--m)) rgba(42, 36, 53, 0.6);
+  transition: opacity 0.15s; opacity: 0.92;
+}
+.mb-stick.on { opacity: 1; transition: none; }
+.mb-stick .a { position: absolute; width: 0; height: 0; border: calc(8 * var(--m)) solid transparent; opacity: 0.85; }
+.mb-stick .a.u { left: 50%; top: calc(6 * var(--m)); margin-left: calc(-8 * var(--m)); border-bottom-color: #fff3cf; border-top-width: 0; }
+.mb-stick .a.d { left: 50%; bottom: calc(6 * var(--m)); margin-left: calc(-8 * var(--m)); border-top-color: #fff3cf; border-bottom-width: 0; }
+.mb-stick .a.l { top: 50%; left: calc(6 * var(--m)); margin-top: calc(-8 * var(--m)); border-right-color: #fff3cf; border-left-width: 0; }
+.mb-stick .a.r { top: 50%; right: calc(6 * var(--m)); margin-top: calc(-8 * var(--m)); border-left-color: #fff3cf; border-right-width: 0; }
+.mb-knob {
+  position: absolute; left: 50%; top: 50%; width: calc(58 * var(--m)); height: calc(58 * var(--m)); margin: calc(-29 * var(--m)) 0 0 calc(-29 * var(--m));
+  border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fffdf5, #efe2c2 70%, #d9c79c); border: calc(3.5 * var(--m)) solid #2a2435;
+  box-shadow: 0 calc(4 * var(--m)) 0 rgba(0, 0, 0, 0.3); box-sizing: border-box;
+}
+
+/* ---------- the right thumb ---------- */
+.mb-right { position: absolute; right: calc(env(safe-area-inset-right)); bottom: 0; width: calc(268 * var(--m)); height: calc(330 * var(--m)); pointer-events: none;
+  --ax: calc(206 * var(--m)); --ay: calc(268 * var(--m)); /* ATTACK's centre in this box */ --r: calc(106 * var(--m)); --s: calc(58 * var(--m)); }
+.mb-attack {
+  position: absolute; left: calc(var(--ax) - 50 * var(--m)); top: calc(var(--ay) - 50 * var(--m)); width: calc(100 * var(--m)); height: calc(100 * var(--m));
+  display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; border-radius: 50%; cursor: pointer;
+  border: calc(4 * var(--m)) solid #2a2435; background: radial-gradient(circle at 50% 30%, #8fd6ff, #3b8fdc 62%, #2a6fbd);
+  box-shadow: 0 0 0 calc(5 * var(--m)) #f3e3b8, 0 0 0 calc(8 * var(--m)) #2a2435, 0 calc(6 * var(--m)) 0 calc(8 * var(--m)) rgba(0, 0, 0, 0.3), inset 0 calc(-6 * var(--m)) 0 rgba(0, 0, 0, 0.18);
+}
+.mb-attack img { width: calc(48 * var(--m)); height: calc(48 * var(--m)); object-fit: contain; filter: drop-shadow(0 calc(3 * var(--m)) 0 rgba(0, 0, 0, 0.3)); }
+.mb-attack b { margin-top: calc(-2 * var(--m)); font: 700 calc(15 * var(--m)) / 1.1 'Mitr', sans-serif; color: #fff; -webkit-text-stroke: calc(4 * var(--m)) #2a2435; paint-order: stroke fill; }
+.mb-attack.pressed, .mb-act.pressed, #mb .hslot.pressed { filter: brightness(1.15); transform: scale(0.93); }
+.mb-attack.life { background: radial-gradient(circle at 50% 30%, #ffe9a0, #f2b632 62%, #d99418); }
+
+/* the skills: 4 in an arc round ATTACK's upper left (page 2: slots 5-8 in the same places) */
+#mb-skills { position: absolute; inset: 0; pointer-events: none; }
+#mb-skills .hslot {
+  position: absolute; left: calc(var(--ax) - var(--s) / 2); top: calc(var(--ay) - var(--s) / 2); width: var(--s); height: var(--s); margin: 0;
+  border-radius: 50%; border-width: calc(3.5 * var(--m)); box-sizing: border-box; cursor: pointer;
+  box-shadow: inset 0 0 0 calc(3 * var(--m)) #a88a55, 0 calc(4 * var(--m)) 0 rgba(0, 0, 0, 0.3);
+  transform: rotate(var(--a)) translateX(var(--r)) rotate(calc(-1 * var(--a)));
+}
+#mb-skills .hslot.pressed { transform: rotate(var(--a)) translateX(var(--r)) rotate(calc(-1 * var(--a))) scale(0.92); }
+#mb-skills .hslot img { left: 6%; top: 6%; width: 88%; height: 88%; border-radius: 50%; object-fit: cover; }
+#mb-skills .hslot .cd { border-radius: 50%; }
+#mb-skills .hslot .cdt { font-size: calc(22 * var(--m)); -webkit-text-stroke-width: calc(4 * var(--m)); }
+#mb-skills .hslot .spc { bottom: calc(-9 * var(--m)); padding: 0 calc(5 * var(--m)); font-size: calc(10.5 * var(--m)); border-width: calc(1.5 * var(--m)); border-radius: calc(6 * var(--m)); }
+#mb-skills .hslot.empty { opacity: 0.45; }
+#mb-skills .hslot.ult { box-shadow: inset 0 0 0 calc(3 * var(--m)) #ffd873, 0 0 calc(10 * var(--m)) rgba(255, 216, 115, 0.6), 0 calc(4 * var(--m)) 0 rgba(0, 0, 0, 0.3); }
+#mb-skills .hslot:nth-child(1), #mb-skills .hslot:nth-child(5) { --a: 180deg; }
+#mb-skills .hslot:nth-child(2), #mb-skills .hslot:nth-child(6) { --a: 209deg; }
+#mb-skills .hslot:nth-child(3), #mb-skills .hslot:nth-child(7) { --a: 238deg; }
+#mb-skills .hslot:nth-child(4), #mb-skills .hslot:nth-child(8) { --a: 267deg; }
+#mb-skills .hslot:nth-child(n+5) { display: none; }
+#mb-skills.p2 .hslot:nth-child(-n+4) { display: none; }
+#mb-skills.p2 .hslot:nth-child(n+5) { display: block; }
+.mb-page {
+  position: absolute; left: calc(var(--ax) - 21 * var(--m)); top: calc(var(--ay) - 21 * var(--m)); width: calc(42 * var(--m)); height: calc(42 * var(--m)); padding: 0;
+  transform: rotate(-66deg) translateX(calc(96 * var(--m))) rotate(66deg); border-radius: 50%; cursor: pointer;
+  border: calc(3 * var(--m)) solid #2a2435; background: radial-gradient(circle at 50% 35%, #3d4670, #232a45); color: #fff3cf;
+  font: 800 calc(14 * var(--m)) / 1 'Baloo 2', sans-serif; box-shadow: 0 0 0 calc(2.5 * var(--m)) #f3e3b8, 0 calc(3 * var(--m)) 0 calc(2.5 * var(--m)) rgba(0, 0, 0, 0.3);
+}
+.mb-page[hidden] { display: none; }
+
+/* potions + AUTO in a row over the arc */
+.mb-items { position: absolute; right: calc(10 * var(--m)); top: 0; display: flex; align-items: center; gap: calc(9 * var(--m)); pointer-events: none; }
+#mb-items .hslot.item {
+  position: relative; width: calc(52 * var(--m)); height: calc(52 * var(--m)); border-radius: 50%; border-width: calc(3.5 * var(--m)); box-sizing: border-box; cursor: pointer;
+  background: radial-gradient(circle at 50% 35%, #56617f, #353d57); box-shadow: inset 0 0 0 calc(3 * var(--m)) #7f89a8, 0 calc(4 * var(--m)) 0 rgba(0, 0, 0, 0.3);
+}
+#mb-items .hslot.item img { left: 12%; top: 10%; width: 76%; height: 76%; }
+#mb-items .hslot.item .cd { border-radius: 50%; }
+#mb-items .hslot.item .count { right: calc(-3 * var(--m)); bottom: calc(-6 * var(--m)); font-size: calc(17 * var(--m)); -webkit-text-stroke-width: calc(4 * var(--m)); }
+#mb-items .af { position: relative; right: auto; bottom: auto; }
+#mb-items .af-btn {
+  width: calc(56 * var(--m)); height: calc(56 * var(--m)); border-radius: 50%; border-width: calc(3.5 * var(--m));
+  box-shadow: 0 0 0 calc(2.5 * var(--m)) #f3e3b8, 0 calc(4 * var(--m)) 0 calc(2.5 * var(--m)) rgba(0, 0, 0, 0.3);
+}
+#mb-items .af-btn b { font-size: calc(11 * var(--m)); bottom: calc(-8 * var(--m)); }
+
+/* the action button (a tree, a vein, water, a teacher, Uncle Coco near) */
+.mb-act {
+  position: absolute; right: calc(12 * var(--m)); top: calc(-72 * var(--m)); display: flex; align-items: center; gap: calc(6 * var(--m));
+  height: calc(54 * var(--m)); padding: 0 calc(16 * var(--m)) 0 calc(6 * var(--m)); border-radius: calc(27 * var(--m)); cursor: pointer;
+  border: calc(3.5 * var(--m)) solid #2a2435; background: linear-gradient(#ffe68d, #f5bb3a); color: #2a2435;
+  box-shadow: 0 calc(4 * var(--m)) 0 rgba(0, 0, 0, 0.3); animation: mb-bob 1.4s ease-in-out infinite;
+}
+.mb-act[hidden] { display: none; }
+.mb-act img { width: calc(40 * var(--m)); height: calc(40 * var(--m)); object-fit: contain; }
+.mb-act img[hidden] { display: none; }
+.mb-act b { font: 700 calc(17 * var(--m)) / 1 'Mitr', sans-serif; white-space: nowrap; }
+@keyframes mb-bob { 50% { transform: translateY(calc(-4 * var(--m))); } }
+
+/* ---------- the chat button, the chat as a sheet ---------- */
+.mb-chat {
+  position: absolute; display: grid; place-items: center; width: calc(46 * var(--m)); height: calc(46 * var(--m)); padding: 0; border-radius: 50%; cursor: pointer;
+  border: calc(3 * var(--m)) solid #2a2435; background: radial-gradient(circle at 50% 35%, #fffaf0, #e9dcbc);
+  box-shadow: 0 calc(3 * var(--m)) 0 rgba(0, 0, 0, 0.3);
+}
+.mb-chat i { position: relative; width: calc(24 * var(--m)); height: calc(17 * var(--m)); border-radius: calc(7 * var(--m)); background: #3b8fdc; border: calc(2.5 * var(--m)) solid #2a2435; box-sizing: border-box; }
+.mb-chat i::after { content: ''; position: absolute; left: calc(3 * var(--m)); bottom: calc(-6 * var(--m)); border: calc(4 * var(--m)) solid transparent; border-top-color: #2a2435; }
+.mb-chat i::before { content: ''; position: absolute; left: calc(3 * var(--m)); right: calc(3 * var(--m)); top: 50%; height: calc(4 * var(--m)); margin-top: calc(-2 * var(--m));
+  background: radial-gradient(circle, #fff calc(1.7 * var(--m)), transparent calc(2.2 * var(--m))) 0 0 / calc(5.4 * var(--m)) 100% repeat-x; }
+html.mob-chat .mb-chat { background: radial-gradient(circle at 50% 35%, #8fd6ff, #3b8fdc); }
+.mb-badge {
+  position: absolute; right: calc(-6 * var(--m)); top: calc(-6 * var(--m)); min-width: calc(20 * var(--m)); height: calc(20 * var(--m)); padding: 0 calc(4 * var(--m));
+  box-sizing: border-box; border-radius: calc(10 * var(--m)); background: #e0525e; border: calc(2 * var(--m)) solid #2a2435; color: #fff;
+  font: 800 normal calc(12 * var(--m)) / calc(16 * var(--m)) 'Baloo 2', sans-serif; text-align: center;
+}
+.mb-badge[hidden] { display: none; }
+.mb-chatline {
+  position: absolute; max-width: calc(210 * var(--m)); padding: calc(5 * var(--m)) calc(12 * var(--m)); border-radius: calc(14 * var(--m));
+  background: rgba(20, 17, 30, 0.72); border: calc(2 * var(--m)) solid rgba(255, 246, 225, 0.35); color: #f4efe6;
+  font: 500 calc(13 * var(--m)) / 1.35 'Mitr', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none;
+}
+.mb-chatline[hidden] { display: none; }
+html.mob-port .mb-chatline { left: calc(env(safe-area-inset-left) + 66 * var(--m)); bottom: calc(env(safe-area-inset-bottom) + 197 * var(--m)); }
+html.mob-land .mb-chatline { right: calc(env(safe-area-inset-right) + 172 * var(--m)); top: calc(env(safe-area-inset-top) + 68 * var(--m)); max-width: calc(200 * var(--m)); }
+/* (open, the chat is what is read: over the lessons' tracker (z 6), and as dark as the PC's while typing, so the tracker
+   under it does not show through the lines) */
+html.mob.mob-chat #hud .chatwin { display: flex; z-index: 7; background: rgba(20, 17, 30, 0.86); }
+
+/* ---------- the EXP bars along the bottom ---------- */
+.mb-exp { position: absolute; bottom: calc(env(safe-area-inset-bottom) + 4 * var(--m)); pointer-events: none; }
+#mb-exp .expbars { margin: 0; gap: calc(6 * var(--m)); }
+#mb-exp .xbar { height: calc(13 * var(--m)); border-width: calc(2 * var(--m)); border-radius: calc(7 * var(--m)); }
+#mb-exp .xbar span, #mb-exp .xbar b { font-size: calc(10 * var(--m)); -webkit-text-stroke-width: calc(3 * var(--m)); }
+
+/* ---------- the menu grid ---------- */
+.mb-pop { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(14, 12, 30, 0.45); pointer-events: auto; }
+.mb-pop[hidden] { display: none; }
+.mb-pop-in {
+  width: min(calc(100vw - 24 * var(--m)), calc(420 * var(--m))); box-sizing: border-box; overflow: hidden; border-radius: calc(20 * var(--m));
+  background: #f7efdc; border: calc(4 * var(--m)) solid #2a2435; box-shadow: inset 0 0 0 calc(3 * var(--m)) #74b6ec, 0 calc(8 * var(--m)) 0 rgba(0, 0, 0, 0.3);
+}
+.mb-pop-top {
+  display: flex; align-items: center; justify-content: space-between; height: calc(48 * var(--m)); padding: 0 calc(12 * var(--m)) 0 calc(18 * var(--m));
+  background: linear-gradient(#7fcaf8, #3b8fdc); border-bottom: calc(3.5 * var(--m)) solid #2a2435;
+}
+.mb-pop-top > span { font: 800 calc(24 * var(--m)) / 1 'Mitr', sans-serif; color: #fff; -webkit-text-stroke: calc(5 * var(--m)) #2a2435; paint-order: stroke fill; }
+.mb-pop-top .coins { position: relative; right: auto; bottom: auto; padding: 0 calc(12 * var(--m)) 0 calc(4 * var(--m)); border-width: calc(3 * var(--m)); border-radius: calc(14 * var(--m)); box-shadow: none; }
+.mb-pop-top .coins img { width: calc(26 * var(--m)); height: calc(26 * var(--m)); }
+.mb-pop-top .coins b { font-size: calc(18 * var(--m)); -webkit-text-stroke-width: calc(3 * var(--m)); }
+#mb-pop-grid { padding: calc(14 * var(--m)) calc(12 * var(--m)) calc(6 * var(--m)); }
+#mb-pop-grid .menubar {
+  position: static; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: calc(12 * var(--m)) calc(8 * var(--m)); padding: 0;
+  background: none; border: 0; box-shadow: none; transform: none;
+}
+#mb-pop-grid .mbtn {
+  position: relative; justify-self: center; width: calc(62 * var(--m)); height: calc(62 * var(--m)); margin-bottom: calc(20 * var(--m)); border-radius: 50%;
+  border: calc(3.5 * var(--m)) solid #2a2435; background: radial-gradient(circle at 50% 35%, #8fd6ff, #3b8fdc); box-shadow: 0 calc(4 * var(--m)) 0 rgba(0, 0, 0, 0.25);
+}
+#mb-pop-grid .mbtn img { left: 14%; top: 12%; width: 72%; height: 72%; }
+#mb-pop-grid .mbtn > b { display: none; }
+#mb-pop-grid .mbtn .dot { right: calc(2 * var(--m)); top: calc(2 * var(--m)); }
+#mb-pop-grid .mb-lbl {
+  position: absolute; left: 50%; top: calc(100% + 4 * var(--m)); transform: translateX(-50%); white-space: nowrap;
+  font: 600 calc(13.5 * var(--m)) / 1.2 'Mitr', sans-serif; color: #2a2435; -webkit-text-stroke: 0;
+}
+.mb-lbl { display: none; }
+#mb-pop-grid .mb-lbl { display: block; }
+.mb-pop-row { display: flex; gap: calc(8 * var(--m)); padding: calc(4 * var(--m)) calc(12 * var(--m)) calc(14 * var(--m)); }
+.mb-pbtn {
+  flex: 1; height: calc(44 * var(--m)); border-radius: calc(14 * var(--m)); border: calc(3 * var(--m)) solid #2a2435; cursor: pointer;
+  background: linear-gradient(#fbf5e8, #e6d9bc); color: #2a2435; font: 600 calc(15 * var(--m)) / 1 'Mitr', sans-serif;
+  box-shadow: inset 0 calc(-3 * var(--m)) 0 rgba(0, 0, 0, 0.08), 0 calc(3 * var(--m)) 0 rgba(0, 0, 0, 0.2);
+}
+
+/* =================== upright (portrait) =================== */
+html.mob-port #hud .tr { transform: scale(0.8); }
+html.mob-port .mb-menu { right: calc(env(safe-area-inset-right) + 30 * var(--m)); top: calc(env(safe-area-inset-top) + 150 * var(--m)); }
+html.mob-port #hud .tframe { top: calc(env(safe-area-inset-top) + 8 * var(--m) + 188 * var(--u)); }
+html.mob-port.mb-party #hud .tframe { left: auto; right: calc(env(safe-area-inset-right) + 8 * var(--m)); transform: none; top: calc(env(safe-area-inset-top) + 212 * var(--m)); }
+html.mob-port .mb-zone { width: 56%; height: 36%; }
+html.mob-port .mb-stick { left: calc(env(safe-area-inset-left) + 18 * var(--m)); bottom: calc(env(safe-area-inset-bottom) + 34 * var(--m)); }
+html.mob-port .mb-chat { left: calc(env(safe-area-inset-left) + 14 * var(--m)); bottom: calc(env(safe-area-inset-bottom) + 190 * var(--m)); }
+html.mob-port .mb-right { bottom: calc(env(safe-area-inset-bottom) + 8 * var(--m)); }
+html.mob-port .mb-exp { left: calc(env(safe-area-inset-left) + 10 * var(--m)); right: calc(env(safe-area-inset-right) + 10 * var(--m)); }
+html.mob-port.mob-chat #hud .chatwin {
+  left: calc(env(safe-area-inset-left) + 8 * var(--m)); right: calc(env(safe-area-inset-right) + 8 * var(--m)); width: auto;
+  bottom: calc(env(safe-area-inset-bottom) + 348 * var(--m)); top: auto;
+}
+html.mob-port.mob-chat #hud .chatwin .cw-list { height: calc(170 * var(--m)); }
+/* the chat's three sizes (its ↕ button, the menu's กล่องแชท) on a phone too (2026-10-21, Discord #124: the one height above
+   beat .size-s / .size-l, so the setting did nothing here). Upright the box grows up from above the potions / AUTO row to
+   just under the menu button: --cw-room is the list height that fits there (the tabs and the online history bar counted).
+   Small 100, medium 170 (less on a short phone, never over the menu), large all the room up to 330 */
+html.mob-port.mob-chat #hud .chatwin { --cw-room: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 605 * var(--m)); }
+@supports (height: 100dvh) { html.mob-port.mob-chat #hud .chatwin { --cw-room: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 605 * var(--m)); } }
+html.mob-port.mob-chat #hud .chatwin .cw-list { height: min(calc(170 * var(--m)), max(calc(100 * var(--m)), var(--cw-room))); }
+html.mob-port.mob-chat #hud .chatwin.size-s .cw-list { height: min(calc(100 * var(--m)), max(calc(80 * var(--m)), var(--cw-room))); }
+html.mob-port.mob-chat #hud .chatwin.size-l .cw-list { height: min(calc(330 * var(--m)), max(calc(100 * var(--m)), var(--cw-room))); }
+
+/* =================== sideways (landscape) =================== */
+html.mob-land .mb-menu { right: calc(env(safe-area-inset-right) + 172 * var(--m)); top: calc(env(safe-area-inset-top) + 12 * var(--m)); }
+html.mob-land .mb-chat { right: calc(env(safe-area-inset-right) + 232 * var(--m)); top: calc(env(safe-area-inset-top) + 13 * var(--m)); }
+html.mob-land .mb-zone { width: 40%; height: 64%; }
+html.mob-land .mb-stick { left: calc(env(safe-area-inset-left) + 30 * var(--m)); bottom: calc(env(safe-area-inset-bottom) + 26 * var(--m)); width: calc(124 * var(--m)); height: calc(124 * var(--m)); }
+html.mob-land .mb-right { right: calc(env(safe-area-inset-right) + 6 * var(--m)); height: calc(292 * var(--m)); --ay: calc(234 * var(--m)); --ax: calc(214 * var(--m)); --r: calc(98 * var(--m)); --s: calc(54 * var(--m)); }
+html.mob-land .mb-attack { transform: scale(0.9); }
+html.mob-land .mb-attack.pressed { transform: scale(0.84); }
+html.mob-land .mb-items { right: calc(8 * var(--m)); top: calc(56 * var(--m)); gap: calc(8 * var(--m)); }
+html.mob-land #mb-items .hslot.item { width: calc(48 * var(--m)); height: calc(48 * var(--m)); }
+html.mob-land #mb-items .af-btn { width: calc(50 * var(--m)); height: calc(50 * var(--m)); }
+html.mob-land .mb-act { right: auto; left: calc(-46 * var(--m)); top: calc(150 * var(--m)); }
+html.mob-land .mb-exp { left: calc(50% - 170 * var(--m)); width: calc(300 * var(--m)); }
+html.mob-land.mob-chat #hud .chatwin { left: calc(env(safe-area-inset-left) + 8 * var(--m)); top: calc(env(safe-area-inset-top) + 64 * var(--m)); bottom: auto; width: calc(360 * var(--m)); }
+html.mob-land.mob-chat #hud .chatwin .cw-list { height: calc(150 * var(--m)); }
+/* (the sizes sideways: a phone on its side has no height to spare between the hero's frame and the joystick, so small is
+   shorter and narrower, large wider up to just left of the hero in the middle, and taller only where the screen has room
+   above the joystick: a tablet) */
+html.mob-land.mob-chat #hud .chatwin { --cw-room: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 271 * var(--m)); }
+@supports (height: 100dvh) { html.mob-land.mob-chat #hud .chatwin { --cw-room: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 271 * var(--m)); } }
+html.mob-land.mob-chat #hud .chatwin.size-s { width: calc(320 * var(--m)); }
+html.mob-land.mob-chat #hud .chatwin.size-s .cw-list { height: calc(80 * var(--m)); }
+html.mob-land.mob-chat #hud .chatwin.size-l { width: max(calc(360 * var(--m)), min(calc(385 * var(--m)), calc(50vw - 30 * var(--m) - env(safe-area-inset-left)))); } /* (never narrower than medium) */
+html.mob-land.mob-chat #hud .chatwin.size-l .cw-list { height: max(calc(150 * var(--m)), min(calc(300 * var(--m)), var(--cw-room))); }
+html.mob-land #mb-pop-grid .menubar { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+html.mob-land .mb-pop-in { width: min(calc(100vw - 24 * var(--m)), calc(520 * var(--m))); }
