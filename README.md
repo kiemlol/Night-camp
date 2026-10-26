@@ -4,10 +4,13 @@ Client nền `v0.5.16` (`game-20261025-1758`) cùng backend Node.js `0.2.0` đư
 thiết kế độc lập. Server phục vụ cả trang game, asset, API và WebSocket trên
 cùng một địa chỉ. Trạng thái chiến đấu, vật phẩm và tiến trình do server quyết định.
 
+Repo GitHub hiện tại: <https://github.com/linhphann66-maker/Night-camp>.
+Deployment Railway/VPS có thể dùng trực tiếp nhánh `main`.
+
 ## Chạy bằng Node.js 22 trở lên
 
 ```bash
-git clone https://github.com/kiemlol/Night-camp.git
+git clone https://github.com/linhphann66-maker/Night-camp.git
 cd Night-camp/server
 npm ci
 npm start
