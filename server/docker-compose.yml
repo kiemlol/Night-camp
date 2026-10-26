@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./runtime:/app/data
+      - ${DATA_PATH:-./runtime}:/app/data
     environment:
       CLIENT_DIR: /client
       FULL_CLIENT_DIR: /client-full

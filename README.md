@@ -23,6 +23,9 @@ Tạo nhân vật rồi vào game. Nút **Hành trang · Hệ thống** mở cá
 lên GitHub. `server/data/` là snapshot test cũ đã được lưu trước đó, không dùng làm
 dữ liệu mặc định. Nếu cần giữ server cũ, đặt `DATA_DIR` tới thư mục dữ liệu cũ;
 ID tài khoản device/custom cũ được nhận lại khi đăng nhập cùng khóa.
+Với Docker server cũ dùng `server/data/`, đặt `DATA_PATH=./data` trong `.env`
+trước khi rebuild để tiếp tục dùng dữ liệu cũ. `DATA_DIR` dùng cho chạy Node,
+còn `DATA_PATH` chọn thư mục volume trên VPS khi chạy Docker.
 
 ## Deploy VPS bằng Docker
 
