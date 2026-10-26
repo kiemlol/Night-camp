@@ -1,80 +1,103 @@
-# Night Camp clone — self-hosted online server
+# Night Camp — bản tự host
 
-This repository contains a public-client reconstruction plus a new,
-self-hosted clone server. The server is an independent implementation of the
-client contracts discovered during static REA analysis; it does not connect to
-Night Camp's original API and does not contain account or private player data.
+Client nền `v0.5.16` (`game-20261025-1758`) cùng backend Node.js `0.2.0` được
+thiết kế độc lập. Server phục vụ cả trang game, asset, API và WebSocket trên
+cùng một địa chỉ. Trạng thái chiến đấu, vật phẩm và tiến trình do server quyết định.
 
-## Run locally
+## Chạy bằng Node.js 22 trở lên
 
 ```bash
-cd server
-cp .env.example .env
-npm install
+git clone https://github.com/kiemlol/Night-camp.git
+cd Night-camp/server
+npm ci
 npm start
-curl http://127.0.0.1:7350/healthz
 ```
 
-For a VPS:
+Mở **http://localhost:7350/**. Server tự mở đúng client online; không phải sửa
+HTML hay tự thêm query string. Trong giao diện đăng nhập hiện có, nhập khóa cá
+nhân dạng 20 chữ số: lần đầu tạo tài khoản, những lần sau dùng lại khóa đó.
+Giữ khóa của bạn riêng tư; khóa này là thông tin đăng nhập của tài khoản đó.
+Tạo nhân vật rồi vào game. Nút **Hành trang · Hệ thống** mở các tính năng tiếng Việt.
+
+`server/runtime/` chứa tiến trình và khóa ký phiên, tự sinh khi chạy và không đưa
+lên GitHub. `server/data/` là snapshot test cũ đã được lưu trước đó, không dùng làm
+dữ liệu mặc định. Nếu cần giữ server cũ, đặt `DATA_DIR` tới thư mục dữ liệu cũ;
+ID tài khoản device/custom cũ được nhận lại khi đăng nhập cùng khóa.
+
+## Deploy VPS bằng Docker
+
+```bash
+cd Night-camp/server
+cp .env.example .env
+```
+
+Trong `.env`, đặt `PUBLIC_ORIGIN=http://IP-VPS:7350`, rồi chạy:
+
+```bash
+docker compose up -d --build
+docker compose logs -f nightcamp
+```
+
+Mở `http://IP-VPS:7350/`. Với domain trỏ tới VPS, đặt `DOMAIN=game.example.com`
+và `PUBLIC_ORIGIN=https://game.example.com` trong `.env`, rồi chạy:
+
+```bash
+docker compose --profile https up -d --build
+```
+
+Caddy phục vụ HTTPS và proxy WebSocket. VPS cần nhận kết nối cổng 80/443 cho
+HTTPS, hoặc 7350 nếu thử bằng HTTP. Volume `server/runtime/` giữ dữ liệu qua
+restart/rebuild. Sao lưu cả thư mục này; `.session-secret` giữ cho phiên đăng
+nhập còn hợp lệ sau restart. Không chạy nhiều replica dùng chung file JSON.
+
+## Những hệ thống đã có
+
+- Ba ô nhân vật, mật khẩu email được băm scrypt, phiên ký HMAC, refresh/logout,
+  giới hạn request, kiểm tra origin, lưu file bằng ghi tạm rồi đổi tên.
+- Thế giới chung theo map và ba kênh, snapshot 10 lần/giây, reconnect,
+  kiểm tra quyền vào match, thứ tự lệnh và chống xử lý lệnh lặp.
+- Di chuyển có giới hạn tốc độ/tầm map; đánh thường và kỹ năng có SP/cooldown,
+  chí mạng, khiên, hồi máu và một số trạng thái; AI đuổi/đánh, chết và hồi sinh.
+- EXP/Job EXP, tăng cấp, điểm chỉ số/kỹ năng, điều kiện đổi nghề và học kỹ năng.
+- Rơi nguyên liệu/trang bị, bảo lưu quyền nhặt, túi/kho, trang bị theo bản sao,
+  bán đồ, mở rộng túi, cường hóa/nâng bậc/đục ô và option.
+- Chuỗi nhiệm vụ riêng bốn bước, lựa chọn lưu bền và danh vọng, điểm danh,
+  nhiệm vụ ngày; phụ bản boss riêng từng nhân vật với nhận thưởng một lần.
+- Thu thập có thời gian và danh mục theo map, câu cá đơn giản, vườn thảo dược,
+  nấu súp/ăn, nấu và mua bình; AUTO khi còn online.
+- Tổ đội, mời có hạn, chia EXP, bạn bè hai chiều, bang và quỹ bang,
+  chat map, chợ chuyển quyền sở hữu đồ với phí 5%, PvP cần đồng ý hai phía.
+- Bảng hệ thống tiếng Việt để thao tác các cơ chế mới trực tiếp trong game.
+
+Danh mục trích từ client: **578 vật phẩm, 66 map, 238 loại quái, 370 nguyên liệu,
+45 nghề, 465 kỹ năng**. Đây là danh mục dữ liệu; số lượng này không có nghĩa từng
+script kỹ năng, sự kiện map và hành vi quái đã được tái hiện riêng hoàn toàn.
+
+## Phạm vi cần phân biệt
+
+Đây là một game tự host có vòng chơi độc lập, vẫn đang phát triển. Công thức,
+bốn nhiệm vụ, thu thập, kinh tế và encounter phụ bản là thiết kế của backend này.
+Nhiều kỹ năng hiện dùng bộ xử lý chung; chưa có toàn bộ tương tác riêng của 465
+kỹ năng, kịch bản boss/phụ bản gốc, cây hội thoại gốc, chiến trường bang theo mùa,
+thanh toán/nạp tiền, mô phỏng AUTO offline, kiểm tra va chạm đầy đủ theo layout
+client và cơ sở dữ liệu nhiều tiến trình. Không gọi đây là bản tương đương 100%
+server Night Camp chính thức. Chi tiết: [docs/backend-status.md](docs/backend-status.md).
+
+## Kiểm tra và công cụ
 
 ```bash
 cd server
-cp .env.example .env
-# Set SERVER_KEY and PUBLIC_ORIGIN to your HTTPS origin.
-docker compose up -d --build
+npm test
 ```
 
-Put Nginx/Caddy in front of port 7350 and proxy both HTTP and WebSocket
-`/ws`. The browser client is based on public version `v0.5.16`, build
-`game-20261025-1758`, and must be opened with:
+Kiểm tra bao gồm giao dịch rollback, chống thưởng lặp, tổ đội/kênh/PvP, thời gian
+farm/thu thập, hai WebSocket thực, xác thực và khôi phục sau restart.
 
-`/game-20261025-1758/index.html?online=https://YOUR-DOMAIN&serverkey=YOUR_SERVER_KEY`
-
-The client build's baked `meta[name=nc-online-servers]` must contain the same
-HTTPS origin. Use a deployment-specific replacement before publishing; do not
-commit a production key.
-
-For the current smoke-test server, the key form accepts any 20-character
-beta-key-shaped value (for example `12345678901234567890`). This is a
-development convenience, not production authentication; replace it with a
-real account/key service before opening the server publicly.
-
-## Current server scope
-
-Implemented: device/custom/email-shaped authentication, refresh sessions,
-release/status/server-load endpoints, character slots, WebSocket match join,
-full/delta snapshots, sequence acknowledgement, movement, attacks, skills,
-pickup/warp/action handling, quest choices/progress, potions, stats, gear,
-travel/rest/AUTO events, and persistent JSON state.
-
-Still intentionally prototype-level: authoritative formulas, anti-cheat,
-multi-process coordination, production database migrations, payment, and
-complete dungeon/PvP/guild-war rules. Replace the JSON store with PostgreSQL
-and add rate limits/auth hardening before exposing it to the public internet.
-
-## Reverse-engineering notes and asset recovery
-
-- `docs/game-systems-catalog.md` records the recovered progression, combat,
-  jobs, skills, items, gear, refine, crafting, quest, map, dungeon, life-skill,
-  social and online contracts.
-- `docs/online-feature-ledger.md` records the HTTP/WebSocket and authoritative
-  state boundary.
-- `tools/survey-original.mjs`, `tools/audit-assets.mjs` and
-  `tools/download-runtime-assets.mjs` reproduce the public resource audit.
-
-The complete research snapshot is tracked in `dist-full/` and is about 557 MB.
-The `dist/` folder is a roughly 194 MB verified boot/runtime bundle: it contains
-all 477 client modules and the assets exercised by offline and online startup.
-The recovery tools can be used to audit or rebuild the full asset tree from the
-public build.
-
-## Client update status
-
-- Baseline: `v0.5.16`, released 2026-10-25.
-- Includes the 29 modules introduced after `v0.5.12`, including online Break,
-  boss, dungeon, progression, job and class-3 presentation modules.
-- Retains the independent JSON WebSocket adapter for the clone server.
-- Uses local asset paths rather than the original game's `/cas/` image CDN.
-- Offline smoke test: no missing requests or page errors.
-- Online smoke test: key authentication, three character slots, character
-  creation, match join and the first authoritative snapshot all pass.
+- `dist/`: client boot/runtime đã chỉnh cho server clone.
+- `dist-full/`: kho client/asset đầy đủ đã tải, gồm 62 bản nhạc; server dùng làm
+  nguồn bổ sung khi asset không có trong `dist/`.
+- `tools/build-server-catalog.mjs`: trích danh mục public bằng sandbox build;
+  hook trình duyệt không chạy được được ghi trong provenance. Server chỉ đọc JSON.
+- `tools/recover-music.mjs`: tải nhạc được tham chiếu bởi manifest đã lưu.
+- `docs/game-systems-catalog.md`, `docs/online-feature-ledger.md`: nghiên cứu hợp
+  đồng client cũ; tình trạng triển khai hiện tại xem `backend-status.md`.

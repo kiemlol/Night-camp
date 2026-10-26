@@ -1,0 +1,4 @@
+server/data/.session-secret
+server/.env
+server/data/*.tmp
+server/runtime/

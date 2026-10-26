@@ -1,10 +1,35 @@
 services:
   nightcamp:
-    build: .
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
     restart: unless-stopped
     ports:
       - "7350:7350"
     env_file:
       - .env
     volumes:
-      - ./data:/app/data
+      - ./runtime:/app/data
+    environment:
+      CLIENT_DIR: /client
+      FULL_CLIENT_DIR: /client-full
+      DATA_DIR: /app/data
+    stop_grace_period: 20s
+  caddy:
+    image: caddy:2-alpine
+    profiles: [https]
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - nightcamp
+volumes:
+  caddy_data:
+  caddy_config:

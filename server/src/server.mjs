@@ -1,138 +1,751 @@
-import http from 'node:http';
-import crypto from 'node:crypto';
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { WebSocketServer } from 'ws';
+import http from "node:http";
+import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { WebSocketServer } from "ws";
+import { Game, createHero, catalog, RESOURCES } from "./game.mjs";
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
-const PORT = Number(process.env.PORT || 7350);
-const HOST = process.env.HOST || '0.0.0.0';
-const SERVER_KEY = process.env.SERVER_KEY || 'nightcamp-clone-dev-key';
-const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(ROOT, '..', 'data'));
-const DB_FILE = path.join(DATA_DIR, 'state.json');
-fs.mkdirSync(DATA_DIR, { recursive: true });
-
-const now = () => Date.now();
-const id = (prefix) => `${prefix}_${crypto.randomBytes(9).toString('hex')}`;
-const b64url = (s) => Buffer.from(String(s)).toString('base64url');
-const json = (res, status, value) => { const body = JSON.stringify(value); res.writeHead(status, { 'content-type': 'application/json', 'cache-control': 'no-store', 'access-control-allow-origin': '*' }); res.end(body); };
-const readBody = (req) => new Promise((resolve, reject) => { let s = ''; req.on('data', (c) => { s += c; if (s.length > 2e6) reject(new Error('body too large')); }); req.on('end', () => { try { resolve(s ? JSON.parse(s) : {}); } catch { reject(new Error('invalid json')); } }); req.on('error', reject); });
-const clone = (v) => JSON.parse(JSON.stringify(v));
-
-const defaultQuest = () => ({ main: { index: 0, id: 'first-night', state: 'active', objectives: [{ have: 0, need: 3, kind: 'dummy' }], keys: [] }, daily: { day: 0, list: [], week: { days: 0, claimed: false } }, rep: {}, tokens: 0, flags: {} });
-const blankHero = (name, appearance = {}) => ({
-  id: id('hero'), name: String(name || 'Traveler').slice(0, 24), appearance, mapId: 'camp', channelId: '1',
-  x: 2200, y: 1600, lv: 1, xp: 0, xpNext: 100, job: 'traveler', jobLv: 1, jobXp: 0, jobXpNext: 100,
-  hp: 126, hpMax: 126, sp: 13, spMax: 13, coins: 250, gems: 0, statPts: 0, skillPts: 0,
-  equip: { weapon: 'sword', hair: 'hair_spiky' }, wu: { weapon: 1 }, bag: [], store: [], bagExtra: 0,
-  materials: {}, potions: { hp: 3, sp: 3 }, quests: defaultQuest(), flags: {}, skills: {}, statuses: [],
-});
-let db = { users: {}, sessions: {}, characters: {}, version: 1 };
-try { if (fs.existsSync(DB_FILE)) db = Object.assign(db, JSON.parse(fs.readFileSync(DB_FILE, 'utf8'))); } catch { /* start clean */ }
-let saveTimer;
-function save() { clearTimeout(saveTimer); saveTimer = setTimeout(() => fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2)), 100); }
-
-const sessions = new Map();
-function tokenFor(userId, refresh = false) {
-  const header = b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-  const payload = b64url(JSON.stringify({ uid: userId, usn: userId, exp: Math.floor(now() / 1000) + (refresh ? 2592000 : 3600) }));
-  return `${header}.${payload}.${crypto.randomBytes(12).toString('hex')}`;
+try {
+  process.loadEnvFile(path.join(ROOT, "../.env"));
+} catch (error) {
+  if (error.code !== "ENOENT") throw error;
 }
-function authUser(req) { const h = req.headers.authorization || ''; if (!h.startsWith('Bearer ')) return null; const s = sessions.get(h.slice(7)); return s && s.exp > now() ? s.userId : null; }
-function newSession(userId) { const access = tokenFor(userId), refresh = tokenFor(userId, true); sessions.set(access, { userId, refresh, exp: now() + 3600000 }); return { token: access, refresh_token: refresh }; }
-function userFor(id0) { return db.users[id0] || (db.users[id0] = { id: id0, slots: [null, null, null], createdAt: now() }); }
-function currentHero(uid) { const u = userFor(uid); const c = u.active && db.characters[u.active]; return c || (u.slots.find(Boolean) && db.characters[u.slots.find(Boolean)]); }
-function slotList(u) {
-  const active = Math.max(0, u.slots.findIndex((heroId) => heroId === u.active));
+const PORT = Number(process.env.PORT || 7350),
+  HOST = process.env.HOST || "0.0.0.0";
+const SERVER_KEY = process.env.SERVER_KEY || "nightcamp-local-key";
+const DATA_DIR = path.resolve(
+  process.env.DATA_DIR || path.join(ROOT, "../runtime"),
+);
+const CLIENT_DIR = path.resolve(
+  process.env.CLIENT_DIR || path.join(ROOT, "../../dist"),
+);
+const FULL_CLIENT_DIR = path.resolve(
+  process.env.FULL_CLIENT_DIR || path.join(ROOT, "../../dist-full"),
+);
+const BUILD = "game-20261025-1758";
+fs.mkdirSync(DATA_DIR, { recursive: true, mode: 0o700 });
+const DB_FILE = path.join(DATA_DIR, "state.json"),
+  SECRET_FILE = path.join(DATA_DIR, ".session-secret");
+if (!fs.existsSync(SECRET_FILE))
+  fs.writeFileSync(SECRET_FILE, crypto.randomBytes(48).toString("hex"), {
+    mode: 0o600,
+    flag: "wx",
+  });
+const secret =
+  process.env.SESSION_SECRET || fs.readFileSync(SECRET_FILE, "utf8").trim();
+let db = { users: {}, characters: {}, sessions: {}, accounts: {}, version: 2 };
+// Never silently reset players' progress when a save is corrupt.
+if (fs.existsSync(DB_FILE))
+  Object.assign(db, JSON.parse(fs.readFileSync(DB_FILE, "utf8")));
+db.accounts ||= {};
+db.sessions ||= {};
+const game = new Game(db);
+let dirty = false;
+function save() {
+  const tmp = DB_FILE + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(db), { mode: 0o600 });
+  fs.renameSync(tmp, DB_FILE);
+  dirty = false;
+}
+function user(id) {
+  return (
+    db.users[id] ||
+    (db.users[id] = { id, slots: [null, null, null], createdAt: Date.now() })
+  );
+}
+function hero(uid) {
+  return db.characters[user(uid).active];
+}
+function slotList(uid) {
+  const u = user(uid);
   return {
-    active,
+    active: Math.max(0, u.slots.indexOf(u.active)),
     max: 3,
-    slots: u.slots.map((heroId, slot) => heroId
-      ? { slot, empty: false, ...clone(db.characters[heroId]), look: clone(db.characters[heroId].appearance || {}) }
-      : { slot, empty: true }),
+    slots: u.slots.map((id, slot) =>
+      id && db.characters[id]
+        ? {
+            slot,
+            empty: false,
+            ...db.characters[id],
+            look: db.characters[id].appearance || {},
+          }
+        : { slot, empty: true },
+    ),
   };
 }
-
-const worlds = new Map();
-function worldFor(matchId, uid, hero) {
-  let w = worlds.get(matchId); if (w) return w;
-  const monsters = [
-    { id: id('mob'), type: 'dummy_plain', x: 2450, y: 1600, lv: 1, hp: 100, hpMax: 100 },
-    { id: id('mob'), type: 'dummy_armored', x: 2650, y: 1600, lv: 2, hp: 140, hpMax: 140 },
-  ];
-  w = { matchId, uid, hero, mapId: hero.mapId || 'camp', channelId: hero.channelId || '1', players: new Map(), monsters, loot: [], seq: 0, clients: new Set() };
-  worlds.set(matchId, w); return w;
+function token(uid, refresh = false) {
+  const head = Buffer.from(
+    JSON.stringify({ alg: "HS256", typ: "JWT" }),
+  ).toString("base64url");
+  const payload = Buffer.from(
+    JSON.stringify({
+      uid,
+      usn: uid,
+      exp: Math.floor(Date.now() / 1000) + (refresh ? 2592000 : 3600),
+      jti: crypto.randomUUID(),
+      refresh,
+    }),
+  ).toString("base64url");
+  const input = head + "." + payload;
+  return (
+    input +
+    "." +
+    crypto.createHmac("sha256", secret).update(input).digest("base64url")
+  );
 }
-function selfWire(h) { return { ...clone(h), mapId: h.mapId || 'camp', channelId: h.channelId || '1', wu: h.wu || {}, bag: h.bag || [], store: h.store || [], quests: h.quests || defaultQuest() }; }
-function snapshot(w, full = true) {
-  const self = selfWire(w.hero);
-  return { full, mapId: w.mapId, channelId: w.channelId, tick: Math.floor(now() / 50), self, players: [...w.players.values()].filter((p) => p.id !== self.id), monsters: clone(w.monsters), loot: clone(w.loot), bag: clone(w.hero.bag || []), store: clone(w.hero.store || []) };
+function verify(value, refresh = false) {
+  try {
+    const [head, payload, sig] = String(value).split(".");
+    const expected = crypto
+        .createHmac("sha256", secret)
+        .update(head + "." + payload)
+        .digest(),
+      got = Buffer.from(sig || "", "base64url");
+    if (
+      got.length !== expected.length ||
+      !crypto.timingSafeEqual(got, expected)
+    )
+      return null;
+    const p = JSON.parse(Buffer.from(payload, "base64url"));
+    if (
+      p.exp <= Date.now() / 1000 ||
+      p.refresh !== refresh ||
+      !db.sessions[p.jti]
+    )
+      return null;
+    return p;
+  } catch {
+    return null;
+  }
 }
-function sendFrame(client, op, value) { const raw = Buffer.from(JSON.stringify(value)); client.send(JSON.stringify({ match_data: { match_id: client.matchId, op_code: String(op), data: raw.toString('base64'), reliable: true } })); }
-function event(w, value) { for (const c of w.clients) if (c.readyState === 1) sendFrame(c, 102, value); }
-function fullSync(client) { sendFrame(client, 101, snapshot(client.world, true)); }
-function deltaSync(client) { sendFrame(client, 101, snapshot(client.world, false)); }
-
-function rpc(uid, method, payload = {}) {
-  const u = userFor(uid); let hero = currentHero(uid);
-  if (method === 'nc_status') return { closing: false, supportedSkills: [], channels: { count: 1, cap: 50 }, online: 1, version: db.version };
-  if (method === 'nc_account') return { ok: true };
-  if (method === 'nc_characters') return slotList(u);
-  if (method === 'nc_character_create') { const slot = Math.max(0, Math.min(2, Number(payload.slot) || 0)); if (u.slots[slot]) throw new Error('slot occupied'); const h = blankHero(payload.name, payload.appearance); db.characters[h.id] = h; u.slots[slot] = h.id; u.active = h.id; save(); return slotList(u); }
-  if (method === 'nc_character_slot') { const slot = Math.max(0, Math.min(2, Number(payload.slot) || 0)); if (payload.delete && u.slots[slot]) { delete db.characters[u.slots[slot]]; u.slots[slot] = null; if (u.active && !db.characters[u.active]) u.active = u.slots.find(Boolean) || null; save(); return slotList(u); } if (u.slots[slot]) { u.active = u.slots[slot]; hero = db.characters[u.active]; save(); return slotList(u); } return slotList(u); }
-  if (method === 'nc_checkin_status') return { ok: true, day: Math.floor(now() / 86400000), claimed: false, first7: [], month: [] };
-  if (method === 'nc_checkin_claim') return { ok: true, claimed: true, reward: { coins: 25 } };
-  if (method === 'nc_gwar') return { lands: [], result: 'ok' };
-  if (method === 'nc_rankings') return { rows: [] };
-  if (method === 'nc_chat') return { ok: true };
-  if (method === 'nc_join') return { matchId: id('match'), channelId: String(payload.channelId || hero?.channelId || '1') };
-  return {};
+function newSession(uid) {
+  const access = token(uid),
+    refresh = token(uid, true);
+  for (const v of [access, refresh]) {
+    const p = JSON.parse(Buffer.from(v.split(".")[1], "base64url"));
+    db.sessions[p.jti] = { uid, exp: p.exp };
+  }
+  save();
+  return { token: access, refresh_token: refresh };
 }
-function applyCommand(w, op, body, client) {
-  const h = w.hero; const seq = Number(body.seq || 0); if (seq <= (client.lastSeq || 0)) return; client.lastSeq = seq;
-  if (op === 1) { h.x += Math.max(-12, Math.min(12, Number(body.dx) || 0)); h.y += Math.max(-12, Math.min(12, Number(body.dy) || 0)); }
-  else if (op === 2 || op === 3) { const target = w.monsters.find((m) => body.targetId ? m.id === body.targetId : m.hp > 0); if (target) { target.hp = Math.max(0, target.hp - (op === 3 ? 24 : 12)); event(w, { type: 'hit', targetId: target.id, amount: op === 3 ? 24 : 12, seq }); if (target.hp <= 0) { h.xp += target.lv * 10; h.coins += target.lv * 5; h.quests.main.objectives[0].have = Math.min(3, (h.quests.main.objectives[0].have || 0) + 1); event(w, { type: 'kill', targetId: target.id, xp: target.lv * 10, coins: target.lv * 5, seq }); target.hp = target.hpMax; } } }
-  else if (op === 4) { const i = w.loot.findIndex((x) => x.id === body.lootId); if (i >= 0) { const [drop] = w.loot.splice(i, 1); h.materials[drop.itemId] = (h.materials[drop.itemId] || 0) + 1; event(w, { type: 'pickup', lootId: body.lootId, itemId: drop.itemId, seq }); } }
-  else if (op === 5 && body.portalId) { h.mapId = String(body.portalId); w.mapId = h.mapId; event(w, { type: 'transfer', mapId: w.mapId, seq }); }
-  else if (op === 6) applyAction(w, body, client);
-  save(); deltaSync(client); sendFrame(client, 103, { id: body.id, ackSeq: seq });
+function requireValue(ok, message) {
+  if (!ok) throw new Error(message);
 }
-function applyAction(w, a, client) {
-  const h = w.hero, kind = String(a.kind || a.action || '');
-  if (a.action === 'quest') { const q = h.quests.main; if (a.op === 'take') q.state = 'active'; if (a.op === 'choose') { h.quests.flags[`choice:${a.id}`] = a.choice; q.state = 'done'; } if (a.op === 'handin' && q.objectives[0].have >= q.objectives[0].need) { q.state = 'done'; h.coins += 100; } event(w, { type: 'quest', op: a.op === 'handin' ? 'done' : a.op, id: a.id || q.id, panels: [] }); }
-  else if (a.action === 'potion') { const k = a.kind === 'sp' ? 'sp' : 'hp'; if ((h.potions?.[k] || 0) > 0) { h.potions[k]--; if (k === 'hp') h.hp = h.hpMax; else h.sp = h.spMax; event(w, { type: 'heal', kind: k, amount: k === 'hp' ? h.hpMax : h.spMax }); } }
-  else if (a.action === 'stat') { const key = String(a.key || 'str'); if (h.statPts > 0) { h.statPts--; h.stats = h.stats || {}; h.stats[key] = (h.stats[key] || 1) + 1; } }
-  else if (a.action === 'equip' && a.itemId) { h.equip[a.slot || 'weapon'] = a.itemId; event(w, { type: 'equip', slot: a.slot, itemId: a.itemId }); }
-  else if (a.action === 'rest') { h.hp = h.hpMax; h.sp = h.spMax; }
-  else if (a.action === 'travel' && a.mapId) { h.mapId = String(a.mapId); w.mapId = h.mapId; }
-  else if (a.action === 'auto') event(w, { type: 'auto', on: a.kind === 'start' });
+const rates = new Map();
+function limit(key, max, period = 1000) {
+  const t = Date.now();
+  let b = rates.get(key);
+  if (!b || b.until <= t) {
+    b = { n: 0, until: t + period };
+    rates.set(key, b);
+  }
+  requireValue(++b.n <= max, "rate_limit");
 }
-
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let size = 0,
+      parts = [];
+    req.on("data", (c) => {
+      size += c.length;
+      if (size > 128 * 1024) {
+        reject(new Error("body_too_large"));
+        req.destroy();
+      } else parts.push(c);
+    });
+    req.on("end", () => {
+      try {
+        resolve(JSON.parse(Buffer.concat(parts).toString() || "{}"));
+      } catch {
+        reject(new Error("invalid_json"));
+      }
+    });
+    req.on("error", reject);
+  });
+}
+function rpc(uid, method, p = {}) {
+  requireValue(
+    p && typeof p === "object" && !Array.isArray(p),
+    "invalid_payload",
+  );
+  const u = user(uid),
+    h = hero(uid);
+  if (method === "nc_status")
+    return {
+      closing: false,
+      supportedSkills: Object.keys(catalog.SKILLS),
+      channels: { count: 3, cap: 50 },
+      online: [...wss.clients].filter((c) => c.world).length,
+      version: 2,
+    };
+  if (method === "nc_account") return { ok: true, id: uid };
+  if (method === "nc_characters") return slotList(uid);
+  if (method === "nc_character_create") {
+    const slot = Number(p.slot ?? 0);
+    requireValue(
+      Number.isInteger(slot) && slot >= 0 && slot < 3 && !u.slots[slot],
+      "invalid_slot",
+    );
+    const h = createHero(p.name, p.appearance);
+    db.characters[h.id] = h;
+    u.slots[slot] = h.id;
+    u.active = h.id;
+    save();
+    return slotList(uid);
+  }
+  if (method === "nc_character_slot") {
+    requireValue(
+      ![...wss.clients].some((c) => c.uid === uid && c.world),
+      "leave_world_first",
+    );
+    const slot = Number(p.slot);
+    requireValue(
+      Number.isInteger(slot) && slot >= 0 && slot < 3,
+      "invalid_slot",
+    );
+    const id = u.slots[slot];
+    requireValue(id && db.characters[id], "empty_slot");
+    if (p.delete) {
+      const h = db.characters[id];
+      requireValue(
+        !h.partyId &&
+          !h.guildId &&
+          !Object.values(db.market).some((row) => row.seller === id),
+        "character_has_social_or_market_state",
+      );
+      delete db.characters[id];
+      u.slots[slot] = null;
+      u.active = u.slots.find(Boolean) || null;
+    } else u.active = id;
+    save();
+    return slotList(uid);
+  }
+  requireValue(h, "character_required");
+  if (method === "nc_join") {
+    const w = game.world(
+      h.mapId,
+      String(p.channelId || h.channelId),
+      h.dungeon?.id || "",
+    );
+    return { matchId: w.id, channelId: w.channelId };
+  }
+  if (method === "nc_checkin_status") return game.checkin(h);
+  if (method === "nc_checkin_claim") {
+    const result = game.checkin(h, true);
+    save();
+    return result;
+  }
+  if (method === "nc_rankings")
+    return {
+      rows: Object.values(db.characters)
+        .sort((a, b) => b.lv - a.lv || b.xp - a.xp)
+        .slice(0, 100)
+        .map((h, i) => ({
+          rank: i + 1,
+          id: h.id,
+          name: h.name,
+          lv: h.lv,
+          job: h.job,
+        })),
+    };
+  if (method === "nc_broker") return { rows: Object.values(db.market) };
+  if (method === "nc_chat") return { ok: true };
+  throw new Error("unsupported_rpc:" + method);
+}
+const mime = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".json": "application/json",
+  ".css": "text/css",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".jpg": "image/jpeg",
+  ".ogg": "audio/ogg",
+  ".mp3": "audio/mpeg",
+  ".woff2": "font/woff2",
+  ".svg": "image/svg+xml",
+};
 const server = http.createServer(async (req, res) => {
-  if (req.method === 'OPTIONS') { res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type,authorization', 'access-control-allow-methods': 'GET,POST,OPTIONS' }); return res.end(); }
-  const u = new URL(req.url, `http://${req.headers.host}`), uid = authUser(req);
-  if (req.method === 'GET' && u.pathname === '/nc/update') return json(res, 200, { schemaVersion: 1, contentVersion: 'clone-local-2', protocolVersion: 1, version: '0.5.16-clone.1', platforms: { web: { build: 2, minimumBuild: 2, version: '0.5.16-clone.1', url: '', notes: '' } }, notes: [] });
-  if (req.method === 'GET' && u.pathname === '/nc/servers') return json(res, 200, { self: true, servers: [{ id: 'local', no: 1, name: 'Clone Local', url: process.env.PUBLIC_ORIGIN || `http://localhost:${PORT}`, status: 'open', tags: ['recommended'], opened: true }] });
-  if (req.method === 'GET' && u.pathname === '/nc/load') return json(res, 200, { population: [...worlds.values()].reduce((n, w) => n + w.clients.size, 0), capacity: 50, state: 'smooth', maps: {} });
-  if (req.method === 'GET' && u.pathname === '/healthz') return json(res, 200, { ok: true, service: 'nightcamp-clone-server' });
-  if (req.method === 'POST' && u.pathname.startsWith('/v2/account/authenticate/')) { const body = await readBody(req); const kind = u.pathname.split('/').pop(); const identity = kind === 'device' ? String(body.id) : kind === 'custom' ? `key:${body.id}` : `email:${body.email}`; const userId = `user_${crypto.createHash('sha256').update(identity).digest('hex').slice(0, 24)}`; userFor(userId); return json(res, 200, newSession(userId)); }
-  if (req.method === 'POST' && u.pathname === '/v2/account/session/refresh') { const b = await readBody(req); const old = [...sessions.values()].find((s) => s.refresh === b.token); if (!old) return json(res, 401, { message: 'session expired' }); return json(res, 200, newSession(old.userId)); }
-  if (req.method === 'POST' && u.pathname === '/v2/session/logout') return json(res, 200, {});
-  if (req.method === 'POST' && u.pathname.startsWith('/v2/rpc/')) { if (!uid) return json(res, 401, { message: 'unauthorized' }); const p = await readBody(req); let payload = {}; try { payload = typeof p === 'string' ? JSON.parse(p || '{}') : JSON.parse(p.payload || '{}'); } catch {} try { return json(res, 200, { payload: JSON.stringify(rpc(uid, decodeURIComponent(u.pathname.slice('/v2/rpc/'.length)), payload)) }); } catch (e) { return json(res, 400, { message: e.message }); } }
-  if (req.method === 'GET' && u.pathname === '/v2/match') return json(res, 200, { matches: [] });
-  return json(res, 404, { message: 'not found' });
+  const origin = process.env.PUBLIC_ORIGIN || `http://${req.headers.host}`;
+  const allowed =
+    !req.headers.origin ||
+    req.headers.origin === origin ||
+    (process.env.CORS_ORIGINS || "").split(",").includes(req.headers.origin);
+  const headers = {
+    "cache-control": "no-store",
+    "x-content-type-options": "nosniff",
+    ...(allowed && req.headers.origin
+      ? { "access-control-allow-origin": req.headers.origin, vary: "Origin" }
+      : {}),
+  };
+  const json = (code, value) => {
+    res.writeHead(code, { ...headers, "content-type": "application/json" });
+    res.end(JSON.stringify(value));
+  };
+  try {
+    requireValue(allowed, "origin_denied");
+    const url = new URL(req.url, "http://localhost"),
+      route = url.pathname;
+    if (route.startsWith("/v2/") || route.startsWith("/nc/"))
+      limit("http:" + req.socket.remoteAddress, 600, 60000);
+    if (req.method === "OPTIONS") {
+      res.writeHead(204, {
+        ...headers,
+        "access-control-allow-headers": "content-type,authorization",
+        "access-control-allow-methods": "GET,POST,OPTIONS",
+      });
+      return res.end();
+    }
+    if (req.method === "GET") {
+      if (route === "/healthz")
+        return json(200, {
+          ok: true,
+          version: "0.2.0",
+          players: [...wss.clients].filter((c) => c.world).length,
+        });
+      if (route === "/backend-ui.js") {
+        res.writeHead(200, { ...headers, "content-type": mime[".js"] });
+        return res.end(
+          fs.readFileSync(path.join(ROOT, "../public/backend-ui.js")),
+        );
+      }
+      if (route === "/nc/update")
+        return json(200, {
+          schemaVersion: 1,
+          contentVersion: "clone-local-3",
+          protocolVersion: 1,
+          version: "0.5.16-clone.2",
+          platforms: {
+            web: {
+              build: 2,
+              minimumBuild: 2,
+              version: "0.5.16-clone.2",
+              url: "",
+              notes: "",
+            },
+          },
+          notes: [],
+        });
+      if (route === "/nc/servers")
+        return json(200, {
+          self: true,
+          servers: [
+            {
+              id: "local",
+              no: 1,
+              name: "Night Camp",
+              url: origin,
+              status: "open",
+              tags: ["recommended"],
+              opened: true,
+            },
+          ],
+        });
+      if (route === "/nc/catalog")
+        return json(200, {
+          items: catalog.ITEMS,
+          jobs: catalog.JOBS,
+          maps: catalog.MAPS,
+          skills: catalog.SKILLS,
+          materials: catalog.MATERIALS,
+          resources: RESOURCES,
+        });
+      if (route === "/nc/load")
+        return json(200, {
+          population: [...wss.clients].filter((c) => c.world).length,
+          capacity: 150,
+          state: "smooth",
+          maps: Object.fromEntries(
+            [...game.worlds.values()].map((w) => [w.id, w.players.size]),
+          ),
+        });
+      if (route === "/v2/match")
+        return json(200, {
+          matches: [...game.worlds.values()]
+            .filter((w) => !w.instance)
+            .map((w) => ({
+              match_id: w.id,
+              size: w.players.size,
+              authoritative: true,
+              label: w.mapId,
+            })),
+        });
+      if (route === "/") {
+        res.writeHead(302, {
+          location: `/${BUILD}/index.html?online=${encodeURIComponent(origin)}&serverkey=${encodeURIComponent(SERVER_KEY)}`,
+        });
+        return res.end();
+      }
+      const relative = decodeURIComponent(route).replace(/^\/+/, "");
+      let file = path.resolve(CLIENT_DIR, relative);
+      requireValue(file.startsWith(CLIENT_DIR + path.sep), "invalid_path");
+      if (!fs.existsSync(file)) {
+        const full = path.resolve(FULL_CLIENT_DIR, relative);
+        requireValue(
+          full.startsWith(FULL_CLIENT_DIR + path.sep),
+          "invalid_path",
+        );
+        file = full;
+      }
+      if (fs.existsSync(file) && fs.statSync(file).isFile()) {
+        if (path.basename(file) === "index.html") {
+          let html = fs.readFileSync(file, "utf8");
+          html = html.replace(
+            /(<meta\s+name="nc-online-servers"\s+content=")[^"]*(")/,
+            (_, a, b) => a + origin.replace(/["<>]/g, "") + b,
+          );
+          html = html.replace(
+            "</body>",
+            '<script src="/backend-ui.js" defer></script></body>',
+          );
+          res.writeHead(200, { ...headers, "content-type": mime[".html"] });
+          return res.end(html);
+        }
+        res.writeHead(200, {
+          ...headers,
+          "content-type":
+            mime[path.extname(file)] || "application/octet-stream",
+        });
+        return fs.createReadStream(file).pipe(res);
+      }
+      return json(404, { message: "not_found" });
+    }
+    requireValue(req.method === "POST", "method_not_allowed");
+    const auth = verify(
+      (req.headers.authorization || "").replace(/^Bearer /, ""),
+    );
+    if (route.startsWith("/v2/account/authenticate/")) {
+      limit("auth:" + req.socket.remoteAddress, 30, 60000);
+      requireValue(
+        req.headers.authorization ===
+          "Basic " + Buffer.from(SERVER_KEY + ":").toString("base64"),
+        "invalid_server_key",
+      );
+      const body = await readBody(req),
+        kind = route.split("/").pop();
+      requireValue(
+        ["device", "custom", "email"].includes(kind),
+        "unsupported_auth",
+      );
+      const ident = String(
+        kind === "email" ? body.email || "" : body.id || "",
+      ).trim();
+      requireValue(
+        ident.length >= 6 && ident.length <= 200,
+        "invalid_identity",
+      );
+      const accountKey = crypto
+        .createHash("sha256")
+        .update(kind + ":" + (kind === "email" ? ident.toLowerCase() : ident))
+        .digest("hex");
+      let account = db.accounts[accountKey];
+      if (kind === "email") {
+        requireValue(
+          typeof body.password === "string" &&
+            body.password.length >= 8 &&
+            body.password.length <= 128,
+          "password_length",
+        );
+        if (!account) {
+          requireValue(
+            url.searchParams.get("create") === "true",
+            "invalid_credentials",
+          );
+          const salt = crypto.randomBytes(16).toString("hex");
+          account = {
+            uid: "user_" + accountKey.slice(0, 24),
+            salt,
+            password: crypto
+              .scryptSync(body.password, salt, 32)
+              .toString("hex"),
+          };
+          db.accounts[accountKey] = account;
+        } else
+          requireValue(
+            crypto.timingSafeEqual(
+              Buffer.from(account.password, "hex"),
+              crypto.scryptSync(body.password, account.salt, 32),
+            ),
+            "invalid_credentials",
+          );
+      } else if (!account) {
+        const oldIdentity = kind === "custom" ? "key:" + ident : ident;
+        const legacy =
+          "user_" +
+          crypto
+            .createHash("sha256")
+            .update(oldIdentity)
+            .digest("hex")
+            .slice(0, 24);
+        account = {
+          uid: db.users[legacy] ? legacy : "user_" + accountKey.slice(0, 24),
+        };
+        db.accounts[accountKey] = account;
+      }
+      user(account.uid);
+      return json(200, newSession(account.uid));
+    }
+    if (route === "/v2/account/session/refresh") {
+      const b = await readBody(req),
+        p = verify(b.token, true);
+      requireValue(p, "session_expired");
+      delete db.sessions[p.jti];
+      return json(200, newSession(p.uid));
+    }
+    requireValue(auth, "unauthorized");
+    if (route === "/v2/session/logout") {
+      const b = await readBody(req);
+      delete db.sessions[auth.jti];
+      const p = verify(b.refresh_token, true);
+      if (p?.uid === auth.uid) delete db.sessions[p.jti];
+      for (const ws of wss.clients)
+        if (ws.uid === auth.uid) ws.close(4002, "logged_out");
+      save();
+      return json(200, {});
+    }
+    if (route.startsWith("/v2/rpc/")) {
+      const b = await readBody(req),
+        payload =
+          typeof b === "string"
+            ? JSON.parse(b || "{}")
+            : typeof b.payload === "string"
+              ? JSON.parse(b.payload || "{}")
+              : b;
+      return json(200, {
+        payload: JSON.stringify(
+          rpc(auth.uid, decodeURIComponent(route.slice(8)), payload),
+        ),
+      });
+    }
+    return json(404, { message: "not_found" });
+  } catch (e) {
+    if (!res.headersSent)
+      json(
+        e.message === "unauthorized" || e.message === "invalid_credentials"
+          ? 401
+          : e.message === "rate_limit"
+            ? 429
+            : 400,
+        { message: e.message },
+      );
+  }
 });
-
-const wss = new WebSocketServer({ noServer: true });
-server.on('upgrade', (req, socket, head) => { const u = new URL(req.url, `http://${req.headers.host}`); if (u.pathname !== '/ws') return socket.destroy(); const token = u.searchParams.get('token') || ''; const session = sessions.get(token); if (!session || session.exp <= now()) return socket.destroy(); wss.handleUpgrade(req, socket, head, (client) => { client.userId = session.userId; client.matchId = null; client.world = null; client.on('message', (raw) => onMessage(client, raw)); }); });
-function onMessage(client, raw) {
-  let m; try { m = JSON.parse(raw.toString()); } catch { return; }
-  if (process.env.DEBUG_WS) console.log('ws in', Object.keys(m), m.cid || '', m.match_join || '');
-  if (m.rpc) { const p = JSON.parse(m.rpc.payload || '{}'); if (m.rpc.id === 'nc_join') { const uid = client.userId || id('user'); client.userId = uid; const h = currentHero(uid) || (userFor(uid), null); if (!h) { client.send(JSON.stringify({ cid: m.cid, rpc: { id: m.rpc.id, payload: JSON.stringify({ matchId: id('match') }) } })); return; } const result = rpc(uid, 'nc_join', p); client.matchId = result.matchId; client.world = worldFor(result.matchId, uid, h); client.world.clients.add(client); client.send(JSON.stringify({ cid: m.cid, rpc: { id: m.rpc.id, payload: JSON.stringify(result) } })); return; } const result = rpc(client.userId, m.rpc.id, p); client.send(JSON.stringify({ cid: m.cid, rpc: { id: m.rpc.id, payload: JSON.stringify(result) } })); return; }
-  if (m.match_join) { client.matchId = m.match_join.match_id; if (!client.world) { const h = currentHero(client.userId); if (!h) return; client.world = worldFor(client.matchId, client.userId, h); } client.world.clients.add(client); if (process.env.DEBUG_WS) console.log('ws join', client.matchId, !!client.world); client.send(JSON.stringify({ cid: m.cid, match: { match_id: client.matchId } })); fullSync(client); return; }
-  if (m.match_leave) { client.world?.clients.delete(client); client.send(JSON.stringify({ cid: m.cid, match: { match_id: m.match_leave.match_id } })); return; }
-  if (m.match_data_send) { const d = m.match_data_send, data = JSON.parse(Buffer.from(d.data || '', 'base64').toString() || '{}'); applyCommand(client.world, Number(d.op_code), data, client); }
+const wss = new WebSocketServer({ noServer: true, maxPayload: 32 * 1024 });
+server.on("upgrade", (req, socket, head) => {
+  try {
+    const u = new URL(req.url, "http://localhost"),
+      auth = verify(u.searchParams.get("token"));
+    requireValue(u.pathname === "/ws" && auth, "unauthorized");
+    const origin = process.env.PUBLIC_ORIGIN || `http://${req.headers.host}`;
+    requireValue(
+      !req.headers.origin ||
+        req.headers.origin === origin ||
+        (process.env.CORS_ORIGINS || "")
+          .split(",")
+          .includes(req.headers.origin),
+      "origin_denied",
+    );
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      ws.uid = auth.uid;
+      ws.jti = auth.jti;
+      ws.exp = auth.exp;
+      ws.seq = 0;
+      ws.alive = true;
+      wss.emit("connection", ws);
+    });
+  } catch {
+    socket.destroy();
+  }
+});
+function send(ws, obj) {
+  if (ws.readyState === 1 && ws.bufferedAmount < 2e6)
+    ws.send(JSON.stringify(obj));
 }
-wss.on('connection', (client) => client.on('close', () => client.world?.clients.delete(client)));
-server.listen(PORT, HOST, () => console.log(`Night Camp clone server listening on ${HOST}:${PORT}`));
+function frame(ws, op, value) {
+  send(ws, {
+    match_data: {
+      match_id: ws.world.id,
+      op_code: String(op),
+      data: Buffer.from(JSON.stringify(value)).toString("base64"),
+      reliable: true,
+    },
+  });
+}
+function detach(ws) {
+  if (
+    ws.world &&
+    ![...wss.clients].some(
+      (other) =>
+        other !== ws &&
+        other.readyState === 1 &&
+        other.heroId === ws.heroId &&
+        other.world === ws.world,
+    )
+  )
+    ws.world.players.delete(ws.heroId);
+  ws.world = null;
+}
+function sync(ws) {
+  const h = db.characters[ws.heroId];
+  if (ws.world && h) frame(ws, 101, game.snapshot(ws.world, h, ws.seq));
+}
+function flush() {
+  for (const { world, event, to } of game.drain())
+    for (const ws of wss.clients)
+      if (ws.world && (to ? ws.heroId === to : ws.world.id === world))
+        frame(ws, 102, event);
+}
+wss.on("connection", (ws) => {
+  ws.on("pong", () => {
+    ws.alive = true;
+  });
+  ws.on("close", () => detach(ws));
+  ws.on("error", () => detach(ws));
+  ws.on("message", (raw) => {
+    let m;
+    try {
+      limit("ws:" + ws.uid, 100);
+      requireValue(
+        ws.exp > Date.now() / 1000 && db.sessions[ws.jti],
+        "session_expired",
+      );
+      m = JSON.parse(raw.toString());
+      if (m.rpc) {
+        const result = rpc(ws.uid, m.rpc.id, JSON.parse(m.rpc.payload || "{}"));
+        return send(ws, {
+          cid: m.cid,
+          rpc: { id: m.rpc.id, payload: JSON.stringify(result) },
+        });
+      }
+      if (m.match_join) {
+        const h = hero(ws.uid);
+        requireValue(h, "character_required");
+        const w = game.world(h.mapId, h.channelId, h.dungeon?.id || "");
+        const target = game.worlds.get(m.match_join.match_id);
+        requireValue(
+          target && target.mapId === h.mapId && target.instance === w.instance,
+          "invalid_match",
+        );
+        detach(ws);
+        for (const other of wss.clients)
+          if (other !== ws && other.heroId === h.id && other.world) {
+            detach(other);
+            other.close(4001, "reconnected");
+          }
+        ws.heroId = h.id;
+        ws.world = game.join(h, target.channelId);
+        ws.seq = 0;
+        send(ws, { cid: m.cid, match: { match_id: ws.world.id } });
+        sync(ws);
+        return;
+      }
+      if (m.match_leave) {
+        detach(ws);
+        return send(ws, {
+          cid: m.cid,
+          match: { match_id: m.match_leave.match_id },
+        });
+      }
+      if (m.match_data_send) {
+        const d = m.match_data_send;
+        requireValue(ws.world && d.match_id === ws.world.id, "not_in_match");
+        const a = JSON.parse(
+            Buffer.from(d.data || "", "base64").toString() || "{}",
+          ),
+          op = Number(d.op_code);
+        if (op === 7)
+          return frame(ws, 103, {
+            id: a.id,
+            clientTime: a.clientTime,
+            serverTime: Date.now(),
+            ackSeq: ws.seq,
+          });
+        requireValue(
+          Number.isSafeInteger(a.seq) && a.seq > 0,
+          "invalid_sequence",
+        );
+        if (a.seq <= ws.seq) {
+          sync(ws);
+          return;
+        }
+        ws.seq = a.seq;
+        let result;
+        try {
+          const beforeCoins = db.characters[ws.heroId].coins;
+          result = game.command(db.characters[ws.heroId], ws.world, op, a);
+          dirty = true;
+          if (
+            op === 6 ||
+            op === 4 ||
+            op === 5 ||
+            beforeCoins !== db.characters[ws.heroId].coins
+          )
+            save();
+        } catch (e) {
+          frame(ws, 102, {
+            type: "error",
+            code: e.message,
+            message: e.message,
+            seq: a.seq,
+            requestId: a.requestId,
+          });
+          sync(ws);
+          return;
+        }
+        if (result?.world) {
+          const next = result.world;
+          frame(ws, 104, { matchId: next.id });
+          ws.world = next;
+        } else sync(ws);
+        flush();
+        return;
+      }
+      throw new Error("invalid_envelope");
+    } catch (e) {
+      send(ws, { cid: m?.cid, error: { code: 3, message: e.message } });
+    }
+  });
+});
+const loop = setInterval(() => {
+  game.tick();
+  flush();
+  for (const ws of wss.clients) {
+    if (ws.world) {
+      dirty = true;
+      sync(ws);
+    }
+  }
+}, 100);
+const persistence = setInterval(() => {
+  if (dirty) save();
+  const t = Date.now();
+  for (const [key, b] of rates) if (b.until < t) rates.delete(key);
+  for (const [key, s] of Object.entries(db.sessions))
+    if (s.exp < t / 1000) delete db.sessions[key];
+}, 1000);
+const heartbeat = setInterval(() => {
+  for (const ws of wss.clients) {
+    if (!ws.alive) {
+      ws.terminate();
+      continue;
+    }
+    ws.alive = false;
+    ws.ping();
+  }
+}, 30000);
+function shutdown() {
+  clearInterval(loop);
+  clearInterval(persistence);
+  clearInterval(heartbeat);
+  save();
+  for (const ws of wss.clients) ws.terminate();
+  server.close(() => process.exit(0));
+}
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
+server.listen(PORT, HOST, () =>
+  console.log(
+    `Night Camp server ready at http://${HOST}:${server.address().port}`,
+  ),
+);
