@@ -15,7 +15,7 @@ fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const now = () => Date.now();
 const id = (prefix) => `${prefix}_${crypto.randomBytes(9).toString('hex')}`;
-const b64 = (s) => Buffer.from(String(s)).toString('base64');
+const b64url = (s) => Buffer.from(String(s)).toString('base64url');
 const json = (res, status, value) => { const body = JSON.stringify(value); res.writeHead(status, { 'content-type': 'application/json', 'cache-control': 'no-store', 'access-control-allow-origin': '*' }); res.end(body); };
 const readBody = (req) => new Promise((resolve, reject) => { let s = ''; req.on('data', (c) => { s += c; if (s.length > 2e6) reject(new Error('body too large')); }); req.on('end', () => { try { resolve(s ? JSON.parse(s) : {}); } catch { reject(new Error('invalid json')); } }); req.on('error', reject); });
 const clone = (v) => JSON.parse(JSON.stringify(v));
@@ -34,11 +34,25 @@ let saveTimer;
 function save() { clearTimeout(saveTimer); saveTimer = setTimeout(() => fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2)), 100); }
 
 const sessions = new Map();
-function tokenFor(userId, refresh = false) { const token = `${b64(JSON.stringify({ uid: userId, exp: Math.floor(now() / 1000) + (refresh ? 2592000 : 3600) }))}.${crypto.randomBytes(12).toString('hex')}`; return token; }
+function tokenFor(userId, refresh = false) {
+  const header = b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const payload = b64url(JSON.stringify({ uid: userId, usn: userId, exp: Math.floor(now() / 1000) + (refresh ? 2592000 : 3600) }));
+  return `${header}.${payload}.${crypto.randomBytes(12).toString('hex')}`;
+}
 function authUser(req) { const h = req.headers.authorization || ''; if (!h.startsWith('Bearer ')) return null; const s = sessions.get(h.slice(7)); return s && s.exp > now() ? s.userId : null; }
 function newSession(userId) { const access = tokenFor(userId), refresh = tokenFor(userId, true); sessions.set(access, { userId, refresh, exp: now() + 3600000 }); return { token: access, refresh_token: refresh }; }
 function userFor(id0) { return db.users[id0] || (db.users[id0] = { id: id0, slots: [null, null, null], createdAt: now() }); }
 function currentHero(uid) { const u = userFor(uid); const c = u.active && db.characters[u.active]; return c || (u.slots.find(Boolean) && db.characters[u.slots.find(Boolean)]); }
+function slotList(u) {
+  const active = Math.max(0, u.slots.findIndex((heroId) => heroId === u.active));
+  return {
+    active,
+    max: 3,
+    slots: u.slots.map((heroId, slot) => heroId
+      ? { slot, empty: false, ...clone(db.characters[heroId]), look: clone(db.characters[heroId].appearance || {}) }
+      : { slot, empty: true }),
+  };
+}
 
 const worlds = new Map();
 function worldFor(matchId, uid, hero) {
@@ -64,9 +78,9 @@ function rpc(uid, method, payload = {}) {
   const u = userFor(uid); let hero = currentHero(uid);
   if (method === 'nc_status') return { closing: false, supportedSkills: [], channels: { count: 1, cap: 50 }, online: 1, version: db.version };
   if (method === 'nc_account') return { ok: true };
-  if (method === 'nc_characters') return { slots: u.slots.map((x) => x ? { slot: u.slots.indexOf(x), ...clone(db.characters[x]) } : null) };
-  if (method === 'nc_character_create') { const slot = Math.max(0, Math.min(2, Number(payload.slot) || 0)); if (u.slots[slot]) throw new Error('slot occupied'); const h = blankHero(payload.name, payload.appearance); db.characters[h.id] = h; u.slots[slot] = h.id; u.active = h.id; save(); return { ok: true, character: clone(h) }; }
-  if (method === 'nc_character_slot') { const slot = Math.max(0, Math.min(2, Number(payload.slot) || 0)); if (payload.delete && u.slots[slot]) { delete db.characters[u.slots[slot]]; u.slots[slot] = null; save(); return { ok: true }; } if (u.slots[slot]) { u.active = u.slots[slot]; hero = db.characters[u.active]; save(); return { ok: true, character: clone(hero) }; } return { ok: false }; }
+  if (method === 'nc_characters') return slotList(u);
+  if (method === 'nc_character_create') { const slot = Math.max(0, Math.min(2, Number(payload.slot) || 0)); if (u.slots[slot]) throw new Error('slot occupied'); const h = blankHero(payload.name, payload.appearance); db.characters[h.id] = h; u.slots[slot] = h.id; u.active = h.id; save(); return slotList(u); }
+  if (method === 'nc_character_slot') { const slot = Math.max(0, Math.min(2, Number(payload.slot) || 0)); if (payload.delete && u.slots[slot]) { delete db.characters[u.slots[slot]]; u.slots[slot] = null; if (u.active && !db.characters[u.active]) u.active = u.slots.find(Boolean) || null; save(); return slotList(u); } if (u.slots[slot]) { u.active = u.slots[slot]; hero = db.characters[u.active]; save(); return slotList(u); } return slotList(u); }
   if (method === 'nc_checkin_status') return { ok: true, day: Math.floor(now() / 86400000), claimed: false, first7: [], month: [] };
   if (method === 'nc_checkin_claim') return { ok: true, claimed: true, reward: { coins: 25 } };
   if (method === 'nc_gwar') return { lands: [], result: 'ok' };
@@ -98,14 +112,14 @@ function applyAction(w, a, client) {
 const server = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') { res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type,authorization', 'access-control-allow-methods': 'GET,POST,OPTIONS' }); return res.end(); }
   const u = new URL(req.url, `http://${req.headers.host}`), uid = authUser(req);
-  if (req.method === 'GET' && u.pathname === '/nc/update') return json(res, 200, { schemaVersion: 1, contentVersion: 'clone-local-1', protocolVersion: 1, version: 'clone-0.1.0', platforms: { web: { minimumBuild: 0 } }, notes: [] });
+  if (req.method === 'GET' && u.pathname === '/nc/update') return json(res, 200, { schemaVersion: 1, contentVersion: 'clone-local-2', protocolVersion: 1, version: '0.5.16-clone.1', platforms: { web: { build: 2, minimumBuild: 2, version: '0.5.16-clone.1', url: '', notes: '' } }, notes: [] });
   if (req.method === 'GET' && u.pathname === '/nc/servers') return json(res, 200, { self: true, servers: [{ id: 'local', no: 1, name: 'Clone Local', url: process.env.PUBLIC_ORIGIN || `http://localhost:${PORT}`, status: 'open', tags: ['recommended'], opened: true }] });
   if (req.method === 'GET' && u.pathname === '/nc/load') return json(res, 200, { population: [...worlds.values()].reduce((n, w) => n + w.clients.size, 0), capacity: 50, state: 'smooth', maps: {} });
   if (req.method === 'GET' && u.pathname === '/healthz') return json(res, 200, { ok: true, service: 'nightcamp-clone-server' });
-  if (req.method === 'POST' && u.pathname.startsWith('/v2/account/authenticate/')) { const body = await readBody(req); const kind = u.pathname.split('/').pop(); const identity = kind === 'device' ? String(body.id) : kind === 'custom' ? `key:${body.id}` : `email:${body.email}`; const userId = id('user') + '_' + crypto.createHash('sha1').update(identity).digest('hex').slice(0, 12); userFor(userId); return json(res, 200, newSession(userId)); }
+  if (req.method === 'POST' && u.pathname.startsWith('/v2/account/authenticate/')) { const body = await readBody(req); const kind = u.pathname.split('/').pop(); const identity = kind === 'device' ? String(body.id) : kind === 'custom' ? `key:${body.id}` : `email:${body.email}`; const userId = `user_${crypto.createHash('sha256').update(identity).digest('hex').slice(0, 24)}`; userFor(userId); return json(res, 200, newSession(userId)); }
   if (req.method === 'POST' && u.pathname === '/v2/account/session/refresh') { const b = await readBody(req); const old = [...sessions.values()].find((s) => s.refresh === b.token); if (!old) return json(res, 401, { message: 'session expired' }); return json(res, 200, newSession(old.userId)); }
   if (req.method === 'POST' && u.pathname === '/v2/session/logout') return json(res, 200, {});
-  if (req.method === 'POST' && u.pathname.startsWith('/v2/rpc/')) { if (!uid) return json(res, 401, { message: 'unauthorized' }); const p = await readBody(req); let payload = {}; try { payload = JSON.parse(p.payload || '{}'); } catch {} try { return json(res, 200, { payload: JSON.stringify(rpc(uid, decodeURIComponent(u.pathname.slice('/v2/rpc/'.length)), payload)) }); } catch (e) { return json(res, 400, { message: e.message }); } }
+  if (req.method === 'POST' && u.pathname.startsWith('/v2/rpc/')) { if (!uid) return json(res, 401, { message: 'unauthorized' }); const p = await readBody(req); let payload = {}; try { payload = typeof p === 'string' ? JSON.parse(p || '{}') : JSON.parse(p.payload || '{}'); } catch {} try { return json(res, 200, { payload: JSON.stringify(rpc(uid, decodeURIComponent(u.pathname.slice('/v2/rpc/'.length)), payload)) }); } catch (e) { return json(res, 400, { message: e.message }); } }
   if (req.method === 'GET' && u.pathname === '/v2/match') return json(res, 200, { matches: [] });
   return json(res, 404, { message: 'not found' });
 });

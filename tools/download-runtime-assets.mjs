@@ -4,9 +4,9 @@ import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
 const run = promisify(execFile);
-const root = '/workspace/work/nightcamp-research/site';
+const root = '/workspace/sites/nightcamp-game/dist-full/game-20261025-1758';
 const origin = 'https://play.nightcamp.app';
-const prefix = '/game-20261022-1641/';
+const prefix = '/game-20261025-1758/';
 const survey = JSON.parse(await readFile('/workspace/work/nightcamp-research/original-runtime-survey.json', 'utf8'));
 const paths = [...new Set(survey.static_paths.map((x) => x.path).filter((x) => x.startsWith(prefix)).map((x) => x.slice(prefix.length)).filter(Boolean))];
 const wanted = [];

@@ -1,0 +1,23 @@
+{
+ "wolf": {
+  "cell": [
+   284,
+   243
+  ],
+  "anims": {
+   "idle": 6,
+   "run": 6,
+   "bite": 6
+  }
+ },
+ "falcon": {
+  "cell": [
+   278,
+   359
+  ],
+  "anims": {
+   "fly": 6,
+   "strike": 4
+  }
+ }
+}

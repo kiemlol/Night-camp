@@ -4,8 +4,8 @@ import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, extname, join, relative } from 'node:path';
 
 const run = promisify(execFile);
-const root = '/workspace/work/nightcamp-research/site';
-const origin = 'https://play.nightcamp.app/game-20261022-1641/';
+const root = '/workspace/sites/nightcamp-game/dist-full/game-20261025-1758';
+const origin = 'https://play.nightcamp.app/game-20261025-1758/';
 const reportPath = '/workspace/work/nightcamp-research/asset-audit.json';
 const allowed = new Set(['.js', '.css', '.png', '.jpg', '.jpeg', '.webp', '.json', '.ogg', '.mp3', '.wav', '.woff', '.woff2', '.bin', '.atlas', '.svg', '.webmanifest', '.txt']);
 const refs = new Map();

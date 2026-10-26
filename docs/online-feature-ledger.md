@@ -1,7 +1,8 @@
 # Night Camp online mechanism ledger
 
 This is a static reconstruction of the public web client, not an observation of
-the private backend. Source snapshot: `game-20261022-1641`. REA focused
+the private backend. Original source snapshot: `game-20261022-1641`; current
+clone client: `game-20261025-1758` (`v0.5.16`). REA focused
 Evidence: `ev_615bf7d12d00163739cfc03b1979d63a69e0ecdb404a1735d01e69ec9487c048`.
 Earlier whole-tree Evidence:
 `ev_6eb7244a403d791566c24e6cef34de8238f6d687caaebc49d7c51ef9e261a6d9`.

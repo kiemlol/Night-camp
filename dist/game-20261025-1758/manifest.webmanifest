@@ -1,0 +1,30 @@
+{
+  "name": "Night Camp",
+  "short_name": "Night Camp",
+  "description": "A cute hand-drawn action RPG round the campfire",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#16131f",
+  "theme_color": "#16131f",
+  "icons": [
+    {
+      "src": "assets/kui/app_icon_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/kui/app_icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/kui/app_icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/"
+}

@@ -1,0 +1,133 @@
+/* update.css — "players know when we deploy" (js/online/update.js): the small "มีอัปเดตใหม่" card (a forced one is a big sign) in the K window look
+   (css/kui.css .kw-win / .kw-title / .kw-btn: cream window, sky-blue title bar, ink outlines) that leaves the game playable
+   under it, and the server notice banner on top (the dark K info strip). Sizes in --u like the rest of the HUD. Both sit
+   over the online lobby's curtain (z 60), so a player in the character select or a reconnect still sees them. */
+.up-card {
+  position: fixed; z-index: 66; left: 50%; top: calc(96 * var(--u)); transform: translateX(-50%);
+  width: min(calc(100vw - 32px), calc(470 * var(--u)));
+  animation: up-in 0.28s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.up-card[hidden] { display: none; }
+.up-card .up-title { height: calc(46 * var(--u)); font-size: calc(26 * var(--u)); -webkit-text-stroke-width: calc(5 * var(--u)); }
+.up-card.force .up-title { background: linear-gradient(#ffb36b, #e2703a); }
+.up-body { display: flex; gap: calc(14 * var(--u)); align-items: flex-start; padding: calc(14 * var(--u)) calc(18 * var(--u)) calc(6 * var(--u)); }
+.up-ic {
+  flex: none; width: calc(76 * var(--u)); height: calc(76 * var(--u)); border-radius: calc(16 * var(--u));
+  border: calc(4 * var(--u)) solid var(--ink); box-shadow: 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.22); object-fit: cover;
+}
+.up-text { min-width: 0; display: flex; flex-direction: column; gap: calc(2 * var(--u)); }
+.up-q { font: 700 calc(20 * var(--u)) / 1.3 'Mitr', sans-serif; color: var(--ink); }
+/* the version line and the notes (versions, 2026-10-18): "v0.5.0 → v0.5.1 · 18 ต.ค. 69 17:42", then the first notes */
+.up-vline { font: 700 calc(15.5 * var(--u)) / 1.35 'Mitr', sans-serif; color: #3b6fb0; font-variant-numeric: tabular-nums; }
+.up-vline:empty { display: none; }
+.up-notes { margin: calc(2 * var(--u)) 0 calc(2 * var(--u)); padding: 0 0 0 calc(22 * var(--u)); font: 500 calc(15.5 * var(--u)) / 1.4 'Mitr', sans-serif; color: var(--ink); }
+.up-notes:empty { display: none; }
+.up-notes li::marker { content: '✦  '; color: #e0a43a; font-size: 0.85em; }
+.up-notes li.more { list-style: none; color: #6a6078; font-weight: 400; }
+.up-notes li.more::marker { content: none; }
+.up-sub { font-size: calc(14.5 * var(--u)); line-height: 1.4; color: #6a6078; }
+.up-line { font: 600 calc(15.5 * var(--u)) / 1.35 'Mitr', sans-serif; color: #d0602a; }
+.up-line.fight { color: #c0473f; }
+.up-line:empty { display: none; }
+.up-btns { display: flex; justify-content: flex-end; gap: calc(10 * var(--u)); padding: calc(8 * var(--u)) calc(18 * var(--u)) calc(16 * var(--u)); }
+.up-btns .kw-btn { min-width: calc(128 * var(--u)); height: calc(44 * var(--u)); font-size: calc(17 * var(--u)); }
+.up-btns .kw-btn[hidden] { display: none; }
+
+/* the server notice: a strip on top, counting down; orange in the last minute, blue while the server switches */
+.up-bar {
+  position: fixed; z-index: 70; left: 50%; top: calc(14 * var(--u)); transform: translateX(-50%); pointer-events: none;
+  display: flex; align-items: center; gap: calc(12 * var(--u)); max-width: calc(100vw - 32px); box-sizing: border-box;
+  padding: calc(7 * var(--u)) calc(22 * var(--u)) calc(7 * var(--u)) calc(10 * var(--u));
+  border-radius: calc(18 * var(--u)); background: linear-gradient(#272b47, #1b1e33); border: calc(4 * var(--u)) solid var(--ink);
+  box-shadow: 0 calc(5 * var(--u)) 0 rgba(0, 0, 0, 0.3); color: #eef0ff; font-family: 'Mitr', sans-serif;
+  animation: up-drop 0.3s ease-out both;
+}
+.up-bar[hidden] { display: none; }
+.up-bar-ic { flex: none; width: calc(40 * var(--u)); height: calc(40 * var(--u)); object-fit: contain; }
+.up-bar-t { font: 700 calc(19 * var(--u)) / 1.3 'Mitr', sans-serif; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.up-bar-s { font-size: calc(14.5 * var(--u)); line-height: 1.3; color: #b9bdd8; }
+.up-bar-s:empty { display: none; }
+.up-bar.soon { background: linear-gradient(#a8492c, #7a2f22); }
+.up-bar.soon .up-bar-s { color: #ffd9c4; }
+.up-bar.busy { background: linear-gradient(#3b6fb0, #26467a); }
+.up-bar.busy .up-bar-ic { animation: up-spin 2.4s linear infinite; }
+.up-bar.busy .up-bar-s { color: #d6e6ff; }
+.up-bar.done { background: linear-gradient(#3f8a4c, #2a5f34); }
+/* The big signs (2026-10-19, the user: "ทำป้าย ประกาศใหญ่ๆ เลยๆ"): the forced update and "มีอะไรใหม่" get their own, larger
+   --u (the K window, its title, buttons and ✕ grow with it), never under 0.85 px so a phone still reads them; both stay
+   on the screen and scroll inside when the notes are long. An update players may put off stays the small card above. */
+.up-card.force, .kw-panel.up-news { --u: clamp(0.85px, min(calc(100vw / 1000), calc(100vh / 640)), 1.6px); }
+/* the forced update: a sign in the middle; its shadow dims the rest without taking the clicks (the hero may fight on
+   until the countdown) */
+.up-card.force {
+  top: 50%; transform: translate(-50%, -50%); width: min(calc(100vw - 24px), calc(620 * var(--u))); max-height: calc(100vh - 24px);
+  display: flex; flex-direction: column; animation-name: up-sign;
+  box-shadow: inset 0 0 0 calc(4 * var(--u)) #ffb36b, 0 0 0 100vmax rgba(9, 10, 26, 0.6), 0 calc(10 * var(--u)) 0 rgba(0, 0, 0, 0.3);
+}
+.up-card.force .up-title { flex: none; height: calc(58 * var(--u)); font-size: calc(32 * var(--u)); -webkit-text-stroke-width: calc(6 * var(--u)); }
+.up-card.force .up-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; gap: calc(18 * var(--u)); padding: calc(20 * var(--u)) calc(24 * var(--u)) calc(6 * var(--u)); }
+.up-card.force .up-ic { width: calc(96 * var(--u)); height: calc(96 * var(--u)); }
+.up-card.force .up-q { font-size: calc(28 * var(--u)); }
+.up-card.force .up-sub { color: #4d4560; }
+.up-card.force .up-line { font-size: calc(19 * var(--u)); font-weight: 700; }
+.up-card.force .up-btns { flex: none; justify-content: center; padding: calc(10 * var(--u)) calc(24 * var(--u)) calc(20 * var(--u)); }
+.up-card.force .up-go { min-width: min(100%, calc(300 * var(--u))); height: calc(58 * var(--u)); font-size: calc(24 * var(--u)); }
+/* "มีอะไรใหม่": this version's notes once, in the world (js/online/update.js showNews), over the ESC menu (z 30) and the
+   check-in popup's layer (41): the version large, then ของใหม่ and แก้ไข in one panel flowing over two balanced columns
+   (one on a narrow screen); the panel scrolls when they don't fit */
+.kw-panel.up-news { z-index: 45; display: grid; place-items: center; padding: 12px; box-sizing: border-box; background: rgba(9, 10, 26, 0.78); }
+.kw-panel.up-news[hidden] { display: none; }
+.up-news-win {
+  width: min(calc(100vw - 24px), calc(880 * var(--u))); max-height: calc(100vh - 24px); display: flex; flex-direction: column;
+  animation: up-pop 0.28s cubic-bezier(0.2, 1.4, 0.4, 1) both; outline: none;
+}
+.up-news-win .kw-title { flex: none; }
+.up-news-head { flex: none; display: flex; align-items: center; gap: calc(18 * var(--u)); padding: calc(12 * var(--u)) calc(26 * var(--u)) calc(2 * var(--u)); }
+.up-news-head .up-ic { width: calc(68 * var(--u)); height: calc(68 * var(--u)); }
+.up-news-head > div { display: grid; grid-template-columns: auto 1fr; align-items: baseline; column-gap: calc(14 * var(--u)); }
+.up-news-kicker { grid-column: 1 / -1; }
+.up-news-kicker { font: 700 calc(19 * var(--u)) / 1.2 'Mitr', sans-serif; color: #d0602a; }
+.up-news-ver { font: 800 calc(46 * var(--u)) / 1 'Baloo 2', 'Mitr', sans-serif; color: var(--ink); font-variant-numeric: tabular-nums; }
+.up-news-date { font: 500 calc(16 * var(--u)) / 1.3 'Mitr', sans-serif; color: #6a6078; }
+.up-news-body {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: calc(10 * var(--u)) calc(26 * var(--u)) 0;
+  padding: calc(12 * var(--u)) calc(18 * var(--u)) calc(14 * var(--u)); border-radius: calc(16 * var(--u));
+  background: #fffaf0; border: calc(3 * var(--u)) solid #e6d8b8; scrollbar-width: thin; scrollbar-color: #d8c49a transparent;
+}
+.up-news-cols { columns: calc(330 * var(--u)) 2; column-gap: calc(30 * var(--u)); }
+.up-news-sec[hidden] { display: none; }
+.up-news-sec + .up-news-sec { margin-top: calc(16 * var(--u)); }
+.up-news-tag {
+  display: inline-block; break-inside: avoid; break-after: avoid; padding: calc(3 * var(--u)) calc(16 * var(--u)); border-radius: 999px; border: calc(3 * var(--u)) solid var(--ink);
+  background: linear-gradient(#ffd36b, #e8a13a); font: 700 calc(18 * var(--u)) / 1.25 'Mitr', sans-serif; color: #fff;
+  -webkit-text-stroke: calc(4 * var(--u)) var(--ink); paint-order: stroke fill;
+}
+.up-news-sec.fix .up-news-tag { background: linear-gradient(#7fcaf8, #3b8fdc); }
+.up-news-list { margin: calc(10 * var(--u)) 0 0; padding: 0 0 0 calc(26 * var(--u)); font-size: calc(16 * var(--u)); }
+.up-news-list li { break-inside: avoid; }
+.up-news-list li + li { margin-top: calc(5 * var(--u)); }
+.up-news-win .up-btns { flex: none; justify-content: center; padding: calc(12 * var(--u)) calc(26 * var(--u)) calc(16 * var(--u)); }
+.up-news-win .up-news-ok { min-width: min(100%, calc(280 * var(--u))); height: calc(56 * var(--u)); font-size: calc(23 * var(--u)); }
+/* a short screen (a phone on its side): smaller heads so the notes keep the room, and the forced sign keeps only what to
+   do (its countdown on screen; the notes come in "มีอะไรใหม่" after the update) */
+@media (max-height: 520px) {
+  .up-news-head .up-ic, .up-news-kicker { display: none; }
+  .up-news-head { padding-top: calc(8 * var(--u)); }
+  .up-news-ver { font-size: calc(36 * var(--u)); }
+  .up-card.force .up-notes { display: none; }
+  .up-card.force .up-ic { width: calc(72 * var(--u)); height: calc(72 * var(--u)); }
+}
+
+/* the version label on the front screens (online/srvsel.js .ss-root, the character select .cs-root): bottom left, quiet */
+.up-verbadge {
+  display: none; position: fixed; z-index: 67; left: max(12px, env(safe-area-inset-left)); bottom: max(8px, env(safe-area-inset-bottom));
+  pointer-events: none; font: 500 13px / 1.2 'Mitr', sans-serif; color: rgba(238, 240, 255, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85); font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
+}
+body:has(.ss-root:not([hidden])) .up-verbadge, body:has(.cs-root:not([hidden])) .up-verbadge { display: block; }
+@keyframes up-pop { from { opacity: 0; transform: scale(0.94); } }
+@keyframes up-sign { from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); } }
+@keyframes up-in { from { opacity: 0; transform: translate(-50%, calc(-14 * var(--u))) scale(0.94); } }
+@keyframes up-drop { from { opacity: 0; transform: translate(-50%, calc(-10 * var(--u))); } }
+@keyframes up-spin { to { transform: rotate(360deg); } }
+@media (max-width: 700px) { .up-bar-t { white-space: normal; } }

@@ -1,6 +1,6 @@
 # Night Camp game systems catalog
 
-Public build: `game-20261022-1641`  
+Research baseline: `game-20261022-1641`; clone client updated to `game-20261025-1758` (`v0.5.16`)  
 Source: `https://play.nightcamp.app`  
 Analysis date: 2026-10-24 UTC
 

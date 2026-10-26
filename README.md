@@ -25,9 +25,10 @@ docker compose up -d --build
 ```
 
 Put Nginx/Caddy in front of port 7350 and proxy both HTTP and WebSocket
-`/ws`. The browser client must be opened with:
+`/ws`. The browser client is based on public version `v0.5.16`, build
+`game-20261025-1758`, and must be opened with:
 
-`/game-20261022-1641/index.html?online=https://YOUR-DOMAIN&serverkey=YOUR_SERVER_KEY`
+`/game-20261025-1758/index.html?online=https://YOUR-DOMAIN&serverkey=YOUR_SERVER_KEY`
 
 The client build's baked `meta[name=nc-online-servers]` must contain the same
 HTTPS origin. Use a deployment-specific replacement before publishing; do not
@@ -61,7 +62,19 @@ and add rate limits/auth hardening before exposing it to the public internet.
 - `tools/survey-original.mjs`, `tools/audit-assets.mjs` and
   `tools/download-runtime-assets.mjs` reproduce the public resource audit.
 
-The complete local research snapshot is about 540 MB. The GitHub `dist/`
-folder remains the smaller boot bundle so the repository is practical to
-clone; use the recovery tools against the public build to rebuild the full
-runtime asset tree.
+The complete local research snapshot is about 554 MB. The GitHub `dist/`
+folder is a roughly 191 MB verified boot/runtime bundle: it contains all 477
+client modules and the assets exercised by offline and online startup.
+`dist-full/` remains ignored so the repository is practical to clone; use the
+recovery tools against the public build to rebuild the full asset tree.
+
+## Client update status
+
+- Baseline: `v0.5.16`, released 2026-10-25.
+- Includes the 29 modules introduced after `v0.5.12`, including online Break,
+  boss, dungeon, progression, job and class-3 presentation modules.
+- Retains the independent JSON WebSocket adapter for the clone server.
+- Uses local asset paths rather than the original game's `/cas/` image CDN.
+- Offline smoke test: no missing requests or page errors.
+- Online smoke test: key authentication, three character slots, character
+  creation, match join and the first authoritative snapshot all pass.
