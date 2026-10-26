@@ -1,0 +1,68 @@
+/* css/wmreal.css — the world map (M) from the real maps (js/wmreal.js). The map pictures show through: a pin is its tile
+   (the whole tile is the button), its name tag sits small on the tile, and on a crowded region (wmr-dense) only the place
+   we are at, the picked one and the one under the mouse show their tag; the tile's edge has the level colour instead.
+   Zoom: --wmz (the art, routes and pins are scaled by it; tags, pin heads and signposts are scaled back to their size). */
+.wmreal .mw-over { background: #141a22; width: calc(140 * var(--u)); opacity: 0.8; transition: width 0.15s, opacity 0.15s; }
+.wmreal .mw-over:hover { width: calc(230 * var(--u)); opacity: 1; } /* (small and see-through: it sits over the tiles) */
+.wmreal #mw-over > img[src*="wm_overview"] { visibility: hidden; }
+.wmreal #mw-art, .wmreal #mw-links, .wmreal #mw-pins { transform-origin: 0 0; }
+.wmreal .mw-world { touch-action: none; }
+.wmreal .mw-world.wmr-zoomed { cursor: grab; }
+.wmreal .mw-world.wmr-zoomed:active { cursor: grabbing; }
+
+/* the tile is the pin */
+.wmreal .mw-pin {
+  width: var(--wmr-tw, 0px); height: var(--wmr-th, 0px); transform: translate(-50%, -50%);
+  border-radius: calc(7px / var(--wmz, 1)); transition: box-shadow 0.12s;
+}
+.wmreal .mw-pin.fit { box-shadow: inset 0 0 0 calc(3px / var(--wmz, 1)) #7fdc78; }
+.wmreal .mw-pin.hard { box-shadow: inset 0 0 0 calc(2px / var(--wmz, 1)) rgba(255, 143, 134, 0.7); }
+.wmreal .mw-pin.easy { box-shadow: inset 0 0 0 calc(2px / var(--wmz, 1)) rgba(185, 188, 203, 0.8); }
+
+/* the routes: none (the user, 2026-10-17: "ใส่เส้นมาทำไมเยอะจัง งงไปหมด"; the tiles side by side show the way) but the
+   gold one of นำทาง, from tile edge to tile edge (js/wmreal.js trims it), the same width at any zoom */
+.wmreal .mw-links line:not(.on) { display: none; }
+.wmreal .mw-links line { vector-effect: non-scaling-stroke; stroke-dasharray: none; }
+.wmreal .mw-links line.u { stroke: rgba(30, 22, 16, 0.85); stroke-width: 7px; }
+.wmreal .mw-links line.t { stroke: #e9cf96; stroke-width: 3.5px; }
+.wmreal .mw-links line.u.on { stroke: #6b4300; stroke-width: 9px; }
+.wmreal .mw-links line.t.on { stroke: #ffcf40; stroke-width: 5px; stroke-dasharray: 8 5; }
+.wmreal .mw-links line.u.far { stroke: rgba(30, 22, 16, 0.45); stroke-width: 4px; }
+.wmreal .mw-links line.t.far { stroke: rgba(240, 222, 180, 0.75); stroke-width: 2px; stroke-dasharray: 6 5; }
+.wmreal .mw-links line.u.far.on { stroke: #6b4300; stroke-width: 8px; }
+.wmreal .mw-links line.t.far.on { stroke: #ffcf40; stroke-width: 4px; }
+.wmreal .mw-pin:hover { box-shadow: inset 0 0 0 calc(3px / var(--wmz, 1)) #fffaf0, 0 0 calc(10px / var(--wmz, 1)) rgba(255, 245, 210, 0.7); }
+.wmreal .mw-pin.sel { box-shadow: inset 0 0 0 calc(4px / var(--wmz, 1)) #ffcf40, 0 0 calc(14px / var(--wmz, 1)) rgba(255, 207, 64, 0.8); }
+.wmreal .mw-pin.route { box-shadow: inset 0 0 0 calc(3px / var(--wmz, 1)) #ffcf40; }
+
+/* the tag: one small line on the tile */
+.wmreal .mw-tags {
+  top: 50%; left: 50%; transform: translate(-50%, -50%) scale(calc(1 / var(--wmz, 1))); pointer-events: none;
+  max-width: calc(var(--wmr-tws, 200px) + 40px);
+}
+.wmreal .mw-tag {
+  flex-direction: row; align-items: center; gap: calc(6 * var(--u)); max-width: 100%; padding: calc(1 * var(--u)) calc(9 * var(--u));
+  border-width: calc(2.5 * var(--u)); background: rgba(255, 250, 240, 0.93);
+}
+.wmreal .mw-tag b { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: calc(14 * var(--u)); }
+.wmreal .mw-tag .mw-lv { flex-shrink: 0; margin: 0; padding: 0 calc(7 * var(--u)); font-size: calc(12 * var(--u)); }
+.wmreal .mw-dtag, .wmreal .mw-ribbon { scale: 0.85; }
+
+/* the pin heads: only the picked place (its element) and where we are (our face), above the tag */
+.wmreal .mw-pin:not(.sel) .mw-head { display: none; }
+.wmreal .mw-head { left: calc(50% - 27 * var(--u)); bottom: calc(50% + 12 * var(--u)); scale: calc(1 / var(--wmz, 1)); }
+.wmreal .mw-you { left: calc(50% - 44 * var(--u)); bottom: calc(50% + 12 * var(--u)); transform-origin: 50% 100%; scale: calc(0.8 / var(--wmz, 1)); }
+.wmreal .mw-sign { scale: calc(1 / var(--wmz, 1)); }
+
+/* crowded: the tiles speak, tags on demand */
+.wmreal .wmr-dense .mw-pin:not(.here):not(.sel):not(.goal):not(:hover) .mw-tags { display: none; }
+.wmreal .wmr-dense .mw-pin:hover { z-index: 4; }
+
+/* + − ⤢ */
+.wmr-zoom { position: absolute; right: calc(12 * var(--u)); top: calc(12 * var(--u)); display: flex; flex-direction: column; gap: calc(6 * var(--u)); z-index: 4; }
+.wmr-zoom button {
+  width: calc(40 * var(--u)); height: calc(40 * var(--u)); padding: 0; border-radius: 50%; cursor: pointer;
+  font: 700 calc(24 * var(--u)) / 1 'Mitr', sans-serif; color: var(--ink); background: #fffaf0; border: calc(3 * var(--u)) solid var(--ink);
+  box-shadow: 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.3);
+}
+.wmr-zoom button:hover { background: #ffe9a8; }

@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta name="nc-online-servers" content="https://api.nightcamp.app">
+  <base href="/game-20261025-1758/" data-nc-site>
+  <script id="nc-online-only">(function(){var q=new URLSearchParams(location.search),c=false,L=/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);if(!L)['dev','uid'].forEach(function(k){if(q.has(k)){q.delete(k);c=true;}});var s=q.toString();if(!q.has('online')&&!q.has('offline')){location.replace('play.html'+(s?'?'+s:'')+location.hash);return;}if(c)location.replace(location.pathname+'?'+s+location.hash);})();</script>
+  <meta name="nc-build" content="game-20261025-1758">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- a phone: "Add to Home Screen" opens the game full screen like an app (manifest + the iOS tags) -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#16131f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Night Camp">
+  <meta name="copyright" content="© 2026 Night Camp. Rights reserved in original Night Camp content.">
+  <link rel="license" href="https://nightcamp.app/th/terms">
+  <link rel="apple-touch-icon" href="assets/kui/app_icon_180.png">
+  <link rel="icon" type="image/png" href="assets/kui/app_icon_192.png"><!-- the tab's icon (no /favicon.ico: it 404'd at every start) -->
+  <title>Night Camp</title>
+  <script src="cas/5c2245d5e3ee.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Mitr:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/hud2.css">
+  <link rel="stylesheet" href="css/shop.css">
+  <link rel="stylesheet" href="css/life.css"><!-- life skills: the H window, the teachers, the seed menu -->
+  <link rel="stylesheet" href="css/inventory.css"><!-- the bag (I): character, 4 tabs, item card -->
+  <link rel="stylesheet" href="css/kui.css"><!-- the chosen window look (K): cream window, sky-blue title bar, buttons -->
+  <link rel="stylesheet" href="css/statuswin.css"><!-- the status window (C): hero, stat hexagon, stats, value cards -->
+  <link rel="stylesheet" href="css/statdetail.css"><!-- the status window's ค่าละเอียด tab (mockup A) -->
+  <link rel="stylesheet" href="css/skillwin.css"><!-- the skill window (K): skills by line, the picked skill's card, the skill bar -->
+  <link rel="stylesheet" href="css/jobteaser.css"><!-- the job change tab's "อาชีพใหม่ เร็ว ๆ นี้" cards (js/jobteaser.js) -->
+  <link rel="stylesheet" href="css/mapwin.css">
+  <link rel="stylesheet" href="css/storynpc.css"><!-- the story NPCs' talk window (js/storynpc.js) --><!-- the map window (M): the painted world map with pins, the place's card -->
+  <link rel="stylesheet" href="css/lifebook.css"><!-- the life-skill window (H): a collection book with bookmarks, "?" squares -->
+  <link rel="stylesheet" href="css/cooking.css"><!-- the cookbook (js/cooking.js), layout B -->
+  <link rel="stylesheet" href="css/shopwin.css"><!-- Uncle Coco's shop / the pouch (B): Coco at his counter, materials, item card -->
+  <link rel="stylesheet" href="css/partywin.css"><!-- the party window (P), layout A: the party round the campfire, the places, the leader's loot rules, invites -->
+  <link rel="stylesheet" href="css/partylist.css"><!-- the party list under the hero frame (js/partylist.js): header pill + fold chevron, a card per member -->
+  <link rel="stylesheet" href="css/socialwin.css"><!-- the guild window (O, layout B: the guild's campfire hall) and the leaderboard (N, layout A: the podium) -->
+  <link rel="stylesheet" href="css/darkroot.css"><!-- รากต้นไม้มืด: the floor HUD, the tower lobby (layout A) and its ranking (layout B) -->
+  <link rel="stylesheet" href="css/gradetier.css"><!-- the colour grades of gear pieces: bag frames (look A), the card, the forge's ขัดเกรด tab -->
+  <link rel="stylesheet" href="css/bible.css"><!-- the Game Bible pages: the journal (J) and its pages, the bot report -->
+  <link rel="stylesheet" href="css/menuwin.css"><!-- the game menu (ESC): big buttons, controls, settings, try a job -->
+  <link rel="stylesheet" href="css/skills2.css">
+  <link rel="stylesheet" href="css/loading.css">
+  <link rel="stylesheet" href="css/intro.css"><!-- the title intro (js/intro.js): the Dark Tree film + start button -->
+  <link rel="stylesheet" href="css/creator.css">
+  <link rel="stylesheet" href="css/social.css">
+  <link rel="stylesheet" href="css/autofarm.css">
+  <link rel="stylesheet" href="css/hudtidy.css"><!-- the main screen tidied: menu tray, AUTO + coins column, chat never under the hotbar (keep it last) -->
+  <link rel="stylesheet" href="css/journey.css"><!-- the guided journey (mockup B) -->
+  <link rel="stylesheet" href="css/mobile.css"><!-- phones: joystick, ATTACK + skill arc, menu grid, portrait and landscape (html.mob; after hudtidy.css) -->
+  <link rel="stylesheet" href="css/portrait.css"><!-- phones held upright: every K window as a full-screen sheet, one column (html.mob-port) -->
+  <link rel="stylesheet" href="css/kskin.css"><!-- the older windows (forge, teachers, player shops, auto farm, seed menu) in the K look -->
+  <link rel="stylesheet" href="css/buildloot.css"><!-- build loot: forge tabs, taint lines, rune slots, monster-art slots (js/bl_*.js) -->
+  <link rel="stylesheet" href="css/gwar.css"><!-- ศึกชิงกองไฟ's screens (js/gwar_ui.js) -->
+  <link rel="stylesheet" href="css/craftgo.css"><!-- งานฝีมือ: crafting away from the camp (js/craftgo.js, mockup A) -->
+  <link rel="stylesheet" href="css/forgemake.css"><!-- the weapon crafting page (js/forgemake.js, mockup A) -->
+  <link rel="stylesheet" href="css/refinewin.css"><!-- the refine page made easy (js/refinewin.js, mockup A) -->
+  <link rel="stylesheet" href="css/resultfx.css"><!-- the big result popup of the smith's work and the crafting stations (js/resultfx.js, look C) -->
+  <link rel="stylesheet" href="css/wcard.css"><!-- the gear card in the bag with the compare (js/wcard.js, mockup B) -->
+  <link rel="stylesheet" href="css/chatlink.css"><!-- items linked in the chat (js/chatlink.js, mockup A) -->
+  <link rel="stylesheet" href="css/mapdrops.css"><!-- the map window's monster + drop table (js/mapdrops.js, mockup C) -->
+  <link rel="stylesheet" href="css/lessons.css"><!-- the first chapter as lessons: the quest talk (mockup A), the tracker, the button ring (js/lessons.js) -->
+  <link rel="stylesheet" href="css/online.css"><!-- the online lobby and badge (js/online/) -->
+  <link rel="stylesheet" href="css/charsel.css"><!-- the online character select + delete window (js/online/lobby.js, charsel.js) -->
+  <link rel="stylesheet" href="css/srvsel.css"><!-- the online server page (mockup B): a painted card per server before the character select (js/online/srvsel.js) -->
+  <link rel="stylesheet" href="css/chwin.css"><!-- the ย้ายแชนแนล window, the CH chip under the minimap, the moving toast (js/online/chwin.js) -->
+  <link rel="stylesheet" href="css/playerflow.css"><!-- the online player flow: change hero / log out window, what a player's page hides (js/online/flow.js) -->
+  <link rel="stylesheet" href="css/uifix.css"><!-- the UI audit's fixes (2026-10-17): skill card buttons, journal + leaderboard on upright phones, small-text floors... (keep last) -->
+  <!-- the pages built from the UI audit's picked mockups (2026-10-17, assets/gen/nightcamp_p3_*): journal pages, auto farm, my shop, monster arts, knocked out -->
+  <link rel="stylesheet" href="css/p3_jbook.css">
+  <link rel="stylesheet" href="css/p3_jgacha.css">
+  <link rel="stylesheet" href="css/p3_jmarket.css">
+  <link rel="stylesheet" href="css/p3_autofarm.css">
+  <link rel="stylesheet" href="css/autosupport.css"><!-- the support mode of the AUTO window (js/autosupport.js) -->
+  <link rel="stylesheet" href="css/partybonds.css"><!-- the party's red threads: the chip under the party list, the pull button (js/partybonds.js) -->
+  <link rel="stylesheet" href="css/p3_vend.css">
+  <link rel="stylesheet" href="css/p3_arts.css">
+  <link rel="stylesheet" href="css/p3_fallen.css">
+  <link rel="stylesheet" href="css/p3_jsocial.css">
+  <link rel="stylesheet" href="css/p3_frienddetail.css"><!-- ดูรายละเอียดเพื่อน (mockup fd B) -->
+  <link rel="stylesheet" href="css/playermenu.css"><!-- the menu a click on another player's hero opens (js/playermenu.js) -->
+  <link rel="stylesheet" href="css/notify.css"><!-- the question cards other players send: guild / party invites, join requests, duels, friend requests (js/notify.js) -->
+  <link rel="stylesheet" href="css/p3_journal.css"><!-- the journal's one window size for all its pages (each page zoomed to the width it was matched at) -->
+  <link rel="stylesheet" href="css/checkin.css">
+  <link rel="stylesheet" href="css/gfx.css"><!-- เช็คเครื่อง over the ESC menu (js/gfx.js) -->
+  <link rel="stylesheet" href="css/topup.css"><!-- the top-up window เติมเพชรจันทร์ ช่วงทดสอบ (js/topupwin.js, mockup C) -->
+  <!-- css/hudshop.css (the PC shop row) is UNHOOKED with js/hudshop.js: the user, 2026-10-19, "ซ่อนอันนี้ไว้ก่อน"; files kept, put both tags back to show it -->
+  <link rel="stylesheet" href="css/cursor.css"><!-- the game's mouse cursors (js/cursor.js) -->
+  <link rel="stylesheet" href="css/eltable.css"><!-- ตารางธาตุ (js/eltable.js, mockup A) -->
+  <link rel="stylesheet" href="css/discord.css"><!-- Discord · แจ้งบัค / เสนอแนะ (js/discord.js) -->
+  <link rel="stylesheet" href="css/stuckhelp.css"><!-- ways out for a stuck hero: the Dark Root HUD's ออกจากราก, the tip card (js/stuckhelp.js) -->
+</head>
+<body>
+  <canvas id="view"></canvas>
+
+  <div id="hud">
+    <!-- the hero: portrait, name, job, levels, HP / SP, points to spend -->
+    <div class="buffs" id="buffs"></div>
+    <div class="cframe">
+      <button class="hud-open" type="button" data-panel="status" aria-label="เปิดสเตตัสตัวละคร (C)" title="สเตตัสตัวละคร (C)"></button>
+      <div class="cport"><canvas id="cport"></canvas><div class="clv">Lv <b id="clv">1</b></div></div>
+      <div class="cbody">
+        <div class="crow"><span class="cname" id="cname"></span><span class="cjob"><span id="cjob">นักเดินทาง</span> · Job <b id="cjlv">1</b></span></div>
+        <div class="gauge hp"><em id="hplag"></em><i id="hpfill"></i><span class="glbl">HP</span><b id="hptext">0 / 0</b></div>
+        <div class="gauge sp"><i id="spfill"></i><span class="glbl">SP</span><b id="sptext">0 / 0</b></div>
+        <div class="cbadges">
+          <button class="badge st" id="stpts" data-panel="status" hidden>แต้มสเตตัส <b id="stptsn">0</b></button>
+          <button class="badge sk" id="skpts" data-panel="skills" hidden>แต้มสกิล <b id="skptsn">0</b></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- the monster aimed at / last hit -->
+    <div class="tframe" id="tframe" hidden>
+      <div class="trow"><img id="tel" alt=""><span class="tname" id="tname"></span><span class="tlv" id="tlv"></span><span class="teff" id="teff"></span></div>
+      <div class="gauge thp"><i id="thpfill"></i><b id="thptext"></b></div>
+    </div>
+
+    <div class="tr">
+      <div class="minimap"><canvas id="minimap"></canvas><button class="hud-open" type="button" data-panel="bigmap" aria-label="เปิดแผนที่ (M)" title="แผนที่ (M)"></button></div>
+      <div class="dial"><canvas id="dial"></canvas><div class="time" id="time">11:40 PM</div></div>
+      <div class="zonelbl" id="zonelbl"></div>
+    </div>
+
+    <!-- messages: EXP, items, levels -->
+    <div class="log" id="log"></div>
+
+    <!-- skills and items, with the EXP bars under them -->
+    <div class="hotbar">
+      <div class="hslot skill" id="hs-q"><span class="key">Q</span><img src="assets/ic_q.png" alt=""><div class="cd" id="cd-q"></div><span class="cdt" id="cdt-q"></span><span class="slv" id="slv-q"></span><span class="spc" id="spc-q"></span></div>
+      <div class="hslot skill" id="hs-e"><span class="key">E</span><img src="assets/ic_e.png" alt=""><div class="cd" id="cd-e"></div><span class="cdt" id="cdt-e"></span><span class="slv" id="slv-e"></span><span class="spc" id="spc-e"></span></div>
+      <div class="hslot skill" id="hs-r"><span class="key">R</span><img src="assets/ic_r.png" alt=""><div class="cd" id="cd-r"></div><span class="cdt" id="cdt-r"></span><span class="slv" id="slv-r"></span><span class="spc" id="spc-r"></span></div>
+      <div class="hslot skill ult" id="hs-f"><span class="key">F</span><img src="assets/ic_q.png" alt=""><div class="cd" id="cd-f"></div><span class="cdt" id="cdt-f"></span><span class="slv" id="slv-f"></span><span class="spc" id="spc-f"></span></div>
+      <div class="hslot skill" id="hs-3"><span class="key">3</span><img src="data:," alt=""><div class="cd" id="cd-3"></div><span class="cdt" id="cdt-3"></span><span class="slv" id="slv-3"></span><span class="spc" id="spc-3"></span></div>
+      <div class="hslot skill" id="hs-4"><span class="key">4</span><img src="data:," alt=""><div class="cd" id="cd-4"></div><span class="cdt" id="cdt-4"></span><span class="slv" id="slv-4"></span><span class="spc" id="spc-4"></span></div>
+      <div class="hslot skill" id="hs-5"><span class="key">5</span><img src="data:," alt=""><div class="cd" id="cd-5"></div><span class="cdt" id="cdt-5"></span><span class="slv" id="slv-5"></span><span class="spc" id="spc-5"></span></div>
+      <div class="hslot skill" id="hs-6"><span class="key">6</span><img src="data:," alt=""><div class="cd" id="cd-6"></div><span class="cdt" id="cdt-6"></span><span class="slv" id="slv-6"></span><span class="spc" id="spc-6"></span></div>
+      <div class="hsep"></div>
+      <div class="hslot item"><span class="key">1</span><img src="assets/ic_potion.png" alt=""><div class="cd" id="cd-pot"></div><span class="count" id="potions">0</span></div>
+      <div class="hslot item"><span class="key">2</span><img src="assets/ic_sppotion.png" alt=""><div class="cd" id="cd-sppot"></div><span class="count" id="sppotions">0</span></div>
+      <div class="expbars">
+        <div class="xbar base"><i id="bxpfill"></i><span>Base</span><b id="bxptext">0%</b></div>
+        <div class="xbar job"><i id="jxpfill"></i><span>Job</span><b id="jxptext">0%</b></div>
+      </div>
+    </div>
+
+    <div class="menubar">
+      <button class="mbtn" data-panel="status" title="สเตตัส (C)"><img src="assets/ic_status.png" alt=""><b>C</b><i class="dot" id="stdot" hidden></i></button>
+      <button class="mbtn" data-panel="skills" title="สกิล (K)"><img src="assets/ic_skills.png" alt=""><b>K</b><i class="dot" id="skdot" hidden></i></button>
+      <button class="mbtn" data-panel="bag" title="อุปกรณ์ (I)"><img src="assets/ic_bag.png" alt=""><b>I</b><i class="dot" id="bagdot" hidden></i></button>
+      <button class="mbtn" data-panel="bigmap" title="แผนที่ (M)"><img src="assets/ic_map.png" alt=""><b>M</b></button>
+      <button class="mbtn" data-panel="pause" title="เมนู (ESC)"><img src="assets/ic_gear.png" alt=""><b>ESC</b></button>
+    </div>
+
+    <div id="zone"></div>
+    <div id="toast"></div>
+  </div>
+
+  <!-- the controls' lines: feature modules add theirs to #pause .keys and the ESC menu (js/menuwin.js) lists them.
+       Never on screen: the old dark windows (menu, bone lab, map, name box) are gone (2026-10-21) -->
+  <div id="pause" hidden>
+    <ul class="keys">
+      <li><kbd>WASD</kbd> เดิน</li>
+      <li><kbd>คลิกขวา</kbd> ที่พื้นเพื่อเดินไปยังจุดนั้น · กด WASD หรือคลิกซ้ายเพื่อควบคุมเอง</li>
+      <li><kbd>คลิกซ้าย</kbd> / <kbd>Space</kbd> ฟันดาบไปทางเมาส์ (กดติดกันได้เป็นคอมโบ)</li>
+      <li><kbd>Q</kbd> <kbd>E</kbd> <kbd>R</kbd> สกิลของอาชีพ · <kbd>F</kbd> อัลติ (ใส่ชุดบอสครบชุด F จะเป็นอัลติของชุดนั้น) · ใช้ SP ดูรายละเอียดที่ <kbd>K</kbd></li>
+      <li>นักเดินทาง Job Lv 10 เปลี่ยนอาชีพได้ที่หน้าสกิล (<kbd>K</kbd>): อัศวิน จอมเวท นักธนู โจร</li>
+      <li><kbd>1</kbd> ยาแดง ฟื้น HP 25% · <kbd>2</kbd> ยาฟ้า ฟื้น SP 25% (ดรอปจากมอนสเตอร์)</li>
+      <li><kbd>C</kbd> สเตตัส — อัพ STR AGI VIT INT DEX LUK ด้วยแต้มที่ได้ตอนเลเวลอัพ · <kbd>K</kbd> สกิล — อัพสกิลด้วยแต้มจาก Job Level</li>
+      <li>ธาตุ: อาวุธ สกิล และมอนสเตอร์มีธาตุ ตีถูกธาตุตัวเลขเป็นสีส้ม (แรงขึ้น) ตีธาตุที่ต้านทานเป็นสีเทา (เบาลง) — ดูธาตุมอนได้ที่ป้ายชื่อ</li>
+      <li>ยืนบน <b>วงเวทย์</b> สักครู่เพื่อวาร์ประหว่างค่ายกับซากป้อม</li>
+      <li><kbd>I</kbd> อุปกรณ์ — เปลี่ยนหมวก ทรงผม เสื้อ กางเกง+รองเท้า อาวุธ แยกกันได้ (ของใหม่ดรอปจากศัตรู)</li>
+      <li><kbd>M</kbd> แผนที่ · <kbd>ESC</kbd> เมนูนี้</li>
+    </ul>
+  </div>
+
+  <!-- the loading screen (css/loading.css, js/loading.js); game.js removes #loading when the game starts -->
+  <div id="loading" class="ld-mark"></div>
+  <div id="preload">
+    <img class="pl-art" alt="">
+    <div class="pl-shade"></div>
+    <canvas class="pl-fx"></canvas>
+    <div class="pl-title">NIGHT CAMP</div>
+    <img class="pl-logo" src="assets/loading/logo.png" alt="Night Camp">
+    <div class="pl-bottom">
+      <div class="pl-status"><span id="pl-text">กำลังเตรียมค่าย…</span><b id="pl-pct">0%</b></div>
+      <div class="pl-bar"><i id="pl-fill"></i><em id="pl-flame"></em></div>
+      <div class="pl-tip" id="pl-tip"></div>
+    </div>
+    <div class="pl-copy">© 2026 Night Camp · สงวนสิทธิ์ในงานต้นฉบับ</div>
+  </div>
+  <script>
+    // the loading screen's picture: one of the key arts at random, and where its fire is
+    (function () {
+      var ARTS = { a: ['assets/loading/keyart_a.jpg', '0.5,0.56'], b: ['assets/loading/keyart_b.jpg', '0.575,0.55'] };
+      var k = Math.random() < 0.5 ? 'a' : 'b';
+      var el = document.getElementById('preload');
+      el.dataset.fire = ARTS[k][1];
+      el.querySelector('.pl-art').src = ARTS[k][0];
+    })();
+  </script>
+  <!-- first of all: the world runs on behind open windows (only the film, the creator, the select and a map change hold it) and in a minimised tab (a worker's clock steps it and keeps the timers on time); ?bgrun=0 off -->
+  <script src="cas/fb021f476af0.js"></script>
+  <script src="cas/67b884133f58.js"></script><!-- before any WebGL context: crash memory (a run that died on screen = start a quality level lower) + a WebGL context the browser takes away is counted (each layer makes itself a new one); ?crash=0 / ?glflags=0 off -->
+  <!-- the game screen drawn by WebGL2 behind the 2D canvas API (every drawing file unchanged); ?gl=0 = the old 2D canvas -->
+  <script src="cas/fdb17f2e2a44.js"></script>
+  <script src="cas/2d95cd690b1e.js"></script>
+  <script src="cas/8c838cdd9cbf.js"></script>
+  <script src="cas/cb886ff80a21.js"></script>
+  <script src="cas/da9ddabcf109.js"></script><!-- the WebGL layers (hero rig, glfx, meshfx, paintgl, Baphomet, bloodaura, ...) share that context; ?gllayers=0 = their own -->
+  <script src="cas/1ce9ae11026e.js"></script><!-- the hero and pet rigs as meshes straight into that batch; ?glrig=0 = through their own framebuffers -->
+  <script src="cas/6f0c1ca89e72.js"></script><!-- keep combat and opening films free of camera shake and impact zoom -->
+  <!-- the title intro: a WebGL film over the loading screen while the game loads, then "เริ่มเกม" (?intro=0 skips) -->
+  <script src="cas/0d2e9194e1da.js"></script>
+  <script src="cas/5db8ebe23aa2.js"></script><!-- the prologue's black-and-white manga shot (the knight's red power); before prologue.js -->
+  <script src="cas/6dcd864e4364.js"></script><!-- the story film after "เริ่มเกม" (the six generals), then the game -->
+
+  <script src="cas/f342b5411aeb.js"></script>
+  <script src="cas/a4d284c080ec.js"></script>
+  <script src="cas/91162994d540.js"></script><!-- ?online: the page is the client of the Go server (a fresh, unsaved game under the lobby) -->
+  <script src="js/online/nakama.js"></script><!-- the smallest Nakama client: sign-in, RPCs, the match socket -->
+  <script src="cas/1b762fc663e3.js"></script><!-- ?online: the snapshot's positions block (server patch 006): the heroes' and monsters' places as bytes, written back into the JSON rows -->
+  <script src="cas/22f267c96bf1.js"></script><!-- NC.Online: the account, nc_join, the map match, snapshots (op 101) and events, reconnects -->
+  <script src="cas/ae78d1c93c90.js"></script>
+  <script src="cas/51cb43f440ea.js"></script>
+  <script src="cas/cdaf7da0ece2.js"></script>
+  <script src="cas/ab8dfb498ca3.js"></script>
+  <script src="cas/6b8c3eb98e17.js"></script>
+  <script src="cas/447471a17535.js"></script><!-- build-loot icons: essences, oils, ammo, runes (tools/buildloot_cut.py) -->
+  <script src="cas/5ab063a2cb6b.js"></script><!-- hero status icons + cures (tools/hstatus_cut.py) -->
+  <script src="cas/6fa6f1827125.js"></script><!-- the ค่าละเอียด tab's row icons (tools/sdicons_cut.py) -->
+  <script src="cas/b8573ff91193.js"></script>
+  <script src="cas/25ab7e8f3d48.js"></script>
+  <script src="cas/8a5fb7801d31.js"></script>
+  <script src="cas/65b116390422.js"></script>
+  <script src="cas/7047be640b23.js"></script><!-- the shield line by level, Lv 20–95 (merged by js/jobs3.js; tools/shield_art.py) -->
+  <script src="cas/3fef9118adea.js"></script>
+  <script src="cas/e0b453acef5c.js"></script>
+  <script src="cas/88e41d1796cf.js"></script>
+  <script src="cas/96e8d1b661dc.js"></script>
+  <script src="cas/f8e3a3fa6cdf.js"></script><!-- the hunting-section monsters' own weapons (merged by js/wcatalog_area.js; tools/wcatarea_art.py) -->
+  <script src="cas/e8f6d94d24c3.js"></script><!-- which weapons have an HD copy in assets/wpn_hd (tools/wpn_hd.py; drawn by js/wpnhd.js) -->
+  <script src="cas/3ba40b96fcbc.js"></script><!-- the gear card's compare icons: arrows, equal, tick (tools/wcicons_cut.py; merged by js/wcard.js) -->
+  <script src="cas/905d7ad3cb0f.js"></script><!-- the outfit catalog (merged by js/outfits.js) -->
+  <script src="cas/2a15bfd9f633.js"></script><!-- the one-piece legs, trousers + boots (merged by js/lowerbody.js; tools/lower_cut.py) -->
+  <script src="cas/11e789d072fd.js"></script><!-- grip hands: palm / fingers / arm without the fist (merged by js/griphand.js; tools/grip_cut.py) -->
+  <script src="cas/e32151c13a03.js"></script><!-- the hat catalog (merged by js/hats2.js) -->
+  <script src="cas/58fbf233a099.js"></script><!-- the blacksmith ป๋าหมูหริ่ง (js/forge.js) -->
+  <script src="cas/46429a2df2ac.js"></script>
+  <script src="cas/7c09b99ceb69.js"></script>
+  <script src="cas/5e1d32cac80c.js"></script>
+  <script src="cas/cdd8bfacb3ad.js"></script>
+  <script src="cas/d029210fc345.js"></script><!-- life skills (merged by js/life.js) -->
+  <script src="cas/c1e3a64cdf5a.js"></script><!-- the story NPCs (merged by js/storynpc.js) -->
+  <script src="cas/059a2b24f795.js"></script><!-- the bag's tab icons (merged by js/inventory.js) -->
+  <script src="cas/9c7130d32f7a.js"></script><!-- the new windows' icons (merged by js/statuswin.js) -->
+  <script src="cas/cb968dec511e.js"></script><!-- the party's loot-rule icons, the crown, the 12 guild emblems (merged by js/partynet.js; tools/social_art.py) -->
+  <script src="cas/354c7a247f23.js"></script><!-- the party's red thread, its knot and two icons (merged by js/partybonds.js; tools/partybonds_cut.py) -->
+  <script src="cas/3465f3618b9f.js"></script><!-- รากต้นไม้มืด: ten zones of root props, the gate, stairs, campfires, the Root Seed, the depth gauge (merged by js/darkroot.js; assets/gen/make_root_prompts.py) -->
+  <script src="cas/3000f3f962b4.js"></script><!-- the grade stones: หินขัดเกรด, ตราผนึกเกรด, หินกันแตก, แก่นราตรี (merged by js/gradetier.js) -->
+  <script src="cas/39b287091cc0.js"></script><!-- the PvP arena: the lake plate and its props (merged by js/pvparena.js) -->
+  <script src="cas/71fa2ce361c5.js"></script><!-- ศึกชิงกองไฟ: root walls, dead trees, fire pits + flames, camps, icons (merged by js/gwar.js; assets/gen/make_gwar_prompts.py) -->
+  <script src="cas/26c83b607850.js"></script><!-- the Samurai line's art for upcoming-job previews -->
+  <script src="cas/19408dc3d63e.js"></script><!-- the upcoming main lines' art (tools/obt_cut.py) -->
+  <script src="cas/a6ca0e173939.js"></script><!-- the new main lines' painted effect frames, each with its origin and delay (played smoothly by js/obt_vfx.js; tools/obtboom_cut.py) -->
+  <script src="cas/1c64cf64d7f4.js"></script><!-- the new main lines' effect paintings (tools/crateslam_cut.py) -->
+  <script src="cas/657b762504c9.js"></script><!-- ผู้ถูกรากสิง: the root-possessed bosses' hats, scythe, root eye (merged by js/rootboss.js; tools/harlock_cut.py) -->
+  <script src="cas/97be8cd3fccb.js"></script><!-- ชุดดาบใหญ่ราตรี (MOONBLADE): the two swords (merged by js/moonblade.js; tools/cutout.py) -->
+  <script src="cas/1b8a30fab523.js"></script><!-- the world boss บาโฟเม็ด's painted skill pieces, scythes, horns (merged by js/baphomet.js; tools/baph_cut.py) -->
+  <script src="cas/c8fc6132523a.js"></script><!-- the old dungeon bosses' painted skill effects (merged by js/dunbossfx.js; tools/dunfx_cut.py) -->
+  <script src="cas/f0d23891bc39.js"></script><!-- the build's WebP sprites (tools/online/webp_build.py) -->
+  <script src="assets/cas-local.js"></script><!-- the build's pictures by content (tools/online/cas_build.py) -->
+  <script src="cas/4163da3d256e.js"></script>
+  <script src="cas/1f07599f3ff9.js"></script>
+  <script src="cas/ddcdb28aed49.js"></script>
+  <script src="cas/6f51e2fa8aad.js"></script>
+  <script src="cas/7496ebaaefdb.js"></script>
+  <script src="cas/e5d57284ad4a.js"></script>
+  <script src="cas/385daaa34f3a.js"></script><!-- shots fly past rocks, trees, bushes, posts and fences (world.shotSolid via NC.shotWall); walking into a prop, the hero turns round it (NC.walkMove; the builders' solidOwn; ?passprops=0 old, ?walkround=0 shots only) -->
+  <script src="cas/56160f94c3f8.js"></script>
+  <script src="cas/3cf792b2e96f.js"></script>
+  <script src="cas/354bd0e0b647.js"></script>
+  <script src="cas/8a7976ac80a8.js"></script>
+  <script src="cas/e4e7125b729a.js"></script>
+  <script src="cas/5cb092c27f23.js"></script>
+  <script src="cas/3ea9d2fd3fd6.js"></script>
+  <script src="cas/1e1cf2cf780b.js"></script>
+  <script src="cas/389d67a335dd.js"></script>
+  <script src="cas/891e013efc3d.js"></script>
+  <script src="cas/e734a913839b.js"></script>
+  <script src="cas/2645b24490f6.js"></script>
+  <script src="cas/a9451053bcfc.js"></script>
+  <script src="cas/9e5e0d485f28.js"></script><!-- hat fits from studio/hats.html -->
+  <script src="cas/7413672feb9f.js"></script>
+  <script src="cas/fe282ecf05b6.js"></script><!-- a hat's fit on one hairstyle, from studio/hats.html ("คู่หมวก × ทรงผม") -->
+  <script src="cas/4a21d0e58466.js"></script><!-- NC.hatWorn: the pair's fit over the hat's own (avatar.js asks it) -->
+  <script src="cas/8036f1e4a55f.js"></script>
+  <script src="cas/fc5ce1a60e2a.js"></script>
+  <script src="cas/9509426ac186.js"></script>
+  <script src="cas/1312529358f1.js"></script>
+  <script src="cas/ffb53949d0e4.js"></script>
+  <script src="cas/4ff1199e1503.js"></script><!-- a rig's parts picked by hand in the Pose Studio (the night falcon's leg variants) -->
+  <script src="cas/4c9974d26610.js"></script><!-- feet turned toward the viewer while standing, the usual feet when moving (the starter boots) -->
+  <script src="cas/35cef7ecfc6f.js"></script><!-- trousers and boots drawn as one piece, standing feet toward the viewer -->
+  <script src="cas/7518140d2889.js"></script><!-- hands that hold the weapon: the handle through the palm, the fingers over it, the hand turning at the wrist -->
+  <script src="cas/5eec8c19f0e8.js"></script>
+  <script src="cas/57fb75d9b143.js"></script>
+  <script src="cas/14ee9ab4bb50.js"></script>
+  <script src="cas/362b9b7b729e.js"></script><!-- the traveler: no area skills (Q heavy blow on one, E dash hits the first); before rotiming.js -->
+  <script src="cas/242f3003f5ba.js"></script>
+  <script src="cas/3ec252bbcdad.js"></script><!-- red and blue potions in three sizes (fixed heals +VIT/INT %, prices, the key's pick, drops by level); before the shops, the bag and the auto farm -->
+  <script src="cas/f0fc5bc6e03e.js"></script><!-- Pose Studio clips (studio/) -->
+  <script src="cas/8ce5ec54ed61.js"></script>
+  <script src="cas/2cb6dc8ac50a.js"></script>
+  <script src="cas/f36e181dd3f9.js"></script>
+  <script src="cas/841b1a986391.js"></script><!-- eight more ways to fight: ranged, summoner, healer, bomber, burrow, shield, splitter, leader -->
+  <script src="cas/9e611f637026.js"></script>
+  <script src="cas/60ba4feb7570.js"></script>
+  <script src="cas/6d4b3be3adf7.js"></script>
+  <script src="cas/3c1635b2e80d.js"></script>
+  <script src="cas/b71c1996f669.js"></script>
+  <script src="cas/6d9c4d475d2a.js"></script><!-- the minimap + M's "แมพนี้" from the real map seen from above (?mmreal=0 minimap.js's painted art) -->
+  <script src="cas/bc6096711352.js"></script>
+  <script src="cas/998f02a64d37.js"></script><!-- what every player sees the same (guilds, the leaderboard): the Artifact's db online, this browser's stand-in on localhost -->
+  <script src="cas/9164864572e5.js"></script><!-- ?online: the guild documents come from the Go server's record (read-only; the guild window's buttons are server actions) -->
+  <script src="cas/172cd1f1ce44.js"></script>
+  <script src="cas/188c541ec837.js"></script>
+  <script src="cas/15536c9d1052.js"></script>
+  <script src="cas/a2890e8382bf.js"></script>
+  <script src="cas/52ba3b0c3ed3.js"></script>
+  <script src="cas/acf94b68cbe8.js"></script>
+  <script src="cas/4b2801ac8789.js"></script><!-- the story's new fields: the road north to Bellhaven and round it (monsters5.js) -->
+  <script src="cas/6f52320f1814.js"></script><!-- the story maps' 33 monsters and their materials -->
+  <script src="cas/d9511c6a096f.js"></script><!-- the story's dungeons: Owlspire, the ledger archive, the puppet workshop, the bell tower, the star's grave -->
+  <script src="cas/fde0c9fcee18.js"></script><!-- the expansion part 1: 79 monsters, 22 zone forms, 4 zone bosses (assets/gen/loot/monsters6_build.py) -->
+  <script src="cas/573e2330b948.js"></script><!-- the expansion part 1: 11 zone maps off the Lv 1-99 fields and the root caves -->
+  <script src="cas/be04b6500fc4.js"></script><!-- the hunting sections' monsters (pilot ไร่ฟักทอง: seed shooter, popcorn pod, black ewe + lambs, stitching doll, 2 rare forms) -->
+  <script src="cas/61ecae617d85.js"></script><!-- hunting AREAS of 4 sections (pilot ไร่ฟักทอง: + the corn maze, the abandoned pens); area labels on warps -->
+  <script src="cas/060add5463c5.js"></script><!-- the hunting areas' new sections, monsters, root-possessed bosses as data (assets/gen/loot/areas_build.py js) -->
+  <script src="cas/9a12748d5333.js"></script><!-- the new sections' monsters from areas_data.js (2 own + 1 rare form a section, their materials) -->
+  <script src="cas/5fdf5a0e8fce.js"></script><!-- the new sections' maps from areas_data.js (warps, roads, landmarks, zones; the safe camp in prime) -->
+  <script src="cas/dc0dbe15e04a.js"></script>
+  <script src="cas/f48af9bab09a.js"></script>
+  <script src="cas/b37530b84109.js"></script>
+  <script src="cas/4b623666f819.js"></script>
+  <script src="cas/d736676fece2.js"></script>
+  <script src="cas/0df0cc87f405.js"></script>
+  <script src="cas/c616bd715afa.js"></script>
+  <script src="cas/4f44f3ead904.js"></script>
+  <script src="cas/a8828ac51402.js"></script>
+  <script src="cas/c54e2b05b9e1.js"></script>
+  <!-- <script src="cas/23eb2a64c61f.js"></script> a floating one-leg cast for magic weapons: tried 2026-10-02, the user kept the old castHold -->
+  <script src="cas/4ec4679b2b37.js"></script>
+  <script src="cas/257c575dbc95.js"></script><!-- the ninja's star line: twin star, star fan, ricochet, huuma, clone burst, star storm (before skillplan.js) -->
+  <script src="cas/fbd82003a13f.js"></script>
+  <script src="cas/cfe7b373b0de.js"></script>
+  <script src="cas/2bd5f09293e9.js"></script>
+  <script src="cas/e0261c7c902d.js"></script>
+  <script src="cas/7ace9b4a14f4.js"></script>
+  <script src="cas/087c95e7f779.js"></script>
+  <script src="cas/3f8753b4ea6b.js"></script>
+  <script src="cas/496560bbdfbf.js"></script><!-- the knight's berserker (2nd job) -->
+
+  <script src="cas/f2f3a5324248.js"></script><!-- the class-3 outfits -->
+  <script src="cas/68431de623b7.js"></script><!-- the class-3 jobs: power-ups of the 2nd jobs' skills, awakening -->
+  <script src="cas/f8e0fc3cdffe.js"></script><!-- knight + mage families -->
+  <script src="cas/8ee7d05923db.js"></script><!-- archer + rogue families -->
+  <script src="cas/e1e0ca4ddfc3.js"></script><!-- priest family -->
+  <script src="cas/542724d6a9e0.js"></script><!-- the 40 greatswords (item plan) -->
+  <script src="cas/40d77db511c1.js"></script><!-- the 40 one-handed swords (item plan) -->
+  <script src="cas/ad25ea272535.js"></script><!-- the weapon catalog rows (tools/wcat_build.py) -->
+  <script src="cas/5722e766daf8.js"></script><!-- 40 weapons of every other type -->
+  <script src="cas/f2e430fd8f37.js"></script><!-- the hunting-section monsters' weapon rows (tools/wcatarea_build.py) -->
+  <script src="cas/53d43a70c7ed.js"></script><!-- one weapon of its own per new monster species (srcSpecies; drops wired in loot_data.js) -->
+  <script src="cas/b881593fc281.js"></script><!-- high-tier weapons: hit effects, a brighter trail, a glow in hand -->
+  <script src="cas/56ef28d69d3c.js"></script><!-- the berserker greatsword (test item, ?equip=gs_berserk): its red cracks glow (vein + bloom layers) -->
+  <script src="cas/bc3b94d18452.js"></script><!-- the samurai swords' painted hamon glow -->
+  <script src="cas/99f3848a360b.js"></script><!-- ชุดเกราะเหล็กคลั่ง: the secret boss set for the berserker greatsword, its red cracks blinking with bloom (test: ?equip=robe_ironrage,cape_ironrage,hat_ironrage,gs_berserk) -->
+  <script src="cas/75d7af2bb864.js"></script><!-- the two falcon sets (white falcon / eclipse falcon), rivals of IRONRAGE: glowing lines, feathers, the sabre sheen, wings on a dash, a halo (test: ?equip=robe_wfalcon,cape_wfalcon,hat_wfalcon,sw_wfalcon) -->
+  <script src="cas/6ae3bc1d7001.js"></script><!-- blood aura of the red marks: the eye + blade glow (the outfit's red softly), short wisps, blood that follows the motion (?blood=a|b|c); on with the night falcon set / blood blades, ?bloodaura on anything -->
+  <script src="cas/0aa14d44628e.js"></script><!-- the night falcon set's dash as a crow's shadow: a black body with a red rim, black-red afterimages, feathers, crows (after bloodaura.js) -->
+  <script src="cas/1b0fb2ed63f1.js"></script><!-- painted scabbards for the samurai blades (Codex, bent along the blade) with a bloom on their glowing pattern; ?saya=a|b|c picks the design -->
+  <script src="cas/bdd368b9a0b7.js"></script><!-- MURAMASA, the cursed blood katana: its own painted saya with the energy on its red lines -->
+  <script src="cas/e6953e1cd4f1.js"></script><!-- ROOTBOUND รากต้นไม้ดำ: the endgame mage set, its violet sap glowing with bloom (test: ?equip=robe_rootbound,hat_rootbound,staff_rootbound) -->
+  <script src="cas/ff7f89dc71af.js"></script><!-- เครื่องประดับ: two accessory slots (acc1, acc2), icon and stats only -->
+  <script src="cas/77767a6ea584.js"></script><!-- the outfit catalog: 4 lines (heavy, light, cloth, ranger) x 4 grades, set bonuses -->
+  <script src="cas/c1b5061e58a9.js"></script><!-- the hat catalog: 80 hats (cool, boss, fashion, other), worn fits measured by tools/hatcut.py -->
+  <script src="cas/e30ee84201d5.js"></script><!-- hats that look precious: a sweeping shine on legend/epic hats, glows, embers, snow, lightning... -->
+  <script src="cas/88974f97545d.js"></script><!-- 20 more pairs of glasses (sheets 2-5 of tools/glasscut.py) -->
+  <script src="cas/8ea0b8762359.js"></script><!-- the founder pack cosmetics: copies of game pictures (lantern hat, two falcon capes), fashion, no stats, never in the gacha or drops; given by js/topup.js -->
+  <script src="cas/8fe5fcff142c.js"></script><!-- items ask a Base Lv (lvReq): weapons of the item plan, the outfits -->
+  <script src="cas/e54b39b75915.js"></script>
+  <!-- the Game Bible / Loot Book (2026-09-30): the weapons' abilities, gear as copies, each monster's own drops
+  (js/wbag.js is replaced by js/gearbag.js and stays unhooked) -->
+  <script src="cas/e19745fa657e.js"></script><!-- weapon abilities + option-row effects (+ set passives through NC.gearFx) -->
+  <script src="cas/b0b11f14f49b.js"></script><!-- the abilities of every catalog weapon (assets/gen/loot/wabil_gen.py) -->
+  <script src="cas/3b0a7e1e8a40.js"></script><!-- gear as copies: option rows, refine level, moonlit; the option stones' drops -->
+  <script src="cas/1146c89b4494.js"></script><!-- the blacksmith ป๋าหมูหริ่ง: craft, drill rows, option stones -->
+  <script src="cas/b289db37a129.js"></script><!-- the forge makes every weapon type: one A per type and grade, junk + ore + coins (?oldforge: greatswords only) -->
+  <script src="cas/de342acf9295.js"></script><!-- each monster's own drop table (assets/gen/loot/loot_build.py) -->
+  <script src="cas/a7bbd8fc249e.js"></script><!-- the drops: per species, level gate, bosses, chests, legends, moonlit, the news -->
+  <script src="cas/104c29204052.js"></script><!-- drops are taken with weight: they settle, then hop and fly to the hero one by one (no key; ESC setting หน่วง / เร็ว, ?fastloot) -->
+  <script src="cas/a9b2a924039e.js"></script><!-- ตีบวก +1..+10 at the forge: costs, ores, the เตาร้อน meter, the shine in hand -->
+  <script src="cas/d49ee81f3f6b.js"></script><!-- magic weapons add MATK by their ATK and refine level (so mages gear up too) -->
+  <script src="cas/77f8be21fa2f.js"></script><!-- the 80 outfit sets' own passives at 4 pieces, the boss sets (weapon + hat + crown) -->
+  <script src="cas/c94dd390df16.js"></script><!-- weapons that strengthen one job's skills (classic MMO style): damage / cast / cooldown -->
+  <script src="cas/aebb47d7fc66.js"></script><!-- Crystal Burst: the 3D crystal cluster rendered in Blender (tools/blender/crystal_burst.py) -->
+  <script src="cas/e9aff0993e9f.js"></script><!-- every ice skill in the Blender look (tools/blender/frost_kit.py): spikes, shards, the lance, the blizzard funnel -->
+  <script src="cas/b21985a93d27.js"></script><!-- DARK ICE: the ice line's Blender ice re-tinted black-violet with a violet bloom while the hero wears the ROOTBOUND set -->
+  <script src="cas/aebb38e28513.js"></script><!-- ROOTBOUND tricks: creeping roots, the living hood eye, sap running along the lines, the awakened form (Codex pieces in assets/rootbound/fx) -->
+  <script src="cas/c9f646bef7c6.js"></script><!-- the Archmage in the Blender look (tools/blender/arcane_kit.py): lightning, element orbs, storm cloud, fusions -->
+  <script src="cas/71f88fed3f93.js"></script><!-- the Lantern Warlock in the Blender look (tools/blender/warlock_kit.py): soul fire, ghosts, tethers, chains, the hex skull -->
+  <script src="cas/0134a31131dd.js"></script><!-- the Paladin's Aegis / Reflect as Blender barriers (tools/blender/barrier_kit.py) -->
+  <script src="cas/961ee93738bb.js"></script><!-- the Paladin's Heaven's Judgment swords + impact in Blender (tools/blender/heaven_kit.py) -->
+  <script src="cas/6d7900189f72.js"></script><!-- the red foam shield that forms, soaks hits and blows up (tools/crimson_shield.py); test: ?crimson -->
+  <script src="cas/4d148cbed8a1.js"></script><!-- sound effects made live by WebAudio (no files), recordable into clips; ESC → ตั้งค่า → เสียงเอฟเฟกต์ -->
+  <script src="cas/19b7b8f01e71.js"></script><!-- painted pictures drawn by a shader (warp, flow, erosion, haze): Codex VFX pieces that move (before glfx.js: its camera punch takes them too) -->
+  <script src="cas/625e932a152d.js"></script><!-- the mesh slashes' painted texture strips (tools/meshfx_cut.py; merged by js/meshfx.js) -->
+  <script src="cas/0b32c885a7c6.js"></script><!-- slashes as MESHES: a band swept along a 3D arc / the blade's path, a painted strip scrolling + dissolving along it (before glfx.js: its camera punch includes them) -->
+  <script src="cas/0406347934ab.js"></script><!-- the uber FX shader's grayscale textures + colour ramps (Codex: assets/gen/make_uberfx_prompts.py -> tools/uberfx_cut.py) -->
+  <script src="cas/601bda4a7148.js"></script><!-- ONE effect shader for every piece: scrolling / polar textures x masks, noise distortion, noise dissolve with a burning edge, colour ramps, glow pass (before glfx.js: its camera punch takes them too) -->
+  <script src="cas/8931222d819c.js"></script><!-- the WebGL2 effects layer: live shader pieces (flowing noise, erosion, toon bands), particles, camera punch -->
+  <script src="cas/b2f38bfd7a52.js"></script><!-- the blood lance on glfx (the baked-sheet try js/bloodlancefx.js is unhooked); test: ?bloodlance -->
+  <script src="cas/68442b80d0b9.js"></script><!-- the void dome: glass hemisphere, absorbs damage (cracks, shatters), bounces monsters off, blocks shots, bursts at the end, runes, sound; test: ?voiddome -->
+  <script src="cas/b876efcc38cb.js"></script><!-- more ways for the void dome to break (plates, melt, stardust, freeze, backlash, void): NC.VoidDomeFX.breakStyle; test: ?voiddome=plates -->
+  <script src="cas/2a9bc6b16703.js"></script><!-- an ice crystal burst after the user's frame sheet + recipe (still pieces + particles, 5 beats); not on a skill yet; test: ?icenova -->
+  <script src="cas/6a57213187c3.js"></script><!-- the Fire Mage's skills drawn by code, the crimson recipe in fire (tools/ember_fx.py → assets/vfx2d/ember/) -->
+  <script src="cas/7829ed1b4805.js"></script><!-- the Archer's skills and bow arrows drawn by code (wind green / star gold, tools/archer_fx.py → assets/vfx2d/archer/); OFF unless picked in the menu (js/hitstyle.js) -->
+  <script src="cas/e01cc962d9cc.js"></script><!-- painted frame-by-frame skill frames, each with its origin and delay (tools/maple_cut.py) -->
+  <script src="cas/39725c81a67f.js"></script><!-- the bow 2nd jobs' Maple-style frames (tools/maplebow_cut.py): merged into the archer's set before maplefx.js reads it -->
+  <script src="cas/d7aa004b4b0e.js"></script><!-- skills as painted frame-by-frame animations (cast / ball / hit); first: the archer's ธนูพายุทะลวง (R); ?maple=0 the old look -->
+  <script src="cas/f285e45cbb72.js"></script><!-- the ranger / wolf hunter skills as painted 12-frame animations (on maplefx.js's player); ?maple=0 the old look -->
+  <script src="cas/4fd51105de6b.js"></script><!-- the ninja's huuma is thrown: out and back into the hand (basic attack + skill poses) -->
+  <script src="cas/b7170fb897bf.js"></script><!-- the summons as moving cutout rigs -->
+  <script src="cas/57d3ff6deb5e.js"></script><!-- the wolf / hawk Spine rigs' atlas pages (tools/pet_spine.py) -->
+  <script src="cas/b706eccfe251.js"></script><!-- the wolf / hawk Spine rigs as data: one painted picture each, weighted meshes, moves (tools/pet_spine.py) -->
+  <script src="cas/6de88f133955.js"></script><!-- the wolf hunter's wolf and the hunter's hawk drawn from those rigs (WebGL) in place of petrig's pieces; ?petspine=0 the old pieces -->
+  <script src="cas/1cc069ef6519.js"></script><!-- VOID COMET ดาวหางดับ: the endgame archer set (cyan cracks with bloom, orbiting shards, star dust) + the wolf / falcon as armoured frame animations (test: ?equip=robe_voidcomet,cape_voidcomet,hat_voidcomet,bow_voidcomet) -->
+  <script src="cas/6421707baece.js"></script><!-- VOID COMET storm: with the set on, his skills / hits / wolf / falcon turn to Blender lightning (assets/vfx3d/storm, tools/blender/storm_kit.py) -->
+  <script src="cas/9f8636f24e94.js"></script><!-- REAPER GUN เกราะปืนยมทูต: the endgame gunslinger set (red glow pass; test ?equip=robe_reapergun,hat_reapergun,gun_reapergun&job=gunslinger) -->
+  <script src="cas/c0cef4527fa4.js"></script><!-- ชุดดาบใหญ่ราตรี (MOONBLADE): endgame greatsword set -->
+  <script src="cas/dd5cadfece23.js"></script><!-- classic MMO skill timing (the default since 2026-10-03; ?rotime=0 = the old one): short cooldowns, a global after-cast delay, F skills as big spells (after every skill file) -->
+  <script src="cas/f929cec8f966.js"></script><!-- the beats of every skill's effect (sid → delays) for the burst numbers -->
+  <script src="cas/42ada5fcae64.js"></script><!-- "burst" damage numbers, the DEFAULT (?dmgfx=0 = the old arcing numbers): shoot up, pop, ladder, job colours, a number per effect beat, ult TOTAL -->
+  <script src="cas/477de9ee57db.js"></script><!-- the light kit's pieces: holy pieces, the sigil, the wings frames + the sword's (tools/lightkit_cut.py) -->
+  <script src="cas/55d86c44f151.js"></script><!-- the shared LIGHT KIT: painted light pieces fired as particles, added as light, bloomed; LK.reskin turns a skill's code-drawn effects into light -->
+  <script src="cas/2ca99c45844b.js"></script><!-- the puppeteer's and the wisp shepherd's ultimates up near the ice age (2026-10-20, offline until the server's patch; ?oldult = the old ones) -->
+  <script src="cas/f8ee8d93eb2c.js"></script><!-- the priest's skills + holy staff bolts made of light (ESC → ตั้งค่า สายพระ; ?priestlight=1) -->
+  <script src="cas/0f7ca00ee55e.js"></script><!-- the knight line's skills made of light: painted slashes, swords of light, domes (ESC → ตั้งค่า สายอัศวิน; ?knightlight=1) -->
+  <script src="cas/0854477a98ba.js"></script><!-- the fire mage's skills made of light (+ starcore); the rest of the mage line keeps its looks (ESC → ตั้งค่า จอมเวทไฟ; ?magelight=1) -->
+  <script src="cas/30d2902c01ff.js"></script><!-- the reaper's light + ink pieces (tools/reaperlight_cut.py; loaded by js/reaperlight.js the first time a reaper is seen) -->
+  <script src="cas/428cf564242d.js"></script><!-- the reaper's scythe skills made of moonlight on ink: the reaping ring, the moon execution, sickles of light, the soul chain (ESC → ตั้งค่า ยมทูต; ?reaperlight=1) -->
+  <script src="cas/553f64e166af.js"></script><!-- the shared "light on ink" helpers (dark ink pieces under the light, the dim, the hit feel in a line's colours) for the line skins below -->
+  <script src="cas/aaacdd3dd663.js"></script><!-- the assassin's deep-red painted frame animations (tools/assassinframes_cut.py; played smoothly by js/inklight.js IL.frames) -->
+  <script src="cas/214a664668ad.js"></script><!-- the rogue line's light + ink pieces (tools/roguelight_cut.py; loaded by js/roguelight.js the first time a hero of the line is seen) -->
+  <script src="cas/748c8424de89.js"></script><!-- the rogue line's skills (โจร นักฆ่า นินจา + class 3) made of light on ink: claws, stabs, the death mark, venom, ninja stars (ESC → ตั้งค่า สายโจร; ?roguelight=1) -->
+  <script src="cas/5dca1cf35c45.js"></script><!-- the berserker's blood ink pieces: only the assassin's deep red uses them now (js/roguelight.js, bk_v*) -->
+  <!-- js/berserklight.js (+ assets/berserkframes) UNHOOKED 2026-10-21, files kept: the owner went back to the berserker's old look (js/knightlight.js) -->
+  <script src="cas/8c47302f6242.js"></script><!-- every melee line staged like the reaper's: a cast flourish (the line's sigil + ink), what each hit tears out of a monster, heavy impacts, ultimates dimming the world -->
+  <script src="cas/8574c5e878d8.js"></script><!-- TEST: the fire mage's เสาเพลิง drawn with the uber FX shader (?uberfx=1; without it the look it has now) -->
+  <script src="cas/af610636b70f.js"></script><!-- the hit style the player picks, old or new (ESC menu → ตั้งค่า): damage numbers and each job's new effects (after the look files) -->
+  <script src="cas/897ad5c96985.js"></script><!-- the map music list (tools/music_pack.py -> assets/music/<map id>.m4a) -->
+  <script src="cas/c2ba2e07daca.js"></script><!-- the map music: crossfades between maps, loops, starts on the first key/click; ESC → ตั้งค่า → เพลง -->
+  <script src="cas/742d41f1f08c.js"></script>
+  <script src="cas/72b3c27d9462.js"></script>
+  <script src="cas/8b7d80932a6d.js"></script>
+  <script src="cas/f727e5cce087.js"></script>
+  <script src="cas/ac4a6a16bc0f.js"></script><!-- life skills (อาชีพเสริม): levels, tools, working a node, the H window, the teachers -->
+  <script src="cas/d9542d7292f2.js"></script><!-- ตัดไม้: the field maps' trees -->
+  <script src="cas/1ca2fd908388.js"></script><!-- ขุดแร่: veins in the dungeons and a few fields -->
+  <script src="cas/abfdd4d0ed10.js"></script><!-- ปลูกผัก + the new map ฟาร์มหิ่งห้อย (homefarm) -->
+  <script src="cas/601f1d3c2faa.js"></script>
+  <script src="cas/2779628469a5.js"></script>
+  <script src="cas/335f73448b54.js"></script><!-- the ponds move: waves, glints, ripples, fish shadows, lapping foam, bubbling lava -->
+  <script src="cas/6e269e1395fd.js"></script><!-- the PvP arena map เวทีประลองกลางทะเลสาบ (pvp_lake): painted plate, platform + bridge, always night; camp exit past the training ground -->
+  <script src="cas/14b3b9a43631.js"></script><!-- ตกปลา: cast, bite, reel; 30 fish by water and time; the fish book; ตานาก -->
+  <script src="cas/fdc3e268ee5f.js"></script><!-- the bag (I), MMO style: character + slots, tabs gear / fashion / farm / etc, item card; the costume layer -->
+  <script src="cas/84ff8d689da9.js"></script><!-- the status window (C), layout B: hero, stat hexagon, + buttons, value cards, what a point changes -->
+  <script src="cas/263e624452b2.js"></script><!-- the skill window (K), layout B: skills by line + resonance, the picked skill's card, the skill bar, job change tab -->
+  <!-- js/jobcards.js + css/jobcards.css (the job change tab as painted cards) UNHOOKED 2026-10-20, the owner: "กาดอาชีพใช้เป็นแบบเดิมดีกว่า ... งงกว่าเดิมเยอะเลย"; files and assets/jobcard kept -->
+  <script src="cas/63331aa1b40f.js"></script><!-- the job change tab: "อาชีพใหม่ เร็ว ๆ นี้" (samurai + the new main lines, shown only, never taken) -->
+  <script src="cas/bd721a2da8dd.js"></script><!-- the world map's regions and where each field's pin sits (?pinedit to drag them) -->
+  <script src="cas/faa46c97b4bc.js"></script><!-- which maps suit which job: elements, reach, packs, monster kinds, EXP by level gap (advice on the map card) -->
+  <script src="cas/2986df5e0b1f.js"></script><!-- the world map's real-map tiles (assets/wmreal, tools/wmreal_sink.py) -->
+  <script src="cas/88399e681a32.js"></script><!-- the world map (M) from the real maps: tiles laid out by their warps, every field pinned (?wmreal=0 the paintings) -->
+  <script src="cas/e2cef743ec15.js"></script><!-- the map window (M), layout A: painted parchment world map + pins, the place's card, นำทาง (route arrow) -->
+  <script src="cas/7c5a7960d672.js"></script><!-- มอน & ดรอป (mockup C): the map window's monster + drop table, filters, search, who else drops it, walk / bot / book buttons -->
+  <script src="cas/ac506bb59a99.js"></script><!-- the life-skill window (H), layout C: a collection book (bookmarks, tool + perks page, "?" collection page) -->
+  <script src="cas/32683e5684db.js"></script><!-- ทำอาหาร: the fifth life skill, ป้าหมีหม้อดำ by the campfire, the cookbook (layout B), 30-minute meals -->
+  <!-- the Game Bible systems (2026-09-30): progression, loot, economy, social, endgame -->
+  <script src="cas/5cd8501159e8.js"></script><!-- the slower level curve, job curves by tier, rested EXP, catch-up, the faint's EXP cost -->
+  <script src="cas/adc0952db426.js"></script><!-- monster HP by level: x1 to Lv 15, x1.6 at 30, x3 at 55, x5 at 90, x5.5 at 99, then x2.5 for every monster (?oldhp: the old numbers, ?hpx=1: no x2.5) -->
+  <script src="cas/44de8a5aecf5.js"></script><!-- สมุดนักเดินทาง (J): one window for the new pages (css/bible.css) -->
+  <script src="cas/0cd5e189694c.js"></script><!-- สรุปคืนที่ผ่านมา: what the auto farm did, shown when it stops -->
+  <script src="cas/8d7947ea2485.js"></script><!-- สมุดสะสม (stars, rewards) and สมุดมอน (kills, drop lists) -->
+  <script src="cas/081da6ece51b.js"></script><!-- a short day (6 min), tougher night monsters with more materials, the dusk bell and ไออุ่น -->
+  <script src="cas/b08cce1694cf.js"></script><!-- floating merchant prices, the week's buys, market tax, the broker, the guiding flame, the ledger -->
+  <script src="cas/099ed2b2cff1.js"></script><!-- the main quests (assets/gen/loot/quests_build.py): objectives, coins, story panels -->
+  <script src="cas/f57d49f60904.js"></script><!-- the story as farming quests, the daily board, the calendar, reputation, the tracker -->
+  <script src="cas/1d73c34dbcdf.js"></script><!-- the story's six generals as rigged human map bosses (dunbosses.js fights, boss.js bar) -->
+  <script src="cas/f6270d0ae5e1.js"></script><!-- ผู้ถูกรากสิง: root-possessed human bosses, hero-sized, coming up at a random zone of their area (pilot: ฮาร์เวน) -->
+  <script src="cas/6ac0c978f239.js"></script><!-- the root-possessed bosses' skill effects painted (Codex pieces assets/lost/fx_*: danger ring/lane, orb, sap, smoke, root spikes; dunbosses.js tags) -->
+  <script src="cas/505846cfeef0.js"></script><!-- the old dungeon bosses' skill effects painted (bat king, ant queen, crypt lord, lava dragon: Codex pieces assets/dunfx/) -->
+  <script src="cas/ca09197ebf56.js"></script><!-- the lava dragon in the blood-shield recipe (tools/lavadragon_fx.py: magma frames, assets/vfx2d/lavadragon/); takes it over from dunbossfx.js -->
+  <!-- js/dunshieldfx.js (the bat king, ant queen, crypt lord in the blood-shield recipe, mixed with the Codex paintings) is UNHOOKED: the user, 2026-10-15, "ผมชอบเเบบเเรกมากกว่า" - those three keep js/dunbossfx.js's first painted look; files kept -->
+  <script src="cas/297731ae8839.js"></script><!-- the new areas' gear: each new species' own weapon in its drop table, the root bosses' pieces as real gear, their top levels -->
+
+  <script src="cas/bbb8c8d538da.js"></script><!-- the story's people in the world: quests taken from and handed to their giver (! / ? over heads, T or click) -->
+  <script src="cas/619349f4c3c4.js"></script><!-- guilds as campfires (lane, EXP, upkeep, weekly quest and boss), friends, the party board -->
+  <script src="cas/66ba742ff05a.js"></script><!-- after Lv 99: constellations, the endless tower หอดาวร่วง, world bosses, the online ranking, seasons -->
+  <script src="cas/ddbcea2cf551.js"></script><!-- world boss บาโฟเม็ด in two forms (goat demon lord -> root-bound), 16:00 / 21:00 on the Dark Tree's maps; painted skills + glfx light -->
+  <script src="cas/7219ce5140ec.js"></script><!-- auto rig: a painted sprite bent by bones (a mesh + geodesic weights made at load, drawn by WebGL); ?meshrig=0 off -->
+  <script src="cas/3de6dd809891.js"></script><!-- the Baphomet's bones on his 4 pictures + his poses (breath, cape, steps, wind-up, swing, roar) -->
+  <script src="cas/d224a88c5bf6.js"></script><!-- the Baphomet Spine rigs' atlas pages (tools/baph_spine.py) -->
+  <script src="cas/f5357e150c21.js"></script><!-- both forms' Spine rigs as data: bones, meshes, IK, physics, moves (tools/baph_spine.py) -->
+  <script src="cas/c81d5ead1bfa.js"></script><!-- the Baphomet played from his Spine rigs (our own player, drawn by WebGL); the auto rig above when it can't; ?spine=0 off -->
+  <script src="cas/de75d9ff7ad7.js"></script><!-- the hero Spine rig's atlas page (tools/hero_spine.py) -->
+  <script src="cas/e39533644d4f.js"></script><!-- the hero (traveler look) Spine rig as data (tools/hero_spine.py) -->
+  <script src="cas/18da5412d868.js"></script><!-- the player's hero played from his Spine rig when he wears the traveler look; ?spinehero=0 off, =1 on anything -->
+  <script src="cas/d63cde86fb9e.js"></script><!-- the other heroes (online players, the party, the map's adventurers) in the same rig; ?spineothers=0 off -->
+  <script src="cas/23d2a3a32f70.js"></script><!-- the fashion gacha (pity 60, stars 120), moon gems, the season pass, the monthly card (payments not open) -->
+  <script src="cas/9ca599c4b7cd.js"></script><!-- เติมเพชรจันทร์: 8 gem packs, 3 founder packs, the beta top-up paid back x2 at launch; offline purchases are unavailable; online purchases use the server -->
+  <script src="cas/255898e96297.js"></script><!-- play numbers for the balance pass: kills/TTK per map and job, faints, levels, drops, coins -->
+  <script src="cas/6bcab5ebf03e.js"></script><!-- ต้มยา at Uncle Coco's: potions from monster junk + 40% of their price (the shop window's fourth tab) -->
+  <script src="cas/1fcaa0dbcd50.js"></script><!-- Uncle Coco's shop / the material pouch (B), layout A: Coco at his counter, sell / buy / reset -->
+  <script src="cas/55fbf3ae370d.js"></script><!-- a party of real players over net.js: invites, the leader, loot rules (who gets the drops), EXP share, the list under the hero frame -->
+  <script src="cas/3719e4e43b4f.js"></script><!-- the party window (P), layout A: the party round the campfire, the places, the leader's loot rules, invites -->
+  <script src="cas/e3ee4f340a58.js"></script><!-- the party list under the hero frame, me included, for this game and ?online (the user's reference, 2026-10-19) -->
+  <script src="cas/c4d4dddfa359.js"></script><!-- a priest's heals, buffs and resurrections reach the real players of the party (stand-ins, presence su), the faint waits 10 s, the support EXP bonus, the support auto farm -->
+  <script src="cas/9c36477bb463.js"></script><!-- guilds on NC.Store: found, invite, ranks, notice, coffer, weekly quest, guild boss, the guild fire; the window (O), layout B -->
+  <script src="cas/b81fa0245806.js"></script><!-- PvP duels over net.js: challenge (a hero's click menu → ท้าดวล, /duel), ring of fire, hit claims through stand-ins, PvP rules; best of 3 on the arena map -->
+  <script src="cas/2a13234719e2.js"></script><!-- Shift: a quick dash for every job (300 units, 3 s cooldown, AGI cuts it), dodges while it lasts; a Shift slot on the hotbar -->
+  <script src="cas/47e499468ce7.js"></script><!-- the leaderboard (N), layout A: level, boss hunter, kills, wealth, life skills, guilds; seasons; NC.Store ranks/{uid} -->
+  <script src="cas/c36d0db99ae5.js"></script><!-- รากต้นไม้มืด: a 100-floor tower down the Dark Tree's roots, solo or a party of 2-4, floor goals, the wind of the week, checkpoints, Root Seeds; records on NC.Store root/ + rootp/ -->
+  <script src="cas/f11c10e11662.js"></script><!-- its windows: the lobby at the root gate (layout A: the root map) and the ranking (layout B: the depth gauge + the podium hall) -->
+  <script src="cas/ad9e2ef871c9.js"></script><!-- ศึกชิงกองไฟ's four lands (each its own map held by a guild): one fair layout, each land its ground, trees, cover and air -->
+  <script src="cas/9f9a496d37f8.js"></script><!-- ศึกชิงกองไฟ: owner vs one challenger per land, 5 fires (firewood = their life, douse / light), the great fire at the end takes the land, the dark, stand-in hits, respawn, sign-ups and holders on NC.Store, the gate north of the guild lane -->
+  <script src="cas/4ea89f6341e4.js"></script><!-- its screens: the war bar, kill feed, respawn choice, scoreboard (Tab), results, the war board at the gate -->
+  <script src="cas/693e085278a0.js"></script><!-- ตารางธาตุ (mockup A): the 10 x 10 element table + the picked element's card + three tips; opens from the menu tray button "ธาตุ", the target frame's element icon, the status window's element cards, ?eltable -->
+  <script src="cas/ef3de1debe6e.js"></script><!-- the game menu (ESC), layout B: side buttons, controls, settings, try a job (after every file that wraps HUD.panel) -->
+  <script src="cas/67ed71668880.js"></script><!-- the forge and the life-skill teachers get their NPC painting + speech bubble beside the content -->
+  <script src="cas/70338b2d13ed.js"></script><!-- the main screen tidied: AUTO, coins and the menu tray in one bottom-right column (after the files that add HUD parts) -->
+  <script src="cas/fa1010c51849.js"></script><!-- phones and tablets: touch HUD (joystick, ATTACK, skill arc, potions, AUTO, action, menu grid, chat sheet), view zoom, auto-aim -->
+  <script src="cas/1bfdf029ff43.js"></script><!-- the 2026-10-02 balance pass (tools/gamesim): class gear = drop grade, fashion looks only, magic hits through MDEF, class-3 power, drop gates + glasses + boss outfits, the curve x the bot's real speed (?oldbal: off) -->
+  <script src="cas/fcec61b72d0d.js"></script><!-- the balance round of 2026-10-04 (after rebalance.js: it changes its JOB_POWER): junk by level, the 1st-job mage, weapon outliers (?oldround: none) -->
+  <script src="cas/d9d55348ed08.js"></script><!-- no shoes slot: each trousers item wears its own boots (their stats added in), after every item file and the balance passes -->
+  <script src="cas/57d80a952b32.js"></script><!-- axes cut over the top, edge first: their own 2nd attack instead of the sword's rising backhand (axe, great axe, hammer) -->
+  <script src="cas/fe6e5f1ab824.js"></script><!-- staves and foci cast with the shaft across the fist, the hand in front of the chest (staff, lantern, orb, bell, puppet bar) -->
+  <script src="cas/783952e8d017.js"></script><!-- swords, maces, torches, twin swords: the basic cuts with the grip across the fist -->
+  <script src="cas/28e03c34c4b1.js"></script><!-- build loot 1: element essences, oils, element ammo, tainted gear (Papa Moo's tab "ธาตุ · แปดเปื้อน") -->
+  <script src="cas/7060f18da82f.js"></script><!-- build loot 2: skill runes (2 slots per skill, the skill card in K; Papa Moo merges them) -->
+  <script src="cas/7eda407b3561.js"></script><!-- build loot 3: monster arts (keys 7 / 8, the book of arts; every species drops its own move) -->
+  <script src="cas/3c4e0a72e7cd.js"></script><!-- monsters put statuses on the hero (stun, freeze, sleep, poison, bleed, burn, silence, blind, slow), resists, cures -->
+  <script src="cas/01858653e638.js"></script><!-- option rows on every piece, ~30 kinds (pierce, resists...), the ceiling, gear in the players' stalls -->
+  <script src="cas/a79e51b44ac8.js"></script><!-- attack speed from gear more than stats: AGI / DEX halved (x1.5 at most), stronger ตีเร็ว rows, a ตีเร็ว row on accessories (?oldaspd off) -->
+  <script src="cas/e10bca37c205.js"></script><!-- a basic swing a skill cuts short still lands its blow when it would have (as the Go server does; not after a dash, a boss set skill, a fall or a map change): slower attacks no longer lose whole swings to the rotation (?oldswing off; off online) -->
+  <script src="cas/2c5a785178cc.js"></script><!-- the colour grades of gear pieces (6: ธรรมดา to ราตรี), rolled per copy, lifting its option rows; ขัดเกรด at the forge with the grade seal; the safety stone (refine.js) -->
+  <script src="cas/7504de43276f.js"></script><!-- a dropped ราตรี piece's light drawn live with shaders (glfx.js beam + bloom), four versions A-D to pick (?droplight) -->
+  <script src="cas/6c12e825b969.js"></script><!-- the shields drop (Discord #96): buckler from soldiers and crabs, kite shield from knights and 3 bosses (before bossrate.js) -->
+  <script src="cas/8a3b1847e32b.js"></script><!-- every boss's own pieces drop rarely: weapons 0.5%, hats / crowns / outfits 1% a kill (after every file that adds boss rows) -->
+  <script src="cas/1a06ccfbe716.js"></script><!-- รากต้นไม้มืด's loot: the shades are real bosses (picked by gear level), bound pieces, shadow cores -> pick a piece of the set (after darkroot / gradetier) -->
+  <script src="cas/2a7005b78ceb.js"></script><!-- the status window's ค่าละเอียด tab: every number with its cap (mockup A) -->
+  <script src="cas/861afeeded72.js"></script><!-- balance round 2026-10-11: monsters of the first fields (Lv <= 24) only fight back -->
+  <script src="cas/d156ad375eea.js"></script><!-- monsters from Lv 25 use skills (shots, slams, breath, blink, harden...); each map fits some plays better -->
+  <script src="cas/8e2bc8563c12.js"></script><!-- hit feel: white blink + flinch back (skills harder), tremble, squash, hit light, painted sparks + embers, hitstop by weight, kill slow-mo, hit sounds (all on; ESC → ตั้งค่า ความมันตอนตีโดน) -->
+  <script src="cas/7b0d8aa4ac91.js"></script><!-- the sword's ink impact frames (tools/inkslash_cut.py) -->
+  <script src="cas/48b7ca6fccd2.js"></script><!-- TEST ?inkslash=1: the sword's plain hits land with a hand-drawn ink starburst, a crimson cut on crits, a colour split on big hits (after hitfeel.js) -->
+  <script src="cas/3a851f4c3545.js"></script><!-- the light pieces of the sword's particle hits (tools/lightslash_cut.py) -->
+  <script src="cas/07938e317866.js"></script><!-- TEST ?inkslash=light: the same hits made of light: painted pieces fired as particles, added as light, bloomed (after inkslash.js) -->
+  <script src="cas/08e9a67b8a25.js"></script><!-- the kept ElevenLabs takes in assets/sfx/ (written by tools/sfx_process.py) -->
+  <script src="cas/b7f69bcb54c2.js"></script><!-- which sound layers stack on a blow (NC.SFXL, shared with the pick page tools/sfx_pick.html) -->
+  <script src="cas/7b0f333d52eb.js"></script><!-- the layered hit sounds: swing, weapon crack + monster body + weight + crit + kill, miss (after hitfeel.js; ?hitsfx=0 = the old synth hits) -->
+  <script src="cas/73215b2b70e5.js"></script><!-- the hero walks himself to a place across maps (warps + A*), for the journey's AUTO -->
+  <script src="cas/43387f1ec28a.js"></script><!-- the journey's steps as plain data (the server and Unity read the same: tools/export_journey.mjs) -->
+  <script src="cas/bdea10c72c99.js"></script><!-- เส้นทางนักเดินทาง: the guided journey Lv 1-20 (mockup B: the ember spirit's bubble, the stage bar, AUTO, firefly trail, HUD rings) -->
+  <script src="cas/2a9991c087f6.js"></script><!-- balance round 2026-10-16 after the B1–B3 sections: root spawns, soft Lv 80+ species, splitters, prices, boar drops, loot tops, Magnum 4 s, species weapons, the curve (?oldbal1016: none) -->
+  <script src="cas/6903768256a4.js"></script><!-- ตีอาวุธ made tidy (mockup A): weapon-type icon tabs, the recipes with พร้อม / ขาด N, one detail, the material slots, one lock select, one button -->
+  <script src="cas/4c17e48116b3.js"></script><!-- ตีบวก made easy the MMORPG way (mockup A): item over the anvil, the chance ring, the +1..+10 track, before -> after, one button; the crafting window's refine station and the bag's ตีบวก open it -->
+  <script src="cas/67c60ee7da38.js"></script><!-- the big result popup (look C): ตีบวก, ตีอาวุธ, หินออฟ / เจาะออฟ, ขัดเกรด, cooking, brewing, runes, essences; wraps their exposed calls, click or key skips; ?resultfx=demo -->
+  <script src="cas/5adc15a62fb8.js"></script><!-- sharp weapons where one is shown big (refine anvil, weapon crafting, bag card, result popup): the HD copy, lazy, the old sprite until it loads; ?wpnhd=0 off -->
+  <script src="cas/08ec7a84fead.js"></script><!-- a gear piece against the worn one of its slot: the hero's own numbers with each (put on for a moment, derived, put back) -->
+  <script src="cas/08ab04797fb8.js"></script><!-- the gear card in the bag, mockup B: this / worn / change table, options side by side, verdict box; green / red arrows on the bag cells; ?wcard=0 the old card -->
+  <script src="cas/cd180a2420d1.js"></script><!-- items linked in the chat: Shift + click / the card's แนบในแชท -> [name] in its colour, pointing shows its card (mockup A); online the server checks the copies (patch 018) -->
+  <script src="cas/941197073965.js"></script><!-- งานฝีมือ (Y / the menu button): cooking, brewing, weapons, essences, runes anywhere out of combat (8 s, not in dungeons / the Dark Root / PvP / the guild war); refine, grade, option stones open their page with "walk to the smith" -->
+  <!-- the pages built from the UI audit's picked mockups (css/p3_*.css): each wraps the window it redraws -->
+  <script src="cas/3da573697add.js"></script>
+  <script src="cas/5d646f0e6dab.js"></script>
+  <script src="cas/9ec082f56450.js"></script>
+  <script src="cas/9b2602f374cb.js"></script>
+  <script src="cas/1af98ac6749f.js"></script>
+  <script src="cas/24e12e72360b.js"></script>
+  <script src="cas/16befb9094cf.js"></script>
+  <script src="cas/81710a5b0452.js"></script>
+  <script src="cas/4cbd5a8086b1.js"></script><!-- ดูรายละเอียดเพื่อน: click a card on J → เพื่อน: the hero, what they wear, guild/party/place, invite · whisper · go · duel (mockup fd B) -->
+  <script src="cas/593e01ee7aaa.js"></script><!-- a click (left or right) on another player's hero: a menu by their head: ดูโปรไฟล์ · กระซิบ · ชวนเข้าปาร์ตี้ · เพิ่มเพื่อน · ท้าดวล -->
+  <script src="cas/d364d8b76cf3.js"></script><!-- โหมดซัพพอร์ต: the AUTO's second mode for support jobs: lock a party member, follow (across maps too), only heal / raise / buff, never a swing -->
+  <script src="cas/a4ed368d238e.js"></script><!-- the question cards (NC.Notify): party invites and join requests, duels, guild invites with เข้าร่วม at once; the hero menu's ชวนเข้ากิลด์ -->
+  <script src="cas/ad9ec7ff93b9.js"></script><!-- what a party gets together: ด้ายเชิด (threads: damage, regen), EXP / drops by the kill's threads and the job mix, ฉุดเพื่อนขึ้น (hold T); NC.PARTY_RULES -> the Go server (patch 005) -->
+  <script src="cas/4388996c9019.js"></script><!-- the top-up window (mockup C): banner, founder packs, x2 timeline, 8 gem packs, confirm sheet; the menu's moon gem button, the gacha page's เพชรจันทร์ tab, ?topup -->
+  <!-- js/hudshop.js (the PC shop row left of the clock: บอส · กิจกรรม · ตลาด · กาชา · เติม) is UNHOOKED: the user, 2026-10-19, "ซ่อนอันนี้ไว้ก่อน" (the moon gem is back in the menu tray, the monster frame and boss bar centred again); files kept -->
+  <script src="cas/806641673a30.js"></script><!-- บทนำเป็นบทสอน: 10 lessons from the camp's people (story quests MQ00-03/MQ08 + their own), the one quest talk window (mockup A), painted ! ? marks, the tracker under the minimap, the button ring; hands over to the journey's stage 2 -->
+  <script src="cas/2c2434f66946.js"></script><!-- AUTO พาไปทำทุกขั้น: one press plays the quest on (walk, talk, auto farm on the right map, chop / dig / garden, dummies) until a step needs the player; ?questauto=0 old -->
+  <script src="cas/e2cecef6168d.js"></script><!-- right-click ground movement alongside WASD and the existing left-click combat -->
+  <script src="cas/fd7cac141a16.js"></script><!-- the UI audit's fixes that measure: the hotbar fitted between the chat and the menu column on wide screens (css/uifix.css has the rest) -->
+  <script src="cas/f3a7297ae035.js"></script><!-- the newbie power: Lv 1–15 HP x3 / damage x2, gone at Lv 25 (outermost NC.derive / NC.heroHit) -->
+  <script src="cas/64d89e3ea1f1.js"></script><!-- kill EXP x the level gap: 100% / 70% / 40% / 20% / 5% (NC.LEVEL_GAP) -->
+  <script src="cas/4ab62fe479ef.js"></script><!-- the endgame audit: monster ATK by level, VIT pierce, drops x the level gap, star ore, gear sale curve -->
+  <script src="cas/89a286fe78da.js"></script><!-- the biggest balance round: monster HP / ATK by level (2–3 hits early, a slope at Lv 22–40), the EXP curve to 260–350 h (?oldbal1018 off) -->
+  <script src="cas/ca3f519bb4c0.js"></script><!-- the 1st-job mage's early pace: its hits x1.5–1.9 to Lv 25, easing to x1 at Lv 40 (outermost NC.heroHit; ?oldmage off) -->
+  <script src="cas/71b38e1d3d2a.js"></script><!-- a lighter level curve: Lv 1 ~8 kills, Lv 10 ~27, Lv 30 ~220, x0.7 of the old need from Lv 70 (NC.xpNext / NC.jobNext; ?oldexp off) -->
+  <script src="cas/1364b2eaf13b.js"></script><!-- monsters dodge a little less: FLEE = Lv + Lv x agiK x 0.7 (outermost NC.monsterStats; ?flee=old) -->
+  <script src="cas/49e3dd534e15.js"></script><!-- nothing in the way on the fields' roads: landmarks step aside, fence gaps, roads round lakes, warps out of the sea, arches on their legs (NC.buildField's outermost wrapper; ?roadclear=0 old) -->
+  <script src="cas/dfb2e9fca898.js"></script><!-- ?online: the character select's stage (the painted camp, the fire, the heroes as slots) -->
+  <script src="cas/a96bb40fcee0.js"></script><!-- ?online: the front door: the character select (account, hero slots around the fire, delete, the creator sends to the server) -->
+  <script src="cas/37bbd01289bf.js"></script><!-- server job gauges and blade-mark looks shared by the online clients -->
+  <script src="cas/81e617ed9ff5.js"></script><!-- ?online: the wisp shepherd's wisps from the server (NC.OnlineWisp, fed by online/world.js) -->
+  <script src="cas/32ec8c4a41e2.js"></script><!-- ?online: the summons on the screen are the server's (wolf, puppet, wyvern, lantern, decoys: NC.OnlinePets, fed by online/world.js); the skills' looks and needs see only their caster's (after every skill file) -->
+  <script src="cas/352e8bca1f9d.js"></script><!-- ?online: the hunters' hawks flown by the server (their meters), the wolf's pounce / leap and the mark (NC.OnlineWolf) -->
+  <script src="cas/6505be595671.js"></script><!-- ?online: the puppeteer's looks from the server: the puppet's strikes, its build, swap, dance, hooks and wires (NC.OnlinePuppet) -->
+  <script src="cas/7c074736197b.js"></script><!-- server monster status stacks and reaction looks -->
+  <script src="cas/d4d289a2cc78.js"></script><!-- ?online: the server's events and snapshots as the window events the old looks below listen to (docs/team/online-missing-looks.md) -->
+  <script src="cas/9780a82eac38.js"></script><!-- ?online: the monsters' Break: the gauge under the HP bar, BREAK! and the dazed stars from the server -->
+  <script src="cas/1d80aa64ca23.js"></script><!-- ?online: the monster kinds' bolts, heal beams, blasts, mounds, rushes, minis and blocks from the server -->
+  <script src="cas/861129f0a3a5.js"></script><!-- ?online: the dungeon, story and Mushroom King bosses' moves, warnings, hazards, waking, rage and fall from the server (Baphomet: online/baph.js) -->
+  <script src="cas/baab8f122217.js"></script><!-- ?online: the assassin's echo and second-cut slashes from the server -->
+  <script src="cas/9bab30471c5c.js"></script><!-- ?online: the icemage's shatter, soak, armour break, regrowth and aura from the server -->
+  <script src="cas/e5bed83159e0.js"></script><!-- ?online: the campfire's rested EXP and the guiding light's catch-up from the server: the log lines and the EXP bar's badge -->
+  <script src="cas/f92894f901a9.js"></script><!-- ?online: the outfit sets' guards from the server (block, shield, shell, gel, revive) -->
+  <script src="cas/eb7c7d41dc9f.js"></script><!-- ?online: the rogue's steal as the server rolled it -->
+  <script src="cas/225296e19e3f.js"></script><!-- ?online: the knights' sword waves from the server (fx_sword_wave.go) -->
+  <script src="cas/785d25b61003.js"></script><!-- ?online: the gunslinger's sixth, boom and pierce rounds from the server -->
+  <script src="cas/ab8ecbbfa6ad.js"></script><!-- ?online: the monk's spirit spheres and triple attacks from the server -->
+  <script src="cas/092c8ba9db68.js"></script><!-- ?online: the priest's duple lights from the server -->
+  <script src="cas/85a1d6faa421.js"></script><!-- ?online: the shinobi's substitute logs from the server -->
+  <script src="cas/830c1793536e.js"></script><!-- ?online: the dragon knight's tail lances and wyvern fireballs from the server -->
+  <script src="cas/6486f403a8f3.js"></script><!-- ?online: the paladin's holy crosses, faith bursts, zeal pulses and reflection bolts from the server -->
+  <script src="cas/5019e484b627.js"></script><!-- ?online: the warlock's souls round the hero from the server -->
+  <script src="cas/98bcb0aaaaf3.js"></script><!-- ?online: the archmage's fusion, orbs, shots and storm from the server -->
+  <script src="cas/34ea98f97401.js"></script><!-- ?online: the bishop's dome, soak, hymn notes and blessing motes from the server -->
+  <script src="cas/d2a248cda955.js"></script><!-- ?online: the lightkeeper's zones, flare and rise from the server -->
+  <script src="cas/f74a9b37809f.js"></script><!-- ?online: the dungeons' spike traps, chest bursts and secret way from the server -->
+  <script src="cas/34a0d5769869.js"></script><!-- ?online: the bard's performances, notes and fireflies from the server -->
+  <script src="cas/9afcfaab1d15.js"></script><!-- ?online: the class-3 moon ring, awakening and power-up looks from the server -->
+  <script src="cas/4206c6431297.js"></script><!-- ?online: the priest family's class-3 looks from the server -->
+  <script src="cas/c5d389f65219.js"></script><!-- ?online: the mage family's class-3 looks from the server -->
+  <script src="cas/6cccc765258f.js"></script><!-- ?online: the archer family's class-3 looks from the server -->
+  <script src="cas/943d51b29972.js"></script><!-- ?online: the knight family's class-3 looks from the server -->
+  <script src="cas/e29d78c215dd.js"></script><!-- ?online: the rogue family's class-3 looks from the server -->
+  <script src="cas/c649a725aedf.js"></script><!-- ?online: the server's world in the web engine: mirrors, prediction, events, the others, chat (the outermost wrappers) -->
+  <script src="cas/01ab69508d3d.js"></script><!-- ?online: what a fall cost (the server's self.faint): the chat line and the หมดแรง screen's EXP card -->
+  <script src="cas/d2dd51bc804c.js"></script><!-- ?online: the hero's statuses are the server's (self.hst / self.hstFx -> p.hst, the words over the head); js/hstatus.js shows and checks them -->
+  <script src="cas/df4d81421a96.js"></script><!-- ?online: the beta test's EXP x1.5 (server patch 015, the back office's "expx5" switch): the painted x1.5 badge in the buff row while self.live.exp says it pays -->
+  <script src="cas/39f97d9e0dbc.js"></script><!-- ?online: the HUD and night-only quest conditions follow the server's world clock -->
+  <script src="cas/e81b5426ff67.js"></script><!-- ?online: the server's bag of pieces is p.bag, wearing / selling pieces go to the server -->
+  <script src="cas/20a838870bae.js"></script><!-- ?online: the story quests, dailies and the week's chest from the server (js/quests.js draws them) -->
+  <script src="cas/d9c6bddb6619.js"></script><!-- ?online: refine, polish, option stones, weapon crafting, cooking and brewing rolled by the server -->
+  <script src="cas/c56ef9542416.js"></script><!-- ?online: the skill runes on the server: รวมรูน and จารึก / ถอด go to it, the skill cards show its record -->
+  <script src="cas/bd441630d82f.js"></script><!-- ?online: the party (NC.PartyNet from self.party, invites) and the guild window's buttons as server actions -->
+  <script src="cas/661babff3254.js"></script><!-- ?online: the other heroes' guild names and fires, guild invites from the hero menu, friends and friend requests on the server, as NC.Notify cards -->
+  <script src="cas/ad8d834644d3.js"></script><!-- ?online: the server's heals, team buffs and revives on the party show on everyone's screen (+HP, the buff icon and line, whole support buffs), the stand-ins know the party's HP again (AUTO support) -->
+  <script src="cas/03d53e6f0f62.js"></script><!-- ?online: the buffed theatre's yanks and curtain, the night's rain and mark bursts from the server (patch 019; js/ultbuff.js) -->
+  <script src="cas/75e7cce2d2c8.js"></script><!-- ?online: woodcutting, mining, fishing and farming on the server (p.life is self.life) -->
+  <script src="cas/46ee66662e90.js"></script><!-- ?online: check-in, the guiding flame, the books, the farm crows, AUTO / offline farm, sitting, the lessons' kills -->
+  <script src="cas/81c392f50723.js"></script><!-- ?online: the journal's สรุปบอท counts the server's kills, EXP, materials and gear drops (js/report.js) -->
+  <script src="cas/9edd12d46c4e.js"></script><!-- Unity's first 7 days and daily popup, with the server's 30-day monthly track -->
+  <script src="cas/7c3218c481de.js"></script><!-- ?online: the broker, player shops, the gacha and top-up through the server -->
+  <script src="cas/b373ef7b5539.js"></script><!-- ?online: duels and the lake arena run by the server, drawn by js/pvp.js -->
+  <script src="cas/c911f781fbb0.js"></script><!-- ?online: the Dark Root run and floors from the server, drawn by js/darkroot*.js -->
+  <script src="cas/d4fedbda7414.js"></script><!-- ?online: the root-possessed bosses come up, walk and sink on the server; its notices; js/rootboss.js's own clock off -->
+  <script src="cas/2f3e09a67b80.js"></script><!-- ?online: the world boss Baphomet from the server, played by js/baphomet.js -->
+  <script src="cas/902e43f5db4c.js"></script><!-- ?online: the guild war run by the server, drawn by js/gwar*.js -->
+  <script src="cas/3735a617f9a0.js"></script><!-- ?online: the server list (/nc/servers + /nc/load lights, ping, the account's heroes on each), moving to another server -->
+  <script src="cas/f9ff32a641ab.js"></script><!-- ?online: the map's channels (how full, from Nakama's match list) and moving to another channel (leave, nc_join {channelId}, join) -->
+  <script src="cas/b7a605659d8f.js"></script><!-- ?online: ย้ายแชนแนล window (mockup F): the "CH n" chip under the minimap, channel loads + where the party / friends / guild are, the moving toast; styles css/chwin.css -->
+  <script src="cas/ec5dd702004b.js"></script><!-- ?online: FPS, signal and ping, the clock, server and current-map online totals, map breakdown (put back 2026-10-22: the owner, "ตัวแสดงผล fps หายไปไหนอ่ะ") -->
+  <script src="cas/69f550cbea90.js"></script><!-- ?online: เลือกเซิร์ฟเวอร์ (mockup B): the front door before the character select, a painted card per server (light, ping, your heroes there), the server line on the character select comes back here -->
+  <script src="cas/b9b5dcfa7a27.js"></script><!-- ?online: the player flow: ESC change hero / log out (with a fight countdown), the dressing room to the server, no try-a-job for players -->
+  <script src="cas/164ea92b4d0b.js"></script><!-- the game version players see (release.json / version.json from deploy_web.sh): read, checked, worded as "v0.5.1 · 18 ต.ค. 69" -->
+  <script src="cas/0fe668c8d752.js"></script><!-- ?online: players know when we deploy: /version.json (deploy_web.sh) -> "มีอัปเดตใหม่" card + back in with the same hero; the server's notice (deploy_server.sh) -> a countdown banner; styles css/update.css -->
+  <script src="cas/54035c7fe44f.js"></script><!-- the rest of the layered sounds: skill charge / cast / flight / ground loops, ultimates, element tails on hits, buffs + heals, monsters' blows + the hero hurt / dodge / parry, boss roar / warning / slam / rage, statuses, level up, loot, coins, potions (after js/online/*: on top of their hooks; ?hitsfx=0 off) -->
+  <script src="cas/9abe453caa94.js"></script><!-- the others' effects at a share (default 30%): their replayed skills' pieces, lights, glfx particles and online hit numbers thinned evenly, a cap on how many live; ESC -> ตั้งค่า "เอฟเฟกต์ผู้เล่นอื่น"; ?otherfx=100 = all (the outermost NC.FX.add wrapper) -->
+  <script src="cas/3a62392a3fc9.js"></script><!-- the other heroes and the online monsters drawn a moment behind, at an even speed between two known places (no rubber bands), their swings / skills / hit numbers at the same moment; after otherfx.js; ?smooth=0 = net.js's own follow() + the mirrors' old slide -->
+  <script src="cas/ab43645c190d.js"></script><!-- a crowd of other heroes without the lag: the nearest live, the rest from shared baked frames or their own picture redrawn a few times a second, a cap on bodies; ESC -> ตั้งค่า "ผู้เล่นอื่นบนจอ"; ?crowd=0 off (the outermost NC.Party wrappers) -->
+  <script src="cas/43fb38486a34.js"></script><!-- คุณภาพภาพที่เข้ากับเครื่อง: the canvas resolution, night light map size and a frame cap by level (auto = a look at the machine, then down when frames drop / up when smooth) + เช็คเครื่อง (what to change on the PC); ESC -> ตั้งค่า -> ความลื่นและคุณภาพภาพ; ?gfx=0 off -->
+  <script src="cas/d99f463eb7ed.js"></script><!-- fast start (2026-10-18): the start map's and the hero's art first, the rest streamed behind the game (js/assets.js); a warp waits for the next map's art behind a veil; ?stream=0 = load all first -->
+  <script src="cas/ed92f7983204.js"></script><script src="cas/bb469b543067.js"></script><!-- the game's mouse cursors (puppet wood, look B): arrow, weapon over a monster, speech bubble over an NPC, grabbing hand over loot, pointing hand on buttons (the outermost NC.Party.collect reader); ?cursor=0 old cursors; off on touch screens -->
+  <script src="cas/0bf397e38c24.js"></script><!-- Discord · แจ้งบัค / เสนอแนะ: a card with the forum room #แจ้งบั๊ก (bugs and ideas), the server, the game's info copied for the post; opens from the pill left of the coins (a cell in the phone menu), ESC side button, เช็คเครื่อง, the server / character select pill, /discord /บัค; ?discord (after hudtidy.js and the online files: the outer NC.HUD.init) -->
+  <script src="cas/d36ed1e82e88.js"></script><script src="cas/83a19ae1863c.js"></script><!-- ways out for a stuck hero: ออกจากราก on the Dark Root floor HUD (online {action:'root',kind:'exit'}), ESC "ติดอยู่? ช่วยพาออก" on every map (online {action:'unstuck'}, offline AUTO's hop), /ติด /ออกราก (after discord.js: the ESC side order) -->
+  <script src="cas/c4e4561efe82.js"></script>
+</body>
+</html>

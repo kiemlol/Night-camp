@@ -1,0 +1,170 @@
+/* portrait.css — the K windows on a phone held upright (html.mob-port, js/mobile.js). Every window becomes a full-screen
+   sheet: the title bar stays at the top, the rest scrolls, one column, text big enough to read (--u = 1/500 of the
+   screen width: 20u text is ~16 px on a phone 390 px across). Landscape phones and PCs never see these rules.
+   Load it after the windows' own stylesheets. */
+
+/* ---------- the sheet ---------- */
+html.mob-port .kw-panel, html.mob-port .iv-panel { --u: calc(100vw / 500); }
+html.mob-port .kw-panel { background: rgba(14, 12, 30, 0.6); }
+html.mob-port .sw-wrap, html.mob-port .skw-wrap, html.mob-port .mw-wrap, html.mob-port .lb-wrap,
+html.mob-port .sp-wrap, html.mob-port .pw-wrap, html.mob-port .mn-wrap, html.mob-port .gw-wrap, html.mob-port .rk-wrap {
+  position: fixed; inset: 0; left: 0; top: 0; transform: none !important; display: flex; flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+html.mob-port .kw-panel .kw-win {
+  flex: 1; min-height: 0; width: auto !important; border-radius: 0; border-left-width: 0; border-right-width: 0;
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+}
+html.mob-port .kw-panel .kw-title { position: sticky; top: 0; z-index: 6; }
+html.mob-port .kw-panel .kw-tabs { overflow-x: auto; scrollbar-width: none; padding-left: calc(10 * var(--u)); padding-right: calc(10 * var(--u)); }
+html.mob-port .kw-panel .kw-tabs::-webkit-scrollbar { display: none; }
+html.mob-port .kw-panel .kw-tab { flex: none; min-width: 0 !important; padding: calc(4 * var(--u)) calc(16 * var(--u)) !important; font-size: calc(19 * var(--u)) !important; }
+
+/* ---------- status (C) ---------- */
+html.mob-port .sw-sub { padding: calc(8 * var(--u)) calc(10 * var(--u)) 0; font-size: calc(18 * var(--u)); }
+html.mob-port .sw-top { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(10 * var(--u)); margin: calc(8 * var(--u)) calc(10 * var(--u)) 0; padding: calc(10 * var(--u)); }
+html.mob-port .sw-hero, html.mob-port .sw-radar { height: calc(290 * var(--u)); }
+html.mob-port .sw-legend { gap: calc(6 * var(--u)); margin: 0 calc(6 * var(--u)) calc(8 * var(--u)); padding: calc(4 * var(--u)) calc(6 * var(--u)); font-size: calc(12 * var(--u)); }
+html.mob-port .sw-stats { grid-column: 1 / -1; }
+html.mob-port .sw-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); margin: calc(10 * var(--u)) calc(10 * var(--u)) 0; }
+html.mob-port .sw-info { margin: calc(10 * var(--u)) calc(10 * var(--u)) calc(14 * var(--u)); }
+
+/* ---------- skills (K) ---------- */
+html.mob-port .skw-sub { padding: calc(8 * var(--u)) calc(10 * var(--u)) calc(2 * var(--u)); font-size: calc(18 * var(--u)); }
+html.mob-port .skw-body { grid-template-columns: minmax(0, 1fr); height: auto; gap: calc(12 * var(--u)); padding: calc(12 * var(--u)) calc(10 * var(--u)) 0; }
+html.mob-port .skw-list { max-height: 52vh; }
+html.mob-port .skw-row { grid-template-columns: calc(58 * var(--u)) minmax(0, 1fr) calc(80 * var(--u)) calc(70 * var(--u)); }
+html.mob-port .skw-row .kw-tag { display: none; }
+html.mob-port .skw-plus { grid-column: 4; width: calc(66 * var(--u)); }
+html.mob-port .skw-need1 { grid-column: 2 / span 2; }
+html.mob-port .skw-card { overflow: visible; }
+html.mob-port .skw-bar { grid-template-columns: minmax(0, 1fr); margin: calc(12 * var(--u)) calc(10 * var(--u)) calc(14 * var(--u)); padding: calc(10 * var(--u)) calc(12 * var(--u)) calc(12 * var(--u)); }
+html.mob-port .skw-slots { justify-content: space-between; gap: calc(4 * var(--u)); margin-top: calc(26 * var(--u)); }
+html.mob-port .skw-slot { width: calc(52 * var(--u)); height: calc(52 * var(--u)); border-width: calc(3 * var(--u)); border-radius: calc(12 * var(--u)); }
+html.mob-port .skw-slot .key { top: calc(-22 * var(--u)); min-width: calc(26 * var(--u)); height: calc(24 * var(--u)); font-size: calc(14 * var(--u)); }
+html.mob-port .skw-hint { grid-column: 1; grid-row: auto; margin-top: calc(10 * var(--u)); padding: calc(8 * var(--u)) 0 0; border-left: 0; border-top: calc(3 * var(--u)) solid #d4c6a6; font-size: calc(16 * var(--u)); }
+html.mob-port #skillwin .jobs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* ---------- world map (M): the painting pans sideways ---------- */
+html.mob-port .mw-where { font-size: calc(14 * var(--u)); }
+html.mob-port .mw-body { grid-template-columns: minmax(0, 1fr); gap: calc(10 * var(--u)); padding: calc(10 * var(--u)); }
+html.mob-port .mw-board { --u: calc(100vw / 560); width: auto; height: calc(768 * var(--u) + 8px); overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+html.mob-port .mw-world { position: relative; width: calc(1152 * var(--u)); height: calc(768 * var(--u)); }
+html.mob-port .mw-here { height: calc(768 * var(--u)); }
+html.mob-port .mw-card { height: auto; overflow: visible; }
+html.mob-port .mw-cbody { overflow: visible; }
+
+/* ---------- life skills (H): the bookmarks become a tab bar along the bottom ---------- */
+html.mob-port .lb-wrap { padding-left: env(safe-area-inset-left); }
+html.mob-port .lb-win { flex: 1; min-height: 0; }
+html.mob-port .lb-marks { order: 2; position: static; flex: none; flex-direction: row; gap: 0; padding: 0; background: #2a2435; }
+html.mob-port .lb-mark {
+  flex: 1; width: auto; height: calc(92 * var(--u)); flex-direction: column; justify-content: center; gap: calc(2 * var(--u)); padding: calc(4 * var(--u)) calc(2 * var(--u));
+  border-radius: 0; border-width: 0 calc(2 * var(--u)) 0 0; box-shadow: none; transform: none !important; text-align: center;
+}
+html.mob-port .lb-mark img { width: calc(40 * var(--u)); height: calc(40 * var(--u)); }
+html.mob-port .lb-mark span { align-items: center; }
+html.mob-port .lb-mark b { font-size: calc(15 * var(--u)); }
+html.mob-port .lb-mark small { font-size: calc(14 * var(--u)); }
+html.mob-port .lb-body { padding: calc(10 * var(--u)); }
+html.mob-port .lb-book { grid-template-columns: minmax(0, 1fr); height: auto; padding: calc(10 * var(--u)); }
+html.mob-port .lb-spine, html.mob-port .lb-clasp, html.mob-port .lb-ribbon { display: none; }
+html.mob-port .lb-page { overflow: visible; border-radius: calc(14 * var(--u)) !important; box-shadow: none !important; }
+html.mob-port .lb-right { margin-top: calc(10 * var(--u)); }
+html.mob-port .lb-grid, html.mob-port .lb-grid.dense { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+html.mob-port .lb-pick { position: static; margin: calc(12 * var(--u)) 0 0; border-radius: calc(14 * var(--u)); border: calc(3 * var(--u)) solid #e0cda3; box-shadow: none; }
+
+/* ---------- Uncle Coco's shop / the pouch (B) ---------- */
+html.mob-port .sp-coins { right: calc(60 * var(--u)); min-width: 0; }
+html.mob-port .sp-body { grid-template-columns: minmax(0, 1fr); height: auto; }
+html.mob-port .sp-art { height: calc(240 * var(--u)); border-right: 0; border-bottom: calc(4 * var(--u)) solid var(--ink); background-size: cover; background-position: 50% 40%; }
+html.mob-port .sp-bubble { left: auto; right: calc(12 * var(--u)); top: calc(14 * var(--u)); max-width: calc(210 * var(--u)); }
+html.mob-port .sp-main { padding: calc(12 * var(--u)) calc(10 * var(--u)) calc(14 * var(--u)); }
+html.mob-port .sp-sell { grid-template-columns: minmax(0, 1fr); }
+html.mob-port .sp-grid { height: auto; }
+html.mob-port .sp-cimg { height: calc(170 * var(--u)); }
+html.mob-port .sp-pot { grid-template-columns: calc(80 * var(--u)) minmax(0, 1fr) auto; }
+html.mob-port .sp-pimg { width: calc(80 * var(--u)); height: calc(80 * var(--u)); }
+html.mob-port .sp-pbtns { grid-column: 1 / -1; }
+html.mob-port .sp-pbtns .kw-btn { flex: 1; }
+html.mob-port .sp-reset { grid-template-columns: calc(90 * var(--u)) minmax(0, 1fr); }
+html.mob-port .sp-rimg { width: calc(90 * var(--u)); height: calc(90 * var(--u)); }
+
+/* ---------- party (P), layout A of the social pages ---------- */
+html.mob-port .pw-count { right: calc(60 * var(--u)); font-size: calc(20 * var(--u)); }
+html.mob-port .pw-body { grid-template-columns: minmax(0, 1fr); padding: calc(10 * var(--u)) calc(10 * var(--u)) 0; }
+html.mob-port .pw-scene { height: calc(300 * var(--u)); }
+html.mob-port .pw-person { width: 24%; }
+html.mob-port .pw-tag b { padding: 0 calc(8 * var(--u)); font-size: calc(16 * var(--u)); }
+html.mob-port .pw-slots { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(8 * var(--u)); }
+html.mob-port .pw-slot { height: auto; min-height: calc(300 * var(--u)); }
+html.mob-port .pw-sname { font-size: calc(19 * var(--u)); }
+html.mob-port .pw-sbtn { height: calc(42 * var(--u)); font-size: calc(16 * var(--u)); }
+html.mob-port .pw-radio { height: calc(48 * var(--u)); font-size: calc(19 * var(--u)); }
+html.mob-port .pw-list { height: auto; max-height: calc(360 * var(--u)); }
+html.mob-port .pw-news { margin: calc(10 * var(--u)); height: auto; min-height: calc(46 * var(--u)); }
+html.mob-port .pw-news span { white-space: normal; }
+
+/* ---------- guild (O), layout B ---------- */
+html.mob-port .gw-scene { height: calc(330 * var(--u)); margin: calc(10 * var(--u)) calc(10 * var(--u)) 0; }
+html.mob-port .gw-card { top: auto; bottom: calc(8 * var(--u)); right: calc(8 * var(--u)); width: calc(220 * var(--u)); padding: calc(6 * var(--u)) calc(10 * var(--u)); gap: calc(2 * var(--u)); }
+html.mob-port .gw-emb { width: calc(70 * var(--u)); height: calc(70 * var(--u)); }
+html.mob-port .gw-gname { font-size: calc(22 * var(--u)); }
+html.mob-port .gw-tag { font-size: calc(15 * var(--u)); }
+html.mob-port .gw-tabs .kw-tab { min-width: 0; }
+html.mob-port .gw-body { height: auto; }
+html.mob-port .gw-mbody, html.mob-port .gw-mbody.none { grid-template-columns: minmax(0, 1fr); padding: calc(10 * var(--u)); }
+html.mob-port .gw-grid { grid-template-columns: minmax(0, 1fr); }
+html.mob-port .gw-list { max-height: none; overflow: visible; }
+html.mob-port .gw-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+html.mob-port .gw-gems { grid-template-columns: repeat(6, calc(58 * var(--u))); }
+html.mob-port .gw-rrow { grid-template-columns: calc(44 * var(--u)) calc(40 * var(--u)) minmax(0, 1fr) calc(60 * var(--u)) calc(120 * var(--u)); }
+html.mob-port .gw-rrow > span:nth-child(5) { display: none; }
+html.mob-port .gw-pad { height: auto; overflow: visible; }
+
+/* ---------- leaderboard (N), layout A ---------- */
+html.mob-port .rk-season { right: calc(56 * var(--u)); font-size: calc(13 * var(--u)); }
+html.mob-port .rk-win .kw-title { justify-content: flex-start; padding-left: calc(44 * var(--u)); font-size: calc(25 * var(--u)); }
+html.mob-port .rk-filter { justify-content: flex-start; overflow-x: auto; scrollbar-width: none; height: calc(62 * var(--u)); padding: 0 calc(8 * var(--u)); }
+html.mob-port .rk-job { flex: none; }
+html.mob-port .rk-stage { height: calc(300 * var(--u)); margin: calc(10 * var(--u)) calc(10 * var(--u)) 0; }
+html.mob-port .rk-plate { min-width: 0; max-width: calc(160 * var(--u)); padding: calc(2 * var(--u)) calc(8 * var(--u)); }
+html.mob-port .rk-plate b { font-size: calc(16 * var(--u)); }
+html.mob-port .rk-plate i { font-size: calc(12 * var(--u)); }
+html.mob-port .rk-list { height: auto; margin: calc(10 * var(--u)) calc(10 * var(--u)) 0; }
+html.mob-port .rk-row { grid-template-columns: calc(48 * var(--u)) calc(40 * var(--u)) minmax(0, 1fr) calc(150 * var(--u)); height: calc(52 * var(--u)); padding: 0 calc(10 * var(--u)); }
+html.mob-port .rk-row .rk-guild, html.mob-port .rk-row .rk-job2 { display: none; }
+html.mob-port .rk-me { margin: calc(10 * var(--u)); padding: 0 calc(10 * var(--u)); }
+html.mob-port .rk-me b { font-size: calc(17 * var(--u)); }
+html.mob-port .rk-me > span { display: none; }
+
+/* ---------- the game menu (ESC) ---------- */
+html.mob-port .mn-body { grid-template-columns: minmax(0, 1fr); height: auto; gap: calc(12 * var(--u)); padding: calc(10 * var(--u)); }
+html.mob-port .mn-side { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(8 * var(--u)); }
+html.mob-port .mn-btn { height: calc(84 * var(--u)); flex-direction: column; justify-content: center; gap: calc(2 * var(--u)); padding: calc(4 * var(--u)); text-align: center; }
+html.mob-port .mn-btn b { font-size: calc(15 * var(--u)); white-space: normal; line-height: 1.15; }
+html.mob-port .mn-ic { width: calc(36 * var(--u)); height: calc(36 * var(--u)); }
+html.mob-port .mn-hero { display: none; }
+html.mob-port .mn-copy { grid-column: 1 / -1; }
+html.mob-port .mn-page { overflow: visible; padding-right: 0; }
+html.mob-port .mn-keys { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+html.mob-port .mn-key { grid-column: span 3; }
+html.mob-port .mn-key.w4, html.mob-port .mn-key.w5, html.mob-port .mn-key.wide { grid-column: span 6; }
+html.mob-port .mn-set { grid-template-columns: minmax(0, 1fr); gap: calc(6 * var(--u)); }
+html.mob-port .mn-pill { flex: 1; min-width: 0; }
+
+/* ---------- the bag (I): the bag, then the item card, then the character ---------- */
+html.mob-port .iv-panel { background: rgba(14, 12, 30, 0.6); }
+html.mob-port .iv-wrap {
+  position: fixed; inset: 0; left: 0; top: 0; transform: none !important; flex-direction: column; align-items: stretch; gap: calc(10 * var(--u));
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; padding: env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 10 * var(--u));
+}
+html.mob-port .iv-win { width: auto; border-radius: 0; border-left-width: 0; border-right-width: 0; flex: none; }
+html.mob-port .iv-bag { order: 1; height: auto; }
+html.mob-port .iv-bag .iv-grid { flex: none; max-height: 56vh; }
+html.mob-port .iv-detail { order: 2; width: auto; max-height: none; margin: 0 calc(10 * var(--u)); }
+html.mob-port .iv-char { order: 3; }
+html.mob-port #iv-close { position: fixed; top: calc(env(safe-area-inset-top) + 9 * var(--u)); right: calc(12 * var(--u)); transform: none; z-index: 9; }
+
+/* windows with coins / a count in the title bar: the title on the left so both fit */
+html.mob-port .sp-win .kw-title, html.mob-port .pw-win .kw-title, html.mob-port .gw-win .kw-title { justify-content: flex-start; padding-left: calc(44 * var(--u)); font-size: calc(27 * var(--u)); }

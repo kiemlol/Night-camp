@@ -1,0 +1,8 @@
+{
+  "build": "game-20261025-1758",
+  "version": "0.5.16-clone.1",
+  "date": "2026-10-26T00:00:00.000Z",
+  "force": false,
+  "note": "Self-hosted Night Camp clone build",
+  "notes": ["Updated public client baseline", "Local asset mode"]
+}

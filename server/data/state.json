@@ -1,0 +1,680 @@
+{
+  "users": {
+    "user_343d4535ad0082ef99_44b9559d8104": {
+      "id": "user_343d4535ad0082ef99_44b9559d8104",
+      "slots": [
+        "hero_39478a35dd67553ba6",
+        null,
+        null
+      ],
+      "createdAt": 1792848756016,
+      "active": "hero_39478a35dd67553ba6"
+    },
+    "user_c185c5615cce719673_0ee124e7c8d6": {
+      "id": "user_c185c5615cce719673_0ee124e7c8d6",
+      "slots": [
+        "hero_dec43847d9dd2efa1c",
+        null,
+        null
+      ],
+      "createdAt": 1792848760277,
+      "active": "hero_dec43847d9dd2efa1c"
+    },
+    "user_180159a6f6116ee8f9": {
+      "id": "user_180159a6f6116ee8f9",
+      "slots": [
+        null,
+        null,
+        null
+      ],
+      "createdAt": 1792848760295
+    },
+    "user_0fae16544261ee2023_ad1be52eff14": {
+      "id": "user_0fae16544261ee2023_ad1be52eff14",
+      "slots": [
+        "hero_4a98e9aca5cf01a548",
+        null,
+        null
+      ],
+      "createdAt": 1792848769165,
+      "active": "hero_4a98e9aca5cf01a548"
+    },
+    "user_3ed5c82eabeaf868c6": {
+      "id": "user_3ed5c82eabeaf868c6",
+      "slots": [
+        null,
+        null,
+        null
+      ],
+      "createdAt": 1792848769184
+    },
+    "user_86fb83bed555652a3c_099f39440a92": {
+      "id": "user_86fb83bed555652a3c_099f39440a92",
+      "slots": [
+        "hero_05be82f4ea2ae9b142",
+        null,
+        null
+      ],
+      "createdAt": 1792848780048,
+      "active": "hero_05be82f4ea2ae9b142"
+    },
+    "user_17ab5939f07c11505e": {
+      "id": "user_17ab5939f07c11505e",
+      "slots": [
+        null,
+        null,
+        null
+      ],
+      "createdAt": 1792848780070
+    },
+    "user_bacbc9872e5e6bb064_15f1fa9de592": {
+      "id": "user_bacbc9872e5e6bb064_15f1fa9de592",
+      "slots": [
+        "hero_742096ef8814b9fa71",
+        null,
+        null
+      ],
+      "createdAt": 1792848797832,
+      "active": "hero_742096ef8814b9fa71"
+    },
+    "user_dff83668c11779f3b9": {
+      "id": "user_dff83668c11779f3b9",
+      "slots": [
+        null,
+        null,
+        null
+      ],
+      "createdAt": 1792848797850
+    },
+    "user_0194373934577832a0_0ed39ec9bcfb": {
+      "id": "user_0194373934577832a0_0ed39ec9bcfb",
+      "slots": [
+        "hero_07c9d2c58a3028686f",
+        null,
+        null
+      ],
+      "createdAt": 1792848820198,
+      "active": "hero_07c9d2c58a3028686f"
+    },
+    "user_ccfd0ad6e9d1638252": {
+      "id": "user_ccfd0ad6e9d1638252",
+      "slots": [
+        null,
+        null,
+        null
+      ],
+      "createdAt": 1792848820218
+    },
+    "user_85fe0fc68623ff632f_9ff5daebe828": {
+      "id": "user_85fe0fc68623ff632f_9ff5daebe828",
+      "slots": [
+        "hero_af2b78d18739657c08",
+        null,
+        null
+      ],
+      "createdAt": 1792848840609,
+      "active": "hero_af2b78d18739657c08"
+    },
+    "user_01616c4ca00824aa5eef4b94": {
+      "id": "user_01616c4ca00824aa5eef4b94",
+      "slots": [
+        "hero_d2281128d9d6e493c7",
+        null,
+        null
+      ],
+      "createdAt": 1792983843172,
+      "active": "hero_d2281128d9d6e493c7"
+    }
+  },
+  "sessions": {},
+  "characters": {
+    "hero_39478a35dd67553ba6": {
+      "id": "hero_39478a35dd67553ba6",
+      "name": "Smoke",
+      "appearance": {},
+      "mapId": "camp",
+      "channelId": "1",
+      "x": 2200,
+      "y": 1600,
+      "lv": 1,
+      "xp": 0,
+      "xpNext": 100,
+      "job": "traveler",
+      "jobLv": 1,
+      "jobXp": 0,
+      "jobXpNext": 100,
+      "hp": 126,
+      "hpMax": 126,
+      "sp": 13,
+      "spMax": 13,
+      "coins": 250,
+      "gems": 0,
+      "statPts": 0,
+      "skillPts": 0,
+      "equip": {
+        "weapon": "sword",
+        "hair": "hair_spiky"
+      },
+      "wu": {
+        "weapon": 1
+      },
+      "bag": [],
+      "store": [],
+      "bagExtra": 0,
+      "materials": {},
+      "potions": {
+        "hp": 3,
+        "sp": 3
+      },
+      "quests": {
+        "main": {
+          "index": 0,
+          "id": "first-night",
+          "state": "active",
+          "objectives": [
+            {
+              "have": 0,
+              "need": 3,
+              "kind": "dummy"
+            }
+          ],
+          "keys": []
+        },
+        "daily": {
+          "day": 0,
+          "list": [],
+          "week": {
+            "days": 0,
+            "claimed": false
+          }
+        },
+        "rep": {},
+        "tokens": 0,
+        "flags": {}
+      },
+      "flags": {},
+      "skills": {},
+      "statuses": []
+    },
+    "hero_dec43847d9dd2efa1c": {
+      "id": "hero_dec43847d9dd2efa1c",
+      "name": "WS Smoke",
+      "appearance": {},
+      "mapId": "camp",
+      "channelId": "1",
+      "x": 2200,
+      "y": 1600,
+      "lv": 1,
+      "xp": 0,
+      "xpNext": 100,
+      "job": "traveler",
+      "jobLv": 1,
+      "jobXp": 0,
+      "jobXpNext": 100,
+      "hp": 126,
+      "hpMax": 126,
+      "sp": 13,
+      "spMax": 13,
+      "coins": 250,
+      "gems": 0,
+      "statPts": 0,
+      "skillPts": 0,
+      "equip": {
+        "weapon": "sword",
+        "hair": "hair_spiky"
+      },
+      "wu": {
+        "weapon": 1
+      },
+      "bag": [],
+      "store": [],
+      "bagExtra": 0,
+      "materials": {},
+      "potions": {
+        "hp": 3,
+        "sp": 3
+      },
+      "quests": {
+        "main": {
+          "index": 0,
+          "id": "first-night",
+          "state": "active",
+          "objectives": [
+            {
+              "have": 0,
+              "need": 3,
+              "kind": "dummy"
+            }
+          ],
+          "keys": []
+        },
+        "daily": {
+          "day": 0,
+          "list": [],
+          "week": {
+            "days": 0,
+            "claimed": false
+          }
+        },
+        "rep": {},
+        "tokens": 0,
+        "flags": {}
+      },
+      "flags": {},
+      "skills": {},
+      "statuses": []
+    },
+    "hero_4a98e9aca5cf01a548": {
+      "id": "hero_4a98e9aca5cf01a548",
+      "name": "WS Smoke",
+      "appearance": {},
+      "mapId": "camp",
+      "channelId": "1",
+      "x": 2200,
+      "y": 1600,
+      "lv": 1,
+      "xp": 0,
+      "xpNext": 100,
+      "job": "traveler",
+      "jobLv": 1,
+      "jobXp": 0,
+      "jobXpNext": 100,
+      "hp": 126,
+      "hpMax": 126,
+      "sp": 13,
+      "spMax": 13,
+      "coins": 250,
+      "gems": 0,
+      "statPts": 0,
+      "skillPts": 0,
+      "equip": {
+        "weapon": "sword",
+        "hair": "hair_spiky"
+      },
+      "wu": {
+        "weapon": 1
+      },
+      "bag": [],
+      "store": [],
+      "bagExtra": 0,
+      "materials": {},
+      "potions": {
+        "hp": 3,
+        "sp": 3
+      },
+      "quests": {
+        "main": {
+          "index": 0,
+          "id": "first-night",
+          "state": "active",
+          "objectives": [
+            {
+              "have": 0,
+              "need": 3,
+              "kind": "dummy"
+            }
+          ],
+          "keys": []
+        },
+        "daily": {
+          "day": 0,
+          "list": [],
+          "week": {
+            "days": 0,
+            "claimed": false
+          }
+        },
+        "rep": {},
+        "tokens": 0,
+        "flags": {}
+      },
+      "flags": {},
+      "skills": {},
+      "statuses": []
+    },
+    "hero_05be82f4ea2ae9b142": {
+      "id": "hero_05be82f4ea2ae9b142",
+      "name": "WS Smoke",
+      "appearance": {},
+      "mapId": "camp",
+      "channelId": "1",
+      "x": 2200,
+      "y": 1600,
+      "lv": 1,
+      "xp": 0,
+      "xpNext": 100,
+      "job": "traveler",
+      "jobLv": 1,
+      "jobXp": 0,
+      "jobXpNext": 100,
+      "hp": 126,
+      "hpMax": 126,
+      "sp": 13,
+      "spMax": 13,
+      "coins": 250,
+      "gems": 0,
+      "statPts": 0,
+      "skillPts": 0,
+      "equip": {
+        "weapon": "sword",
+        "hair": "hair_spiky"
+      },
+      "wu": {
+        "weapon": 1
+      },
+      "bag": [],
+      "store": [],
+      "bagExtra": 0,
+      "materials": {},
+      "potions": {
+        "hp": 3,
+        "sp": 3
+      },
+      "quests": {
+        "main": {
+          "index": 0,
+          "id": "first-night",
+          "state": "active",
+          "objectives": [
+            {
+              "have": 0,
+              "need": 3,
+              "kind": "dummy"
+            }
+          ],
+          "keys": []
+        },
+        "daily": {
+          "day": 0,
+          "list": [],
+          "week": {
+            "days": 0,
+            "claimed": false
+          }
+        },
+        "rep": {},
+        "tokens": 0,
+        "flags": {}
+      },
+      "flags": {},
+      "skills": {},
+      "statuses": []
+    },
+    "hero_742096ef8814b9fa71": {
+      "id": "hero_742096ef8814b9fa71",
+      "name": "WS Smoke",
+      "appearance": {},
+      "mapId": "camp",
+      "channelId": "1",
+      "x": 2200,
+      "y": 1600,
+      "lv": 1,
+      "xp": 0,
+      "xpNext": 100,
+      "job": "traveler",
+      "jobLv": 1,
+      "jobXp": 0,
+      "jobXpNext": 100,
+      "hp": 126,
+      "hpMax": 126,
+      "sp": 13,
+      "spMax": 13,
+      "coins": 250,
+      "gems": 0,
+      "statPts": 0,
+      "skillPts": 0,
+      "equip": {
+        "weapon": "sword",
+        "hair": "hair_spiky"
+      },
+      "wu": {
+        "weapon": 1
+      },
+      "bag": [],
+      "store": [],
+      "bagExtra": 0,
+      "materials": {},
+      "potions": {
+        "hp": 3,
+        "sp": 3
+      },
+      "quests": {
+        "main": {
+          "index": 0,
+          "id": "first-night",
+          "state": "active",
+          "objectives": [
+            {
+              "have": 0,
+              "need": 3,
+              "kind": "dummy"
+            }
+          ],
+          "keys": []
+        },
+        "daily": {
+          "day": 0,
+          "list": [],
+          "week": {
+            "days": 0,
+            "claimed": false
+          }
+        },
+        "rep": {},
+        "tokens": 0,
+        "flags": {}
+      },
+      "flags": {},
+      "skills": {},
+      "statuses": []
+    },
+    "hero_07c9d2c58a3028686f": {
+      "id": "hero_07c9d2c58a3028686f",
+      "name": "x",
+      "appearance": {},
+      "mapId": "camp",
+      "channelId": "1",
+      "x": 2200,
+      "y": 1600,
+      "lv": 1,
+      "xp": 0,
+      "xpNext": 100,
+      "job": "traveler",
+      "jobLv": 1,
+      "jobXp": 0,
+      "jobXpNext": 100,
+      "hp": 126,
+      "hpMax": 126,
+      "sp": 13,
+      "spMax": 13,
+      "coins": 250,
+      "gems": 0,
+      "statPts": 0,
+      "skillPts": 0,
+      "equip": {
+        "weapon": "sword",
+        "hair": "hair_spiky"
+      },
+      "wu": {
+        "weapon": 1
+      },
+      "bag": [],
+      "store": [],
+      "bagExtra": 0,
+      "materials": {},
+      "potions": {
+        "hp": 3,
+        "sp": 3
+      },
+      "quests": {
+        "main": {
+          "index": 0,
+          "id": "first-night",
+          "state": "active",
+          "objectives": [
+            {
+              "have": 0,
+              "need": 3,
+              "kind": "dummy"
+            }
+          ],
+          "keys": []
+        },
+        "daily": {
+          "day": 0,
+          "list": [],
+          "week": {
+            "days": 0,
+            "claimed": false
+          }
+        },
+        "rep": {},
+        "tokens": 0,
+        "flags": {}
+      },
+      "flags": {},
+      "skills": {},
+      "statuses": []
+    },
+    "hero_af2b78d18739657c08": {
+      "id": "hero_af2b78d18739657c08",
+      "name": "x",
+      "appearance": {},
+      "mapId": "camp",
+      "channelId": "1",
+      "x": 2200,
+      "y": 1600,
+      "lv": 1,
+      "xp": 0,
+      "xpNext": 100,
+      "job": "traveler",
+      "jobLv": 1,
+      "jobXp": 0,
+      "jobXpNext": 100,
+      "hp": 126,
+      "hpMax": 126,
+      "sp": 13,
+      "spMax": 13,
+      "coins": 250,
+      "gems": 0,
+      "statPts": 0,
+      "skillPts": 0,
+      "equip": {
+        "weapon": "sword",
+        "hair": "hair_spiky"
+      },
+      "wu": {
+        "weapon": 1
+      },
+      "bag": [],
+      "store": [],
+      "bagExtra": 0,
+      "materials": {},
+      "potions": {
+        "hp": 3,
+        "sp": 3
+      },
+      "quests": {
+        "main": {
+          "index": 0,
+          "id": "first-night",
+          "state": "active",
+          "objectives": [
+            {
+              "have": 0,
+              "need": 3,
+              "kind": "dummy"
+            }
+          ],
+          "keys": []
+        },
+        "daily": {
+          "day": 0,
+          "list": [],
+          "week": {
+            "days": 0,
+            "claimed": false
+          }
+        },
+        "rep": {},
+        "tokens": 0,
+        "flags": {}
+      },
+      "flags": {},
+      "skills": {},
+      "statuses": []
+    },
+    "hero_d2281128d9d6e493c7": {
+      "id": "hero_d2281128d9d6e493c7",
+      "name": "SmokeHero",
+      "appearance": {
+        "g": "m",
+        "hair": "spiky"
+      },
+      "mapId": "camp",
+      "channelId": "1",
+      "x": 2200,
+      "y": 1600,
+      "lv": 1,
+      "xp": 0,
+      "xpNext": 100,
+      "job": "traveler",
+      "jobLv": 1,
+      "jobXp": 0,
+      "jobXpNext": 100,
+      "hp": 126,
+      "hpMax": 126,
+      "sp": 13,
+      "spMax": 13,
+      "coins": 250,
+      "gems": 0,
+      "statPts": 0,
+      "skillPts": 0,
+      "equip": {
+        "weapon": "sword",
+        "hair": "hair_spiky"
+      },
+      "wu": {
+        "weapon": 1
+      },
+      "bag": [],
+      "store": [],
+      "bagExtra": 0,
+      "materials": {},
+      "potions": {
+        "hp": 3,
+        "sp": 3
+      },
+      "quests": {
+        "main": {
+          "index": 0,
+          "id": "first-night",
+          "state": "active",
+          "objectives": [
+            {
+              "have": 0,
+              "need": 3,
+              "kind": "dummy"
+            }
+          ],
+          "keys": []
+        },
+        "daily": {
+          "day": 0,
+          "list": [],
+          "week": {
+            "days": 0,
+            "claimed": false
+          }
+        },
+        "rep": {},
+        "tokens": 0,
+        "flags": {}
+      },
+      "flags": {},
+      "skills": {},
+      "statuses": []
+    }
+  },
+  "version": 1
+}

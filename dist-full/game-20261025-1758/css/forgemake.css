@@ -1,0 +1,109 @@
+/* forgemake.css — the weapon crafting page (js/forgemake.js), mockup A (assets/gen/nightcamp_forgemake_a_raw.png) inside
+   the crafting window (css/craftgo.css): the weapon-type icon tabs across the top, the recipes on the left, the picked one
+   on the right (spotlight, numbers, material slots, the lock select, one big button). 1 mockup px = 1.1u. */
+.cg-page.pg-make { overflow: hidden; }
+.fm { display: grid; height: 100%; min-height: 0; grid-template-columns: calc(370 * var(--u)) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: calc(14 * var(--u)) calc(16 * var(--u)); }
+
+/* ---------- the types ---------- */
+.fm-types {
+  grid-column: 1 / 3; display: flex; gap: calc(6 * var(--u)); overflow-x: auto; overflow-y: hidden; padding: 0 0 calc(4 * var(--u));
+  scrollbar-width: thin; scrollbar-color: #74b6ec transparent;
+}
+.fm-type {
+  flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(2 * var(--u)); width: calc(78 * var(--u)); height: calc(98 * var(--u));
+  cursor: pointer; color: var(--ink); background: linear-gradient(#fffaf0, #efe3c8); border: calc(3 * var(--u)) solid var(--ink); border-radius: calc(14 * var(--u));
+  box-shadow: inset 0 calc(-4 * var(--u)) 0 rgba(0, 0, 0, 0.08); font: 600 calc(15 * var(--u)) / 1.1 'Mitr', sans-serif;
+}
+.fm-type img { width: calc(56 * var(--u)); height: calc(56 * var(--u)); object-fit: contain; filter: drop-shadow(0 calc(2 * var(--u)) 0 rgba(0, 0, 0, 0.18)); }
+.fm-type span { max-width: 100%; padding: 0 calc(3 * var(--u)); box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fm-type:hover { filter: brightness(1.04); }
+.fm-type.on { background: linear-gradient(#7fcaf8, #3b8fdc); color: #fff; -webkit-text-stroke: calc(3.5 * var(--u)) var(--ink); paint-order: stroke fill; }
+.fm-type.all { background: linear-gradient(#fff3d2, #f2d993); }
+.fm-type.all.on { background: linear-gradient(#ffe384, #f2b632); color: var(--ink); -webkit-text-stroke: 0; }
+
+/* ---------- the recipes ---------- */
+.fm-list { display: flex; flex-direction: column; gap: calc(12 * var(--u)); min-height: 0; overflow-y: auto; padding: calc(2 * var(--u)) calc(4 * var(--u)) calc(4 * var(--u)) calc(2 * var(--u)); scrollbar-width: thin; scrollbar-color: #74b6ec transparent; }
+.fm-row {
+  flex: none; display: grid; grid-template-columns: calc(84 * var(--u)) minmax(0, 1fr) auto; align-items: center; gap: calc(12 * var(--u)); min-height: calc(112 * var(--u));
+  padding: calc(8 * var(--u)) calc(14 * var(--u)) calc(8 * var(--u)) calc(8 * var(--u)); cursor: pointer; text-align: left; color: var(--ink);
+  background: linear-gradient(#fffaf0, #efe3c8); border: calc(3 * var(--u)) solid var(--ink); border-radius: calc(16 * var(--u)); font: inherit;
+}
+.fm-row img { width: calc(84 * var(--u)); height: calc(84 * var(--u)); object-fit: contain; filter: drop-shadow(0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.18)); }
+.fm-row span { display: flex; flex-direction: column; gap: calc(4 * var(--u)); min-width: 0; }
+.fm-row b { font: 700 calc(21 * var(--u)) / 1.2 'Mitr', sans-serif; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.fm-row small { color: #6a6078; font: 500 calc(17 * var(--u)) / 1.2 'Mitr', sans-serif; }
+.fm-row em {
+  font-style: normal; padding: 0 calc(14 * var(--u)); height: calc(38 * var(--u)); display: grid; place-items: center; border-radius: calc(12 * var(--u));
+  border: calc(3 * var(--u)) solid var(--ink); color: #fff; font: 700 calc(18 * var(--u)) / 1 'Mitr', sans-serif; -webkit-text-stroke: calc(3.5 * var(--u)) var(--ink); paint-order: stroke fill; white-space: nowrap;
+}
+.fm-row em.ok { background: linear-gradient(#6fd47a, #2f9a46); }
+.fm-row em.no { background: linear-gradient(#ff8a8f, #d8434f); }
+.fm-row.on { background: linear-gradient(#e9f5ff, #cfe7fb); border-color: #3b8fdc; box-shadow: 0 0 0 calc(3 * var(--u)) var(--ink), 0 0 calc(12 * var(--u)) rgba(59, 143, 220, 0.5); }
+.fm-empty { padding: calc(16 * var(--u)); color: #6a6078; }
+
+/* ---------- the picked one ---------- */
+.fm-detail {
+  display: flex; flex-direction: column; gap: calc(10 * var(--u)); min-height: 0; padding: calc(16 * var(--u)) calc(18 * var(--u));
+  background: #fbf3df; border: calc(3 * var(--u)) solid #d8c69c; border-radius: calc(20 * var(--u)); overflow-y: auto; scrollbar-width: thin; scrollbar-color: #74b6ec transparent;
+}
+.fm-head { display: grid; grid-template-columns: calc(184 * var(--u)) minmax(0, 1fr); gap: calc(16 * var(--u)); align-items: center; }
+.fm-spot { display: grid; place-items: center; width: calc(184 * var(--u)); height: calc(184 * var(--u)); border-radius: 50%;
+  background: radial-gradient(circle, #fffbe8 0%, color-mix(in srgb, var(--rc) 35%, #fff3c8) 42%, transparent 70%); }
+.fm-spot img { width: calc(164 * var(--u)); height: calc(164 * var(--u)); object-fit: contain; filter: drop-shadow(0 calc(5 * var(--u)) 0 rgba(0, 0, 0, 0.25)); }
+.fm-info { display: flex; flex-direction: column; align-items: flex-start; gap: calc(4 * var(--u)); min-width: 0; }
+.fm-name { font: 800 calc(33 * var(--u)) / 1.15 'Mitr', sans-serif; color: var(--ink); }
+.fm-grade { padding: calc(2 * var(--u)) calc(14 * var(--u)); border-radius: calc(10 * var(--u)); border: calc(3 * var(--u)) solid var(--ink); background: linear-gradient(#e9e6ef, #c9c4d6); font: 700 calc(17 * var(--u)) / 1.3 'Mitr', sans-serif; }
+.fm-atk { font: 800 calc(32 * var(--u)) / 1.2 'Baloo 2', 'Mitr', sans-serif; color: var(--ink); }
+.fm-lv { font: 700 calc(22 * var(--u)) / 1.2 'Mitr', sans-serif; }
+.fm-lv.no { color: #d8434f; }
+.fm-jobs { font: 500 calc(19 * var(--u)) / 1.3 'Mitr', sans-serif; color: #4a4258; }
+.fm-info small { font: 400 calc(15 * var(--u)) / 1.35 'Mitr', sans-serif; color: #6a6078; }
+.fm-mats { display: grid; grid-template-columns: repeat(auto-fit, minmax(calc(104 * var(--u)), 1fr)); gap: calc(10 * var(--u)); padding: calc(12 * var(--u)); border-top: calc(2 * var(--u)) solid #e3d4ae; }
+.fm-mat { display: flex; flex-direction: column; align-items: center; gap: calc(3 * var(--u)); min-width: 0; text-align: center; cursor: pointer; }
+.fm-mat.coin { cursor: default; }
+.fm-slot {
+  display: grid; place-items: center; width: calc(100 * var(--u)); height: calc(94 * var(--u)); border-radius: calc(16 * var(--u)); box-sizing: border-box;
+  background: linear-gradient(#e9f5ff, #c9e3fa); border: calc(4 * var(--u)) solid var(--ink); box-shadow: inset 0 calc(-4 * var(--u)) 0 rgba(0, 0, 0, 0.08);
+}
+.fm-mat.coin .fm-slot { background: linear-gradient(#fff2c4, #f2d27a); }
+.fm-slot img { width: calc(72 * var(--u)); height: calc(72 * var(--u)); object-fit: contain; }
+.fm-mat:not(.coin):hover .fm-slot { box-shadow: 0 0 0 calc(3 * var(--u)) #ffd873, inset 0 calc(-4 * var(--u)) 0 rgba(0, 0, 0, 0.08); }
+.fm-mat b { max-width: 100%; font: 600 calc(17 * var(--u)) / 1.2 'Mitr', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fm-mat em { font: 700 calc(22 * var(--u)) / 1.1 'Mitr', sans-serif; font-style: normal; white-space: nowrap; }
+.fm-mat.coin em { font-size: calc(15 * var(--u)); }
+.fm-mat.ok em { color: #2f9a46; }
+.fm-mat.no em { color: #d8434f; }
+.fm-where { color: #d8434f; font: 600 calc(15 * var(--u)) / 1.2 'Mitr', sans-serif; text-decoration: underline; }
+.fm-foot { display: grid; grid-template-columns: minmax(0, 1fr) calc(280 * var(--u)); gap: calc(14 * var(--u)); align-items: start; margin-top: auto; }
+.fm-lock { display: flex; flex-direction: column; gap: calc(4 * var(--u)); min-width: 0; }
+.fm-lock > span { font: 600 calc(16 * var(--u)) / 1.2 'Mitr', sans-serif; color: #4a4258; }
+.fm-lock select {
+  height: calc(52 * var(--u)); padding: 0 calc(12 * var(--u)); border: calc(3 * var(--u)) solid var(--ink); border-radius: calc(12 * var(--u)); background: #fffaf0; color: var(--ink);
+  font: 600 calc(18 * var(--u)) 'Mitr', sans-serif; cursor: pointer;
+}
+.fm-lock small { color: #6a6078; font: 400 calc(15 * var(--u)) / 1.3 'Mitr', sans-serif; }
+.fm-go { display: flex; flex-direction: column; gap: calc(6 * var(--u)); }
+.fm-btn {
+  width: 100%; height: calc(92 * var(--u)); border-radius: calc(18 * var(--u)); font-size: calc(36 * var(--u)); gap: calc(12 * var(--u));
+  -webkit-text-stroke: calc(5 * var(--u)) var(--ink) !important; color: #fff !important;
+}
+.fm-btn img { width: calc(60 * var(--u)); height: calc(60 * var(--u)); object-fit: contain; }
+.fm-btn.armed { background: linear-gradient(#ff9d6a, #e8562a); animation: rw-next 0.6s ease-in-out infinite; font-size: calc(26 * var(--u)); }
+.fm-go small { text-align: center; color: #6a6078; font: 500 calc(15 * var(--u)) / 1.3 'Mitr', sans-serif; }
+.fm-go small.bad { color: #d8434f; }
+.fm-made {
+  display: grid; grid-template-columns: calc(64 * var(--u)) minmax(0, 1fr) auto auto; align-items: center; gap: calc(10 * var(--u)); padding: calc(8 * var(--u)) calc(12 * var(--u));
+  border-radius: calc(16 * var(--u)); border: calc(3 * var(--u)) solid #e0b45a; background: #fff3d2; animation: fm-pop 0.4s ease-out both;
+}
+@keyframes fm-pop { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.fm-made img { width: calc(60 * var(--u)); height: calc(60 * var(--u)); object-fit: contain; }
+.fm-made span { display: flex; flex-direction: column; min-width: 0; }
+.fm-made b { font: 700 calc(19 * var(--u)) / 1.2 'Mitr', sans-serif; color: #2f9a46; }
+.fm-made small { color: #6a6078; font-size: calc(14 * var(--u)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fm-made .kw-btn { height: calc(42 * var(--u)); font-size: calc(16 * var(--u)); }
+
+/* an upright phone: one column */
+html.mob-port .fm { grid-template-columns: 1fr; height: auto; }
+html.mob-port .cg-page.pg-make { overflow-y: auto; }
+html.mob-port .fm-types { grid-column: auto; }
+html.mob-port .fm-head, html.mob-port .fm-foot { grid-template-columns: 1fr; }

@@ -1,0 +1,144 @@
+/* cooking.css — the cookbook (js/cooking.js), layout "B" of assets/gen/nightcamp_ec_cook_b_raw.png: an open book in a blue
+   cover inside a K window; the left page the cooking level and the recipe cards, the right page the meal on now, the picked
+   recipe (its buff, its time, the hero at the pot), what it takes, the cook buttons and the auto-farm switch.
+   Sizes follow the mockup at the same window width (1 mockup px = 1.1u). The window's look is css/kui.css. */
+.ck-wrap { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); transform-origin: 50% 50%; }
+.ck-win { width: calc(1300 * var(--u)); }
+.ck-body { padding: calc(13 * var(--u)) calc(22 * var(--u)) calc(18 * var(--u)); }
+.ck-book {
+  position: relative; display: grid; grid-template-columns: calc(520 * var(--u)) calc(26 * var(--u)) minmax(0, 1fr); height: calc(822 * var(--u));
+  padding: calc(13 * var(--u)) calc(14 * var(--u)) calc(14 * var(--u)); box-sizing: border-box; border-radius: calc(26 * var(--u)); border: calc(4 * var(--u)) solid var(--ink);
+  background: linear-gradient(#4a74c8, #2e4c96); box-shadow: inset 0 0 0 calc(3 * var(--u)) #88aaf0, 0 calc(6 * var(--u)) 0 rgba(0, 0, 0, 0.3);
+}
+.ck-page {
+  position: relative; min-height: 0; padding: calc(18 * var(--u)) calc(20 * var(--u)) calc(14 * var(--u)); color: var(--ink); box-sizing: border-box;
+  background: radial-gradient(ellipse at 50% 40%, #fbf3df 0%, #f5e9cd 70%, #eddcb6 100%); border: calc(3 * var(--u)) solid #d3be8f;
+}
+.ck-left {
+  border-radius: calc(18 * var(--u)) calc(6 * var(--u)) calc(6 * var(--u)) calc(18 * var(--u)); overflow-y: auto;
+  box-shadow: inset calc(-18 * var(--u)) 0 calc(18 * var(--u)) calc(-12 * var(--u)) rgba(120, 90, 40, 0.4);
+}
+.ck-right {
+  border-radius: calc(6 * var(--u)) calc(18 * var(--u)) calc(18 * var(--u)) calc(6 * var(--u)); display: flex; flex-direction: column; gap: calc(12 * var(--u));
+  box-shadow: inset calc(18 * var(--u)) 0 calc(18 * var(--u)) calc(-12 * var(--u)) rgba(120, 90, 40, 0.4);
+}
+.ck-spine { background: linear-gradient(90deg, #c7ae78, #efe1bd 40%, #efe1bd 60%, #c7ae78); border-top: calc(3 * var(--u)) solid #d3be8f; border-bottom: calc(3 * var(--u)) solid #d3be8f; }
+.ck-clasp {
+  position: absolute; left: calc(14 * var(--u) + 520 * var(--u) + 6 * var(--u)); width: calc(14 * var(--u)); height: calc(46 * var(--u)); border-radius: calc(6 * var(--u));
+  background: linear-gradient(90deg, #f3d27a, #b8892e); border: calc(3 * var(--u)) solid var(--ink); pointer-events: none;
+}
+.ck-clasp.a { top: calc(96 * var(--u)); }
+.ck-clasp.b { bottom: calc(96 * var(--u)); }
+
+/* ---------- the left page: the level, then the recipes ---------- */
+.ck-title { font: 700 calc(30 * var(--u)) / 1.25 'Mitr', sans-serif; }
+.ck-xprow { display: flex; align-items: center; gap: calc(12 * var(--u)); margin: calc(8 * var(--u)) 0 calc(14 * var(--u)); }
+.ck-xp { flex: 1; height: calc(24 * var(--u)); border-radius: 999px; background: #e3d6b6; border: calc(3 * var(--u)) solid var(--ink); overflow: hidden; }
+.ck-xp i { display: block; height: 100%; background: linear-gradient(#8ee07a, #3faa55); }
+.ck-xprow b { font: 700 calc(22 * var(--u)) / 1 'Mitr', sans-serif; }
+.ck-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(13 * var(--u)); }
+.ck-card {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: calc(3 * var(--u)); height: calc(212 * var(--u)); padding: calc(10 * var(--u)) calc(8 * var(--u));
+  box-sizing: border-box; cursor: pointer; color: var(--ink); background: #fbf5e6; border: calc(3 * var(--u)) solid #d8c69c; border-radius: calc(16 * var(--u));
+  box-shadow: 0 calc(3 * var(--u)) 0 rgba(120, 90, 40, 0.18);
+}
+.ck-card:hover { filter: brightness(1.03); }
+.ck-card.sel { background: linear-gradient(#e9f5ff, #cfe7fb); border: calc(4 * var(--u)) solid #3b8fdc; box-shadow: 0 0 0 calc(3 * var(--u)) var(--ink); }
+.ck-card img { width: calc(122 * var(--u)); height: calc(122 * var(--u)); object-fit: contain; filter: drop-shadow(0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.15)); }
+.ck-card b { font: 700 calc(23 * var(--u)) / 1.2 'Mitr', sans-serif; white-space: nowrap; }
+.ck-card .ck-q { display: grid; place-items: center; width: calc(122 * var(--u)); height: calc(122 * var(--u)); font: 800 calc(90 * var(--u)) / 1 'Baloo 2', 'Mitr', sans-serif; color: #b9ab8a; }
+.ck-card.lk b { color: #6f6656; }
+.ck-have {
+  position: absolute; right: calc(10 * var(--u)); top: calc(8 * var(--u)); font: 700 calc(18 * var(--u)) / 1 'Mitr', sans-serif; font-style: normal; color: #fff;
+  -webkit-text-stroke: calc(4 * var(--u)) var(--ink); paint-order: stroke fill;
+}
+.ck-pill {
+  display: inline-flex; align-items: center; justify-content: center; max-width: 100%; height: calc(38 * var(--u)); padding: 0 calc(14 * var(--u)); box-sizing: border-box;
+  border-radius: 999px; font: 700 calc(18 * var(--u)) / 1 'Mitr', sans-serif; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  -webkit-text-stroke: calc(3.5 * var(--u)) var(--ink); paint-order: stroke fill; border: calc(3 * var(--u)) solid var(--ink);
+}
+.ck-pill.ck-lg { height: calc(46 * var(--u)); padding: 0 calc(20 * var(--u)); font-size: calc(23 * var(--u)); }
+.ck-red { background: linear-gradient(#ff8a8f, #e14b57); }
+.ck-blue { background: linear-gradient(#7fcaf8, #3b8fdc); }
+.ck-green { background: linear-gradient(#8ee07a, #3faa55); }
+.ck-purple { background: linear-gradient(#c49cff, #8a5ad8); }
+.ck-yellow { background: linear-gradient(#ffe384, #f2b632); color: var(--ink); -webkit-text-stroke: 0; }
+.ck-orange { background: linear-gradient(#ffc27a, #f08a2c); }
+.ck-grey { background: linear-gradient(#d7d4dd, #a9a5b5); }
+
+/* ---------- the right page ---------- */
+.ck-top { display: flex; }
+.ck-meal {
+  display: inline-flex; align-items: center; gap: calc(10 * var(--u)); height: calc(66 * var(--u)); padding: 0 calc(18 * var(--u)) 0 calc(10 * var(--u)); box-sizing: border-box;
+  background: #fffaf0; border: calc(4 * var(--u)) solid #3b8fdc; border-radius: calc(18 * var(--u)); box-shadow: 0 0 0 calc(3 * var(--u)) var(--ink);
+  font: 600 calc(21 * var(--u)) / 1.2 'Mitr', sans-serif;
+}
+.ck-meal img { width: calc(54 * var(--u)); height: calc(54 * var(--u)); object-fit: contain; }
+.ck-meal b { color: #2f7fd6; }
+.ck-meal .ck-none { color: #7d7466; padding-left: calc(8 * var(--u)); }
+.ck-head { position: relative; display: grid; grid-template-columns: minmax(calc(300 * var(--u)), 1fr) calc(330 * var(--u)); min-height: calc(300 * var(--u)); }
+.ck-info { display: flex; flex-direction: column; align-items: flex-start; gap: calc(12 * var(--u)); padding-top: calc(16 * var(--u)); min-width: 0; z-index: 1; }
+.ck-name { font: 700 calc(42 * var(--u)) / 1.15 'Mitr', sans-serif; white-space: nowrap; }
+.ck-time { display: flex; align-items: center; gap: calc(10 * var(--u)); font: 700 calc(30 * var(--u)) / 1 'Mitr', sans-serif; }
+.ck-clock {
+  position: relative; width: calc(30 * var(--u)); height: calc(30 * var(--u)); border-radius: 50%; border: calc(4 * var(--u)) solid var(--ink); background: #fffaf0; box-sizing: border-box;
+}
+.ck-clock::before, .ck-clock::after { content: ''; position: absolute; left: 50%; top: 50%; background: var(--ink); border-radius: 2px; transform-origin: 50% 100%; }
+.ck-clock::before { width: calc(3 * var(--u)); height: calc(9 * var(--u)); margin: calc(-9 * var(--u)) 0 0 calc(-1.5 * var(--u)); }
+.ck-clock::after { width: calc(3 * var(--u)); height: calc(7 * var(--u)); margin: calc(-7 * var(--u)) 0 0 calc(-1.5 * var(--u)); transform: rotate(90deg); }
+.ck-eatrow { display: flex; align-items: center; gap: calc(12 * var(--u)); font: 500 calc(19 * var(--u)) / 1.2 'Mitr', sans-serif; white-space: nowrap; }
+.ck-eatrow .ck-eat { height: calc(40 * var(--u)); padding: 0 calc(20 * var(--u)); }
+.ck-scene { position: relative; margin-right: calc(-6 * var(--u)); }
+.ck-scene canvas { position: absolute; right: calc(-12 * var(--u)); top: calc(-14 * var(--u)); width: calc(420 * var(--u)); height: calc(283 * var(--u)); }
+.ck-dish {
+  position: absolute; left: calc(-70 * var(--u)); top: calc(128 * var(--u)); width: calc(180 * var(--u)); height: calc(180 * var(--u)); object-fit: contain;
+  filter: drop-shadow(0 calc(4 * var(--u)) 0 rgba(0, 0, 0, 0.2));
+}
+.ck-steam {
+  position: absolute; width: calc(36 * var(--u)); height: calc(36 * var(--u)); border-radius: 50%; filter: blur(calc(1.5 * var(--u)));
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.35) 45%, rgba(255, 255, 255, 0) 70%);
+  left: calc(30 * var(--u)); top: calc(140 * var(--u)); animation: ck-steam 2.4s ease-out infinite; pointer-events: none;
+}
+.ck-steam.s2 { left: calc(52 * var(--u)); animation-delay: 0.8s; }
+.ck-steam.s3 { left: calc(14 * var(--u)); animation-delay: 1.6s; }
+@keyframes ck-steam { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 25% { opacity: 0.8; } 100% { transform: translateY(calc(-70 * var(--u))) scale(1.4); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ck-steam { animation: none; display: none; } }
+
+.ck-mats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(calc(128 * var(--u)), 1fr)); gap: calc(10 * var(--u)); padding: calc(14 * var(--u)) calc(14 * var(--u));
+  background: #f7eed8; border: calc(3 * var(--u)) solid #d8c69c; border-radius: calc(18 * var(--u));
+}
+.ck-mat { display: flex; flex-direction: column; align-items: center; gap: calc(3 * var(--u)); min-width: 0; text-align: center; }
+.ck-slot {
+  display: grid; place-items: center; width: calc(122 * var(--u)); height: calc(110 * var(--u)); border-radius: calc(18 * var(--u)); box-sizing: border-box;
+  background: linear-gradient(#e9f5ff, #c9e3fa); border: calc(4 * var(--u)) solid var(--ink); box-shadow: inset 0 calc(-4 * var(--u)) 0 rgba(0, 0, 0, 0.08);
+}
+.ck-slot img { width: calc(90 * var(--u)); height: calc(90 * var(--u)); object-fit: contain; }
+.ck-slot i { font: 800 calc(48 * var(--u)) / 1 'Baloo 2', sans-serif; color: #9aa9bf; font-style: normal; }
+.ck-coinslot { background: linear-gradient(#fff2c4, #f2d27a); }
+.ck-mat b { font: 600 calc(20 * var(--u)) / 1.2 'Mitr', sans-serif; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ck-mat em { font: 700 calc(25 * var(--u)) / 1.1 'Mitr', sans-serif; font-style: normal; }
+.ck-mat em.ok { color: #2f9a46; }
+.ck-mat em.no { color: #d8434f; }
+.ck-btns { display: grid; grid-template-columns: 1fr 1fr; gap: calc(22 * var(--u)); padding: 0 calc(6 * var(--u)); }
+.ck-btns .kw-btn { height: calc(78 * var(--u)); font-size: calc(34 * var(--u)); border-radius: calc(18 * var(--u)); -webkit-text-stroke-width: calc(5 * var(--u)); }
+.ck-btns .kw-btn.gold { -webkit-text-stroke: calc(5 * var(--u)) var(--ink); color: #fff; }
+.ck-why { margin-top: calc(-4 * var(--u)); text-align: center; color: #c0444e; font: 500 calc(17 * var(--u)) / 1.3 'Mitr', sans-serif; }
+.ck-auto {
+  display: flex; align-items: center; gap: calc(14 * var(--u)); padding: 0 calc(10 * var(--u)); border: 0; background: none; cursor: pointer; color: var(--ink);
+  font: 500 calc(22 * var(--u)) / 1.3 'Mitr', sans-serif; text-align: left;
+}
+.ck-auto:disabled { opacity: 0.5; cursor: default; }
+.ck-auto i {
+  position: relative; flex: none; width: calc(92 * var(--u)); height: calc(46 * var(--u)); border-radius: 999px; box-sizing: border-box;
+  background: #cfc8b9; border: calc(4 * var(--u)) solid var(--ink); transition: background 0.15s;
+}
+.ck-auto i::after {
+  content: ''; position: absolute; left: calc(3 * var(--u)); top: calc(3 * var(--u)); width: calc(32 * var(--u)); height: calc(32 * var(--u)); border-radius: 50%;
+  background: #fff; border: calc(3 * var(--u)) solid var(--ink); box-sizing: border-box; transition: left 0.15s;
+}
+.ck-auto.on i { background: linear-gradient(#7fcaf8, #3b8fdc); }
+.ck-auto.on i::after { left: calc(49 * var(--u)); }
+
+/* ---------- the meal on the HUD (hud.js #buffs) ---------- */
+#buffs .buff.meal img { object-fit: contain; background: #fff3d6; border-radius: 50%; }

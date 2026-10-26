@@ -1,0 +1,31 @@
+/* partybonds.css — the party's red threads (js/partybonds.js): the chip under the party list and the pull button.
+   The dark card look of the party rows (hud2.css .pm). */
+.pb-chip {
+  position: absolute; display: flex; align-items: center; gap: calc(8 * var(--u)); width: calc(272 * var(--u));
+  padding: calc(4 * var(--u)) calc(12 * var(--u)) calc(4 * var(--u)) calc(6 * var(--u));
+  border-radius: calc(14 * var(--u)); background: linear-gradient(#3d3848, #2e2a38); border: calc(3 * var(--u)) solid var(--ink);
+  box-shadow: inset 0 0 0 calc(2 * var(--u)) #6e5a72, 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.25);
+  color: #d9d2e6; font-size: calc(15 * var(--u)); line-height: 1.15; pointer-events: none; flex-wrap: wrap;
+}
+.pb-chip[hidden] { display: none; }
+.pb-chip img { width: calc(38 * var(--u)); height: calc(30 * var(--u)); object-fit: contain; flex: none; opacity: 0.55; filter: grayscale(0.6); }
+.pb-chip b { font-weight: 600; color: #c9c2d6; }
+.pb-chip small { flex: 1 0 100%; padding-left: calc(46 * var(--u)); margin-top: calc(-14 * var(--u)); font-size: calc(13 * var(--u)); color: #a99fbb; }
+.pb-chip.on { box-shadow: inset 0 0 0 calc(2 * var(--u)) #c42a3a, 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.25); }
+.pb-chip.on img { opacity: 1; filter: none; }
+.pb-chip.on b { color: #ff9aa8; }
+.pb-chip.on small { color: #f3dfe4; }
+
+.pb-pull {
+  position: absolute; left: 50%; bottom: calc(190 * var(--u)); transform: translateX(-50%); display: flex; align-items: center;
+  gap: calc(10 * var(--u)); padding: calc(8 * var(--u)) calc(20 * var(--u)) calc(8 * var(--u)) calc(10 * var(--u));
+  border-radius: calc(18 * var(--u)); background: linear-gradient(#ff8a9a, #d8475c); border: calc(4 * var(--u)) solid var(--ink);
+  box-shadow: inset 0 calc(-4 * var(--u)) 0 rgba(0, 0, 0, 0.18), 0 calc(4 * var(--u)) 0 rgba(0, 0, 0, 0.3);
+  color: #fff; font: 600 calc(19 * var(--u)) 'Mitr', sans-serif; cursor: pointer; touch-action: none; user-select: none;
+  -webkit-text-stroke: calc(3 * var(--u)) var(--ink); paint-order: stroke fill;
+}
+.pb-pull[hidden] { display: none; }
+.pb-pull img { width: calc(44 * var(--u)); height: calc(44 * var(--u)); object-fit: contain; -webkit-text-stroke: 0; }
+.pb-pull small { font-size: calc(14 * var(--u)); opacity: 0.9; margin-left: calc(4 * var(--u)); }
+.pb-pull.on { background: linear-gradient(#ffb3bf, #ff6f84); transform: translateX(-50%) scale(1.05); }
+html.mob .pb-pull { bottom: calc(260 * var(--u)); }

@@ -1,0 +1,83 @@
+/* partylist.css — the party list under the hero's frame (js/partylist.js), the user's reference layout of 2026-10-19 in
+   our HUD's look: the hero frame's plum glass and gold ring (style.css .cbody / .cport), the ink outline, Mitr words and
+   'Baloo 2' numbers, the party list's green HP (hud2.css .pm-bar). A header pill "ปาร์ตี้ n/4" with a round fold
+   chevron, then a card per member: a round portrait over the card's left edge with the job's badge at its foot, the
+   leader's crown, name + Lv, a short status word top right, a slim HP bar; my own card in a soft green ring.
+   Sizes in --pl: --u on a PC, --m on a phone (the PC's --u is too small there to read), times --fit when the screen is
+   too short for the whole list (js/partylist.js fit()). Placed by .partybox. */
+.ptl-box { --pl: calc(var(--u) * var(--fit, 1)); width: calc(330 * var(--pl)); gap: calc(8 * var(--pl)); padding-left: calc(10 * var(--pl)); }
+html.mob .ptl-box { --pl: calc(0.6 * var(--m) * var(--fit, 1)); }
+html.mob-land .ptl-box { --pl: calc(0.5 * var(--m) * var(--fit, 1)); } /* (on its side the screen is short) */
+
+/* ---------- the header: the pill and the fold chevron ---------- */
+.ptl-head { display: flex; align-items: center; gap: calc(8 * var(--pl)); }
+.ptl-pill, .ptl-fold, .ptl-card {
+  background: linear-gradient(rgba(61, 56, 72, 0.94), rgba(46, 42, 56, 0.94)); border: calc(3.5 * var(--pl)) solid var(--ink);
+  box-shadow: inset 0 0 0 calc(2.5 * var(--pl)) #a88a55, 0 calc(4 * var(--pl)) 0 rgba(0, 0, 0, 0.25);
+}
+.ptl-pill {
+  display: flex; align-items: center; gap: calc(6 * var(--pl)); height: calc(48 * var(--pl)); padding: 0 calc(20 * var(--pl)) 0 calc(6 * var(--pl));
+  border-radius: 99px; white-space: nowrap;
+}
+.ptl-pill img { width: calc(40 * var(--pl)); height: calc(40 * var(--pl)); object-fit: contain; filter: drop-shadow(0 calc(1.5 * var(--pl)) 0 var(--ink)); }
+.ptl-pill span, .ptl-pill b { -webkit-text-stroke: calc(4 * var(--pl)) var(--ink); paint-order: stroke fill; }
+.ptl-pill span { font: 600 calc(21 * var(--pl)) / 1 'Mitr', sans-serif; color: #fff3cf; }
+.ptl-pill b { margin-left: calc(4 * var(--pl)); font: 800 calc(24 * var(--pl)) / 1 'Baloo 2', sans-serif; color: #ffd873; }
+.ptl-fold {
+  position: relative; flex: none; width: calc(48 * var(--pl)); height: calc(48 * var(--pl)); padding: 0; border-radius: 50%;
+  cursor: pointer; pointer-events: auto; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.ptl-fold::after { content: ''; position: absolute; inset: calc(-8 * var(--pl)); border-radius: 50%; } /* (a bigger thumb target) */
+html.mob .ptl-fold::after { inset: calc(-12 * var(--pl)); }
+.ptl-fold svg { display: block; width: 62%; height: 62%; margin: auto; transition: transform 0.18s; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.ptl-fold .o { stroke: var(--ink); stroke-width: 7; }
+.ptl-fold .f { stroke: #fff3cf; stroke-width: 3.2; }
+.ptl-box.folded .ptl-fold svg { transform: rotate(180deg); }
+.ptl-fold:hover .f { stroke: #ffd873; }
+.ptl-fold:active { transform: translateY(calc(1.5 * var(--pl))); }
+.ptl-fold:focus-visible { outline: calc(3 * var(--pl)) solid #ffd873; outline-offset: calc(2 * var(--pl)); }
+
+/* ---------- the cards ---------- */
+.ptl-cards { display: flex; flex-direction: column; gap: calc(8 * var(--pl)); }
+.ptl-cards[hidden] { display: none; }
+.ptl-card {
+  position: relative; height: calc(72 * var(--pl)); margin-left: calc(12 * var(--pl)); padding: calc(9 * var(--pl)) calc(14 * var(--pl)) 0 calc(78 * var(--pl));
+  border-radius: calc(18 * var(--pl));
+}
+.ptl-card.me {
+  box-shadow: inset 0 0 0 calc(2.5 * var(--pl)) #8fe07a, 0 0 calc(14 * var(--pl)) rgba(143, 232, 122, 0.5), 0 calc(4 * var(--pl)) 0 rgba(0, 0, 0, 0.25);
+}
+.ptl-face {
+  position: absolute; left: calc(-12 * var(--pl)); top: 50%; width: calc(76 * var(--pl)); height: calc(76 * var(--pl)); transform: translateY(-50%);
+  border-radius: 50%; background: radial-gradient(circle at 50% 35%, #fff6e2, #e8d9bb); border: calc(4 * var(--pl)) solid var(--ink);
+  box-shadow: inset 0 0 0 calc(3 * var(--pl)) #a88a55, 0 calc(3 * var(--pl)) 0 rgba(0, 0, 0, 0.25);
+}
+.ptl-card.me .ptl-face { box-shadow: inset 0 0 0 calc(3 * var(--pl)) #8fe07a, 0 calc(3 * var(--pl)) 0 rgba(0, 0, 0, 0.25); }
+.ptl-face > canvas { display: block; width: 100%; height: 100%; border-radius: 50%; }
+.ptl-badge {
+  --job: #ffd873;
+  position: absolute; left: calc(-10 * var(--pl)); bottom: calc(-7 * var(--pl)); width: calc(36 * var(--pl)); height: calc(36 * var(--pl));
+  border-radius: 50%; border: calc(3 * var(--pl)) solid var(--ink); background: #4a4258;
+  background: radial-gradient(circle at 38% 30%, color-mix(in srgb, var(--job) 80%, #fff), color-mix(in srgb, var(--job) 55%, #2a2435) 78%);
+}
+.ptl-badge canvas { display: block; width: 100%; height: 100%; filter: drop-shadow(0 calc(1 * var(--pl)) 0 rgba(42, 36, 53, 0.7)); }
+
+.ptl-top { display: flex; align-items: baseline; gap: calc(7 * var(--pl)); height: calc(32 * var(--pl)); white-space: nowrap; }
+.ptl-crown { align-self: center; flex: none; width: calc(26 * var(--pl)); height: calc(26 * var(--pl)); margin-right: calc(-2 * var(--pl)); filter: drop-shadow(0 calc(1.5 * var(--pl)) 0 var(--ink)); }
+.ptl-name, .ptl-lv, .ptl-word { -webkit-text-stroke: calc(4 * var(--pl)) var(--ink); paint-order: stroke fill; }
+.ptl-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; font: 600 calc(22 * var(--pl)) / 1.35 'Mitr', sans-serif; color: #fff3cf; }
+.ptl-card.me .ptl-name { color: #a8f08f; }
+.ptl-lv { flex: none; font: 700 calc(17 * var(--pl)) / 1 'Baloo 2', sans-serif; color: #cfc6b8; -webkit-text-stroke-width: calc(3.5 * var(--pl)); }
+.ptl-word { flex: none; margin-left: auto; align-self: flex-start; font: 600 calc(15 * var(--pl)) / 1.3 'Mitr', sans-serif; color: #9fe0ff; -webkit-text-stroke-width: calc(3.5 * var(--pl)); }
+.ptl-word.down { color: #ff9c9c; }
+.ptl-word.off { color: #c4bdd1; }
+.ptl-word.map { pointer-events: auto; cursor: help; } /* (its tooltip: the map's name; #hud lets clicks through) */
+
+.ptl-hp {
+  position: relative; height: calc(13 * var(--pl)); margin-top: calc(6 * var(--pl)); border-radius: 99px; overflow: hidden;
+  background: #241f2e; border: calc(2.5 * var(--pl)) solid var(--ink);
+}
+.ptl-hp i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; border-radius: 99px; background: linear-gradient(#93e883, #4fb24a); transition: width 0.2s; }
+.ptl-card.low .ptl-hp i { background: linear-gradient(#ff8f8f, #d84a4a); }
+.ptl-card.down .ptl-face > canvas, .ptl-card.off .ptl-face > canvas { filter: grayscale(0.9) brightness(0.8); }
+.ptl-card.off { opacity: 0.72; }

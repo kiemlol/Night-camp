@@ -1,0 +1,20 @@
+/* p3_journal.css — the journal (J) window's frame for the pages built from the picked mockups (2026-10-17, js/p3_*.js).
+   Each page was matched to its own mockup at its own window size (book 1228 u wide, monster book 1292, market 1394 x 894,
+   bot report 1192 x 923, gacha / endgame 1180 x 780), so the window jumped size when you changed page. Now the window has
+   ONE size and each page is scaled (CSS zoom) so that its inside keeps the width it was matched at: what looked right
+   beside its mockup still does, and the window stays put. The page list follows the mockups: wider, bigger icons and words.
+   Desktop and phones held sideways only: an upright phone shows the journal as a full-screen sheet (css/uifix.css). */
+html:not(.mob-port) #journal .hb-win { width: calc(1300 * var(--u)); height: calc(860 * var(--u)); }
+html:not(.mob-port) #journal .hb-body { grid-template-columns: calc(236 * var(--u)) minmax(0, 1fr); }
+html:not(.mob-port) #journal .hb-tabs { gap: calc(5 * var(--u)); padding: calc(12 * var(--u)) calc(10 * var(--u)); }
+html:not(.mob-port) #journal .hb-tabs button { gap: calc(12 * var(--u)); padding: calc(6 * var(--u)) calc(10 * var(--u)); font-size: calc(20 * var(--u)); }
+html:not(.mob-port) #journal .hb-tabs button img { width: calc(52 * var(--u)); height: calc(52 * var(--u)); }
+
+/* each page's inside at the width it was matched at (page area here ~1054 u): zoom = 1054 / its old page width, or the
+   height's ratio when that is smaller (the report is the tall one) */
+html:not(.mob-port) #hb-page { zoom: 1.05; }
+html:not(.mob-port) #hb-page[data-tab="book"] { zoom: 1.046; }
+html:not(.mob-port) #hb-page[data-tab="mon"] { zoom: 0.983; }
+html:not(.mob-port) #hb-page[data-tab="market"] { zoom: 0.898; }
+html:not(.mob-port) #hb-page[data-tab="report"] { zoom: 0.926; }
+html:not(.mob-port) #hb-page[data-tab="gacha"], html:not(.mob-port) #hb-page[data-tab="endgame"] { zoom: 1.098; }

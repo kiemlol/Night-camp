@@ -1,0 +1,60 @@
+/* shop.css — the coin counter (js/materials.js) and the pieces the forge and the player shops (js/forge.js, vend.js)
+   still share from the old trade window (its own window is js/shopwin.js, css/shopwin.css). Sizes in --u like style.css. */
+
+/* ---------- the coin counter (above the menu buttons) ---------- */
+.coins {
+  position: absolute; right: calc(20 * var(--u)); bottom: calc(92 * var(--u)); display: flex; align-items: center; gap: calc(6 * var(--u));
+  padding: calc(2 * var(--u)) calc(16 * var(--u)) calc(2 * var(--u)) calc(6 * var(--u)); border-radius: calc(16 * var(--u));
+  background: linear-gradient(#3d3848, #2e2a38); border: calc(4 * var(--u)) solid var(--ink);
+  box-shadow: inset 0 0 0 calc(3 * var(--u)) #a88a55, 0 calc(5 * var(--u)) 0 rgba(0, 0, 0, 0.25);
+}
+.coins img { width: calc(40 * var(--u)); height: calc(40 * var(--u)); }
+.coins b, .sh-coins b {
+  font: 800 calc(26 * var(--u)) / 1.3 'Baloo 2', sans-serif; color: #ffd873; -webkit-text-stroke: calc(4 * var(--u)) var(--ink); paint-order: stroke fill;
+}
+.coins.bump, .sh-coins.bump { animation: coinbump 0.35s ease; }
+@keyframes coinbump { 40% { transform: scale(1.14); } }
+.coins-pop {
+  position: absolute; right: calc(10 * var(--u)); top: calc(-8 * var(--u)); pointer-events: none; white-space: nowrap;
+  font: 800 calc(24 * var(--u)) 'Baloo 2', sans-serif; color: #ffe28a; -webkit-text-stroke: calc(4 * var(--u)) var(--ink); paint-order: stroke fill;
+  animation: coinpop 1.25s ease forwards;
+}
+@keyframes coinpop { 0% { opacity: 0; transform: translateY(calc(8 * var(--u))); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(calc(-40 * var(--u))); } }
+@media (max-aspect-ratio: 7/5) { .coins { bottom: calc(246 * var(--u)); } }
+
+/* ---------- shared by the forge and the player shops ---------- */
+.card.shop { width: min(96vw, calc(1120 * var(--u))); }
+.card.shop .ptitle { gap: calc(14 * var(--u)); }
+.sh-coins {
+  display: flex; align-items: center; gap: calc(6 * var(--u)); padding: 0 calc(14 * var(--u)) 0 calc(6 * var(--u)); border-radius: calc(14 * var(--u));
+  background: rgba(20, 18, 30, 0.5); border: calc(3 * var(--u)) solid var(--ink);
+}
+.sh-coins img { width: calc(38 * var(--u)); height: calc(38 * var(--u)); }
+.sh-tabs { display: flex; align-items: center; flex-wrap: wrap; gap: calc(8 * var(--u)); margin-bottom: calc(12 * var(--u)); }
+.sh-tabs button {
+  cursor: pointer; padding: 0 calc(16 * var(--u)); border-radius: calc(10 * var(--u)); border: calc(3 * var(--u)) solid var(--ink);
+  background: #4a4555; color: #f4efe6; font: 500 calc(19 * var(--u)) / 1.7 'Mitr', sans-serif;
+}
+.sh-tabs button.on { background: #ffd873; color: var(--ink); }
+.sh-tabs button:disabled { opacity: 0.4; cursor: default; }
+.sh-where { margin-left: auto; font-size: calc(16 * var(--u)); color: #cfc6b8; }
+.sh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(82 * var(--u)), 1fr)); gap: calc(8 * var(--u)); max-height: calc(440 * var(--u)); overflow-y: auto; padding: calc(6 * var(--u)); }
+.sh-cell {
+  position: relative; aspect-ratio: 1; padding: calc(6 * var(--u)); cursor: pointer; border-radius: calc(12 * var(--u));
+  border: calc(4 * var(--u)) solid var(--ink); background: linear-gradient(#56617f, #414b66); box-shadow: inset 0 0 0 calc(3 * var(--u)) #a88a55;
+}
+.sh-cell img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.sh-cell b {
+  position: absolute; right: calc(4 * var(--u)); bottom: calc(-4 * var(--u)); font: 800 calc(20 * var(--u)) 'Baloo 2', sans-serif; color: #fff;
+  -webkit-text-stroke: calc(4 * var(--u)) var(--ink); paint-order: stroke fill;
+}
+.sh-cell:hover { transform: translateY(calc(-3 * var(--u))); }
+.sh-cell.none { background: linear-gradient(#45485e, #363a4f); }
+.sh-cell.none img { opacity: 0.55; }
+.sh-cell.locked { background: #2b2836; box-shadow: inset 0 0 0 calc(3 * var(--u)) #4a4555; }
+.sh-cell.locked img { filter: brightness(0); opacity: 0.35; }
+.sh-cell.rare { box-shadow: inset 0 0 0 calc(3 * var(--u)) #ffd873, 0 0 calc(10 * var(--u)) rgba(255, 216, 115, 0.45); }
+.sh-cell.sel { outline: calc(3 * var(--u)) solid #fff3cf; outline-offset: calc(2 * var(--u)); }
+.big:disabled { opacity: 0.4; cursor: default; }
+.sh-price { grid-area: price; display: flex; align-items: center; gap: calc(4 * var(--u)); font: 800 calc(24 * var(--u)) 'Baloo 2', sans-serif; color: #ffd873; }
+.sh-price img { width: calc(30 * var(--u)); height: calc(30 * var(--u)); }

@@ -1,0 +1,9 @@
+/* The game's own mouse cursors (js/cursor.js sets html.ncc and the --ncc-* values; README "เคอร์เซอร์เมาส์").
+   Without js/cursor.js (or with ?cursor=0, or on a touch screen) none of this applies and the old cursors stay. */
+html.ncc { cursor: var(--ncc-normal); }
+html.ncc #view { cursor: var(--ncc-view); }
+html.ncc #view.ncc-attack { cursor: var(--ncc-attack); }
+html.ncc #view.ncc-talk { cursor: var(--ncc-talk); }
+html.ncc #view.ncc-pickup { cursor: var(--ncc-pickup); }
+/* typing keeps the text bar */
+html.ncc :is(input:not([type=checkbox], [type=radio], [type=range], [type=button], [type=submit], [type=reset], [type=color], [type=file], [type=image]), textarea, [contenteditable=""], [contenteditable="true"]) { cursor: text; }

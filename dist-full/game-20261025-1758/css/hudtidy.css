@@ -1,0 +1,52 @@
+/* hudtidy.css — the main screen tidied, same places as before (the user, 2026-09-29: "ชอบคล้ายๆเเบบเก่าครับ
+   เเค่จัดให้มันดีดีเฉยๆก็ได้"). What was wrong: on wide screens the chat, the hotbar and the row of menu buttons didn't fit
+   side by side, so the chat covered the Q slot and the Base EXP bar, and the menu buttons sat on the hotbar and ran off
+   the screen's edge (H, added last, even came after ESC).
+   Now (js/hudtidy.js puts my shop's pill, AUTO, the coins and the menu in one bottom-right column, .hud-br):
+     wide screens (5:3 and wider)  chat bottom-left, hotbar in the middle, the column bottom-right: one row
+     narrower screens              the chat and the column go up, above the hotbar (left and right)
+   The menu is a tray of 5 columns in the hotbar's look (dark cells, gold rim, the key on a small key cap).
+   Loaded after every other stylesheet; rules start with #hud so they win over the older ones. Sizes in --u. */
+
+/* ---------- the bottom-right column: AUTO, the coins, the menu tray ---------- */
+#hud .hud-br {
+  position: absolute; right: calc(16 * var(--u)); bottom: calc(185 * var(--u)); /* (narrower screens: above the hotbar) */
+  display: flex; flex-direction: column; align-items: flex-end; gap: calc(12 * var(--u));
+}
+#hud .hud-br > .af, #hud .hud-br > .coins, #hud .hud-br > .menubar, #hud .hud-br > .vend-pill {
+  position: relative; left: auto; right: auto; top: auto; bottom: auto; transform: none;
+}
+#hud .hud-br > .af { margin-bottom: calc(4 * var(--u)); } /* (room for the AUTO label that hangs under the button) */
+
+/* the menu tray */
+#hud .menubar {
+  display: grid; grid-template-columns: repeat(5, calc(58 * var(--u))); gap: calc(12 * var(--u));
+  padding: calc(12 * var(--u)) calc(14 * var(--u)) calc(16 * var(--u));
+  border-radius: calc(18 * var(--u)); background: linear-gradient(rgba(61, 56, 72, 0.94), rgba(46, 42, 56, 0.94));
+  border: calc(4 * var(--u)) solid var(--ink); box-shadow: inset 0 0 0 calc(3 * var(--u)) #a88a55, 0 calc(5 * var(--u)) 0 rgba(0, 0, 0, 0.25);
+}
+#hud .mbtn {
+  border-radius: calc(12 * var(--u)); background: linear-gradient(#4a4555, #37323f);
+  box-shadow: inset 0 0 0 calc(2 * var(--u)) rgba(168, 138, 85, 0.6);
+}
+#hud .mbtn img { position: absolute; left: 9%; top: 9%; width: 82%; height: 82%; }
+#hud .mbtn:hover { background: linear-gradient(#5a5468, #45404f); }
+/* the key on a small key cap, like the hotbar's */
+#hud .mbtn b {
+  right: calc(-6 * var(--u)); bottom: calc(-9 * var(--u)); min-width: calc(22 * var(--u)); padding: 0 calc(5 * var(--u));
+  border-radius: calc(6 * var(--u)); background: #f4f1ea; color: var(--ink); border: calc(2.5 * var(--u)) solid var(--ink);
+  font: 800 calc(13 * var(--u)) / 1.3 'Baloo 2', sans-serif; text-align: center; -webkit-text-stroke: 0;
+}
+
+/* ---------- the chat (bottom left): never under the hotbar, never under the tray ---------- */
+#hud .chatwin { left: calc(16 * var(--u)); bottom: calc(185 * var(--u)); width: min(calc(640 * var(--u)), calc(100vw - 430 * var(--u))); }
+
+/* ---------- narrow screens: the target frame clear of the hero's frame (it touched its corner at 156) ---------- */
+@media (max-aspect-ratio: 7/5) { #hud .tframe { top: calc(184 * var(--u)); } }
+
+/* ---------- wide screens: chat, hotbar and the column on one row ---------- */
+@media (min-aspect-ratio: 5/3) {
+  #hud .hud-br { bottom: calc(14 * var(--u)); }
+  /* the chat fills the space left of the hotbar (the hotbar: 946 --u wide, centred) */
+  #hud .chatwin { bottom: calc(14 * var(--u)); width: min(calc(540 * var(--u)), calc(50vw - 505 * var(--u))); }
+}

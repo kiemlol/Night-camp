@@ -1,0 +1,80 @@
+/* hudshop.css — the PC shop row (js/hudshop.js; the user's pick D of four, 2026-10-19: "อยากได้แบบนี้"): five round
+   painted buttons at the top right, left of the clock window — บอส · กิจกรรม · ตลาด · กาชา · เติม. The menu tray stays
+   bottom right (hudtidy.css) without its moon gem button. Phones and iPads keep their own layout (html.mob: no row).
+   Sizes in --u. The row is 430 u wide; its right edge stands 392 u from the screen's right (the clock window's left
+   edge is 378 u: hud2.css .tr right 12 + width 262 + the dial's -104). */
+#hud .hudshop {
+  position: absolute; z-index: 6; right: calc(392 * var(--u)); top: max(calc(34 * var(--u)), 28px); /* (the online FPS line sits on the top edge above it) */
+  display: flex; gap: calc(12 * var(--u)); align-items: flex-start; transform-origin: 100% 0;
+}
+html.mob #hud .hudshop { display: none; }
+#hud .hs-b {
+  position: relative; display: flex; flex-direction: column; align-items: center; padding: 0; border: 0; background: none;
+  cursor: pointer; font: inherit; color: inherit; -webkit-tap-highlight-color: transparent;
+}
+#hud .hs-b[hidden] { display: none; }
+/* every disc sits in an 86 u tall box so the labels share one line under the bigger เติม */
+#hud .hs-disc { position: relative; width: calc(74 * var(--u)); height: calc(86 * var(--u)); display: grid; place-items: center; }
+#hud .hs-disc img {
+  width: calc(74 * var(--u)); height: calc(74 * var(--u)); display: block;
+  filter: drop-shadow(0 calc(4 * var(--u)) 0 rgba(0, 0, 0, 0.3)); transition: transform .12s ease-out, filter .12s;
+}
+#hud .hs-b:hover .hs-disc img { transform: translateY(calc(-3 * var(--u))); filter: drop-shadow(0 calc(6 * var(--u)) 0 rgba(0, 0, 0, 0.3)) brightness(1.08); }
+#hud .hs-b:active .hs-disc img { transform: scale(.95); }
+#hud .hs-b:focus-visible { outline: calc(3 * var(--u)) solid #ffd873; outline-offset: calc(2 * var(--u)); border-radius: calc(14 * var(--u)); }
+#hud .hs-name {
+  margin-top: calc(-2 * var(--u)); font: 600 calc(17 * var(--u)) / 1.1 'Mitr', sans-serif; color: #fff3cf; white-space: nowrap;
+  -webkit-text-stroke: calc(4.5 * var(--u)) var(--ink); paint-order: stroke fill;
+}
+
+/* the badges: blue = a time, red = waiting for you, pink = a promotion */
+#hud .hs-badge {
+  position: absolute; z-index: 2; top: calc(2 * var(--u)); right: calc(-10 * var(--u)); padding: 0 calc(7 * var(--u));
+  border-radius: 999px; border: calc(2.5 * var(--u)) solid var(--ink); background: #e2434f; color: #fff;
+  font: 800 calc(14 * var(--u)) / 1.45 'Baloo 2', 'Mitr', sans-serif; white-space: nowrap; pointer-events: none;
+}
+#hud .hs-badge[hidden] { display: none; }
+#hud .hs-badge.time { background: #3d7fd6; }
+#hud .hs-badge.dot { width: calc(18 * var(--u)); height: calc(18 * var(--u)); padding: 0; right: calc(2 * var(--u)); top: calc(10 * var(--u)); }
+#hud .hs-badge.promo { background: linear-gradient(#ff7aa8, #e0457c); }
+#hud .hs-badge.live { animation: hs-pulse 1.2s ease-in-out infinite; }
+
+/* เติม: the button that sells, bigger, with light running round its ring */
+#hud .hs-b.hero .hs-disc { width: calc(86 * var(--u)); }
+#hud .hs-b.hero .hs-disc img { width: calc(86 * var(--u)); height: calc(86 * var(--u)); filter: drop-shadow(0 0 calc(10 * var(--u)) rgba(255, 196, 92, 0.55)) drop-shadow(0 calc(4 * var(--u)) 0 rgba(0, 0, 0, 0.3)); }
+#hud .hs-b.hero .hs-disc::before {
+  content: ""; position: absolute; left: 50%; top: 54%; width: calc(88 * var(--u)); height: calc(88 * var(--u)); border-radius: 50%;
+  transform: translate(-50%, -50%); pointer-events: none;
+  background: conic-gradient(from 0deg, transparent 0 68%, rgba(255, 236, 160, 0.95) 80%, transparent 92%);
+  -webkit-mask: radial-gradient(circle, transparent 60%, #000 62%, #000 70%, transparent 72%);
+  mask: radial-gradient(circle, transparent 60%, #000 62%, #000 70%, transparent 72%);
+  animation: hs-spin 3.2s linear infinite;
+}
+#hud .hs-b.hero .hs-name { color: #ffe08a; }
+#hud .hs-b.hero .hs-badge { right: calc(-12 * var(--u)); top: calc(4 * var(--u)); }
+@keyframes hs-spin { to { transform: translate(-50%, -50%) rotate(1turn); } }
+@keyframes hs-pulse { 50% { transform: scale(1.12); } }
+@media (prefers-reduced-motion: reduce) {
+  #hud .hs-b.hero .hs-disc::before, #hud .hs-badge.live { animation: none; }
+}
+
+/* the moon gem leaves the PC menu tray (it is เติม now); phones keep it in their menu grid */
+html:not(.mob) #hud .menubar .tu-mbtn { display: none; }
+
+/* ---------- the monster frame and the boss bar make room for the row (both centred at the top before) ----------
+   2:1 and wider        the row is clear of them: nothing moves
+   16:9 to 2:1          they move left so their right edge stops before the row (the frame ends 14 u before it, the
+                        wider boss bar 8 u), still clear of the hero's frame on the left
+   7:5 to 16:9          they go down under the row (the boss bar follows the frame: js/boss.js place())
+   under 7:5            hudtidy.css already puts the frame at 184 u */
+@media (min-aspect-ratio: 173/100) and (max-aspect-ratio: 1985/1000) {
+  html:not(.mob) #hud .tframe { left: calc(100% - 1051 * var(--u)); }
+  html:not(.mob) #bossbar { left: calc(100% - 1080 * var(--u)) !important; }
+}
+@media (min-aspect-ratio: 7/5) and (max-aspect-ratio: 1729/1000) {
+  html:not(.mob) #hud .tframe { top: calc(150 * var(--u)); }
+}
+/* the narrowest screens (width-bound --u, 1300 u across): the row shrinks so it stays clear of the hero's frame */
+@media (max-aspect-ratio: 126/100) {
+  #hud .hudshop { transform: scale(.8); }
+}

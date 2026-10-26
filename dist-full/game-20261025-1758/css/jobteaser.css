@@ -1,0 +1,17 @@
+/* jobteaser.css — "อาชีพใหม่ เร็ว ๆ นี้" under the job change tab (js/jobteaser.js): the old job cards (css/skillwin.css .job)
+   with a gold "เร็ว ๆ นี้" badge, the 2nd jobs' line and a grey button that only says so. Sizes in --u. */
+#skillwin .jobs-h.jt-h { margin-top: calc(22 * var(--u)); padding-top: calc(14 * var(--u)); border-top: calc(3 * var(--u)) dashed #d4c6a6; }
+#skillwin .jobs-h.jt-h small { margin-left: calc(10 * var(--u)); font: 400 calc(15 * var(--u)) / 1.45 'Mitr', sans-serif; color: #8a7f9c; }
+#skillwin .jobs.jt-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+#skillwin .job.soon { position: relative; background: #f7f1e3; }
+#skillwin .job.soon canvas { filter: saturate(0.85); }
+#skillwin .jt-badge {
+  position: absolute; top: calc(-10 * var(--u)); right: calc(-8 * var(--u)); z-index: 1; padding: calc(4 * var(--u)) calc(12 * var(--u));
+  border-radius: calc(12 * var(--u)); border: calc(3 * var(--u)) solid var(--ink); background: linear-gradient(#ffe384, #f2b632);
+  font: 700 calc(15 * var(--u)) / 1.2 'Mitr', sans-serif; font-style: normal; color: var(--ink);
+  box-shadow: 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.22); transform: rotate(6deg);
+}
+#skillwin .jt-next { font: 600 calc(14 * var(--u)) / 1.4 'Mitr', sans-serif; color: #6d5aa6; }
+#skillwin .big.job-go.jt-go { background: linear-gradient(#d9d3e3, #aaa2ba); cursor: help; }
+#skillwin .big.job-go.jt-go:hover { filter: brightness(1.04); }
+@media (max-aspect-ratio: 7/5) { #skillwin .jobs.jt-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

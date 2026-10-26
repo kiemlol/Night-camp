@@ -1,0 +1,79 @@
+/* statuswin.css — the status window (js/statuswin.js), layout "B" the user picked: the hero, the stat hexagon and the
+   six stats on top, the combat-value cards under them, the info strip at the bottom. The window's look is css/kui.css.
+   Sizes in --u like the rest of the HUD. */
+.sw-wrap { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); transform-origin: 50% 50%; }
+.sw-win { width: calc(1220 * var(--u)); }
+.sw-sub { padding: calc(10 * var(--u)) 0 calc(4 * var(--u)); text-align: center; font: 600 calc(22 * var(--u)) / 1.3 'Mitr', sans-serif; }
+
+/* ---------- top: hero · hexagon · stats ---------- */
+.sw-top {
+  display: grid; grid-template-columns: calc(300 * var(--u)) calc(330 * var(--u)) 1fr; gap: calc(14 * var(--u));
+  margin: calc(8 * var(--u)) calc(20 * var(--u)) 0; padding: calc(14 * var(--u));
+}
+.sw-hero, .sw-radar {
+  position: relative; height: calc(404 * var(--u)); border-radius: calc(16 * var(--u)); border: calc(3 * var(--u)) solid #cdbf9f; overflow: hidden;
+}
+.sw-hero { background: radial-gradient(ellipse at 50% 66%, #fffbf2 0%, #f3e9d3 55%, #e5d7b9 100%); }
+.sw-hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sw-who { position: absolute; left: 0; right: 0; bottom: calc(10 * var(--u)); text-align: center; line-height: 1.25; }
+.sw-who b { display: block; font: 700 calc(24 * var(--u)) 'Mitr', sans-serif; -webkit-text-stroke: calc(4 * var(--u)) #fffbf2; paint-order: stroke fill; }
+.sw-who span { font: 500 calc(16 * var(--u)) 'Mitr', sans-serif; color: #5d5470; -webkit-text-stroke: calc(3 * var(--u)) #fffbf2; paint-order: stroke fill; }
+.sw-radar { display: flex; flex-direction: column; background: #fbf5e8; }
+.sw-radar canvas { flex: 1; min-height: 0; width: 100%; }
+.sw-legend {
+  display: flex; justify-content: center; gap: calc(14 * var(--u)); margin: 0 calc(12 * var(--u)) calc(12 * var(--u)); padding: calc(6 * var(--u)) calc(10 * var(--u));
+  border-radius: calc(12 * var(--u)); background: #fffaf0; border: calc(2 * var(--u)) solid #d4c6a6; font: 500 calc(15 * var(--u)) / 1.3 'Mitr', sans-serif; white-space: nowrap;
+}
+.sw-legend i { display: inline-block; width: calc(15 * var(--u)); height: calc(15 * var(--u)); margin-right: calc(6 * var(--u)); vertical-align: -2%; border-radius: 50%; border: calc(2.5 * var(--u)) solid var(--ink); }
+.sw-legend i.b { background: #6fa6ff; }
+.sw-legend i.g { background: #8fe08a; }
+
+.sw-stats { display: flex; flex-direction: column; min-width: 0; }
+.sw-rows { display: grid; gap: calc(8 * var(--u)); }
+.sw-row {
+  display: grid; grid-template-columns: calc(66 * var(--u)) calc(52 * var(--u)) calc(56 * var(--u)) 1fr calc(44 * var(--u)) calc(70 * var(--u));
+  align-items: center; height: calc(52 * var(--u)); padding: 0 calc(8 * var(--u)) 0 calc(16 * var(--u));
+  border-radius: calc(14 * var(--u)); background: #fffaf0; border: calc(3 * var(--u)) solid var(--ink);
+  box-shadow: inset 0 calc(-3 * var(--u)) 0 rgba(0, 0, 0, 0.06);
+}
+.sw-row:hover { background: #fff; box-shadow: 0 0 0 calc(3 * var(--u)) #7fcaf8; }
+.sw-row .k { font: 800 calc(22 * var(--u)) / 1 'Baloo 2', sans-serif; }
+.sw-row .v { font: 800 calc(25 * var(--u)) / 1 'Baloo 2', sans-serif; }
+.sw-row .bo { font: 800 calc(20 * var(--u)) / 1 'Baloo 2', sans-serif; color: #2f9a3a; }
+.sw-row .bo.neg { color: #c8404c; }
+.sw-row .th { grid-column: 4; min-width: 0; padding-left: calc(6 * var(--u)); font: 400 calc(15 * var(--u)) / 1 'Mitr', sans-serif; color: #8a8295; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sw-row .cost { grid-column: 6; padding-left: calc(8 * var(--u)); font: 500 calc(15 * var(--u)) / 1 'Mitr', sans-serif; color: #6a6078; white-space: nowrap; }
+.sw-plus {
+  grid-column: 5; cursor: pointer; width: calc(42 * var(--u)); height: calc(42 * var(--u)); padding: 0; border-radius: 50%;
+  border: calc(3.5 * var(--u)) solid var(--ink); background: linear-gradient(#7fcaf8, #3b8fdc); color: #fff;
+  display: grid; place-items: center;
+  box-shadow: inset 0 calc(-3 * var(--u)) 0 rgba(0, 0, 0, 0.18), 0 calc(2 * var(--u)) 0 rgba(0, 0, 0, 0.2);
+}
+.sw-plus svg { display: block; width: calc(24 * var(--u)); height: calc(24 * var(--u)); fill: currentColor; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.sw-plus:not(:disabled):hover { filter: brightness(1.1); transform: scale(1.06); }
+.sw-plus:not(:disabled):active { transform: scale(0.94); }
+.sw-plus { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; } /* (held down: raises on and on, js/statuswin.js) */
+.sw-plus.held:not(:disabled) { transform: scale(0.94); filter: brightness(1.15); }
+.sw-plus:disabled { cursor: default; background: linear-gradient(#d9d6df, #aaa6b6); filter: grayscale(0.4); opacity: 0.7; }
+.sw-foot { display: flex; align-items: center; justify-content: space-between; gap: calc(12 * var(--u)); margin-top: auto; padding: calc(10 * var(--u)) calc(4 * var(--u)) 0; }
+.sw-pts { font: 600 calc(20 * var(--u)) / 1 'Mitr', sans-serif; white-space: nowrap; }
+.sw-pts b { margin-left: calc(6 * var(--u)); font: 800 calc(30 * var(--u)) / 1 'Baloo 2', sans-serif; color: #6a6078; }
+.sw-pts.some b { color: #2f7fd6; }
+
+/* ---------- the combat values ---------- */
+.sw-cards { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: calc(10 * var(--u)); margin: calc(14 * var(--u)) calc(20 * var(--u)) 0; }
+.sw-card {
+  position: relative; display: flex; align-items: center; gap: calc(8 * var(--u)); min-width: 0; height: calc(62 * var(--u)); padding: 0 calc(8 * var(--u));
+  border-radius: calc(14 * var(--u)); background: #fffaf0; border: calc(3 * var(--u)) solid var(--ink); box-shadow: inset 0 calc(-3 * var(--u)) 0 rgba(0, 0, 0, 0.06);
+}
+.sw-card[hidden] { display: none; }
+.sw-card:hover { background: #fff; box-shadow: 0 0 0 calc(3 * var(--u)) #7fcaf8; }
+.sw-card img { flex: none; width: calc(38 * var(--u)); height: calc(38 * var(--u)); object-fit: contain; }
+.sw-card .t { display: flex; flex-direction: column; min-width: 0; }
+.sw-card .l { font: 600 calc(13 * var(--u)) / 1.2 'Mitr', sans-serif; color: #6a6078; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sw-card .v { font: 800 calc(18 * var(--u)) / 1.2 'Baloo 2', 'Mitr', sans-serif; white-space: nowrap; }
+.sw-card .v small { font-size: calc(14 * var(--u)); color: #6a6078; }
+/* the ATK multiplier sits up on the label's row: a late hero's "243 + 351~447" fills the value's row */
+.sw-card[data-card="atk"] .v small { position: absolute; top: calc(9 * var(--u)); right: calc(10 * var(--u)); line-height: 1.2; }
+
+.sw-info { margin: calc(14 * var(--u)) calc(20 * var(--u)) calc(20 * var(--u)); }

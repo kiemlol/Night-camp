@@ -62,11 +62,11 @@ and add rate limits/auth hardening before exposing it to the public internet.
 - `tools/survey-original.mjs`, `tools/audit-assets.mjs` and
   `tools/download-runtime-assets.mjs` reproduce the public resource audit.
 
-The complete local research snapshot is about 554 MB. The GitHub `dist/`
-folder is a roughly 191 MB verified boot/runtime bundle: it contains all 477
-client modules and the assets exercised by offline and online startup.
-`dist-full/` remains ignored so the repository is practical to clone; use the
-recovery tools against the public build to rebuild the full asset tree.
+The complete research snapshot is tracked in `dist-full/` and is about 557 MB.
+The `dist/` folder is a roughly 194 MB verified boot/runtime bundle: it contains
+all 477 client modules and the assets exercised by offline and online startup.
+The recovery tools can be used to audit or rebuild the full asset tree from the
+public build.
 
 ## Client update status
 

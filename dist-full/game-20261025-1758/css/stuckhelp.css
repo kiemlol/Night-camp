@@ -1,0 +1,45 @@
+/* stuckhelp.css — ways out for a stuck hero (js/stuckhelp.js): the ออกจากราก button on the Dark Root floor HUD, the tip
+   card, the ESC side button's longer name. The confirm card is the player flow's window (css/playerflow.css pf-*). */
+
+/* the floor HUD's button (the HUD itself lets clicks through: css/darkroot.css #rt-hud) */
+#rt-hud .rt-leave {
+  pointer-events: auto; display: flex; align-items: center; justify-content: center; gap: calc(6 * var(--u));
+  width: 100%; height: calc(38 * var(--u)); margin-top: calc(7 * var(--u)); padding: 0 calc(10 * var(--u)); cursor: pointer;
+  border-radius: calc(12 * var(--u)); border: calc(3 * var(--u)) solid var(--ink);
+  background: linear-gradient(#5d4a92, #3b2c64); box-shadow: inset 0 calc(-3 * var(--u)) 0 rgba(0, 0, 0, 0.28), inset 0 0 0 calc(2 * var(--u)) #7a62b8;
+  color: #f4e9ff; font: 600 calc(17 * var(--u)) / 1 'Mitr', sans-serif;
+}
+#rt-hud .rt-leave img { height: calc(28 * var(--u)); object-fit: contain; }
+#rt-hud .rt-leave:hover { filter: brightness(1.15); }
+#rt-hud .rt-leave:active { transform: translateY(calc(1 * var(--u))); }
+
+/* the tip card (under the floor HUD, over the top toast) */
+#sh-tip {
+  position: absolute; left: 50%; top: calc(250 * var(--u)); transform: translateX(-50%); z-index: 30; pointer-events: auto;
+  display: flex; align-items: center; gap: calc(12 * var(--u)); width: max-content; max-width: min(calc(100vw - 32px), calc(780 * var(--u)));
+  padding: calc(10 * var(--u)) calc(10 * var(--u)) calc(10 * var(--u)) calc(18 * var(--u)); box-sizing: border-box;
+  border-radius: calc(16 * var(--u)); border: calc(4 * var(--u)) solid var(--ink); background: linear-gradient(#fbf5e8, #e6d9bc);
+  box-shadow: inset 0 calc(-4 * var(--u)) 0 rgba(0, 0, 0, 0.08), 0 calc(4 * var(--u)) 0 rgba(0, 0, 0, 0.25);
+  color: var(--ink); font: 600 calc(18 * var(--u)) / 1.35 'Mitr', sans-serif;
+}
+#sh-tip[hidden] { display: none; }
+#sh-tip.show { animation: sh-in 0.22s ease-out; }
+@keyframes sh-in { from { opacity: 0; transform: translate(-50%, calc(-10 * var(--u))); } }
+#sh-tip .sh-t { min-width: 0; }
+#sh-tip .sh-go { flex: none; display: flex; align-items: center; gap: calc(6 * var(--u)); height: calc(42 * var(--u)); padding: 0 calc(14 * var(--u)); font-size: calc(17 * var(--u)); white-space: nowrap; }
+#sh-tip .sh-go img { height: calc(28 * var(--u)); object-fit: contain; }
+#sh-tip .sh-x { flex: none; width: calc(30 * var(--u)); height: calc(30 * var(--u)); padding: 0; border: 0; background: none; cursor: pointer; color: var(--ink); opacity: 0.5; font: 700 calc(17 * var(--u)) / 1 'Mitr', sans-serif; }
+#sh-tip .sh-x:hover { opacity: 0.85; }
+
+/* the ESC menu's side button: a longer name than the others */
+.mn-btn.sh-side b { font-size: calc(19 * var(--u)); }
+/* the online column holds 9 buttons with this one (+ เช็คอิน, เปลี่ยนตัวละคร, ออกจากระบบ): a little shorter, so our hero under
+   them still shows (at 66u it shrank to ~20u) */
+html:not(.mob-port) .mn-side:has(> .mn-btn:nth-of-type(9)) > .mn-btn { height: calc(57 * var(--u)); }
+html:not(.mob-port) .mn-side:has(> .mn-btn:nth-of-type(9)) > .mn-btn .mn-ic { width: calc(42 * var(--u)); height: calc(42 * var(--u)); }
+.sh-modal .pf-note { white-space: pre-line; }
+/* phones (html.mob, js/mobile.js): a finger-sized button on the small floor HUD and in the tip */
+html.mob #rt-hud .rt-leave { height: auto; min-height: 30px; font-size: max(12px, calc(17 * var(--u))); }
+html.mob #sh-tip .sh-go { height: auto; min-height: 32px; font-size: max(12px, calc(17 * var(--u))); }
+html.mob #sh-tip .sh-x { width: 32px; height: 32px; }
+html.mob #sh-tip { font-size: max(12px, calc(18 * var(--u))); }

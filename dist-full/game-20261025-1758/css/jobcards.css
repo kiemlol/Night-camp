@@ -1,0 +1,213 @@
+/* jobcards.css — the job cards (js/jobcards.js) in the skill window's job change tab, built to layout A of
+   assets/gen/nightcamp_jc_a_raw.png ("เหมือน 100%"). Every size is the mockup's, measured in its pixels: the window is
+   1480u on this tab (mockup 1310 px), so 1 mockup px = 1.13u; a card is 245 x 660 px = 277 x 746u and its parts sit at
+   the mockup's places (absolute, from the card's top). Thai text 1-2u larger than the mockup's English. */
+
+/* the window widens on this tab; the skill bar and the points line hide */
+.skw-win:has(.skw-body.jobs-on) { width: calc(1480 * var(--u)); }
+.skw-win:has(.skw-body.jobs-on) .skw-bar, .skw-win:has(.skw-body.jobs-on) .skw-point-detail { display: none; }
+.skw-body.jobs-on { height: calc(812 * var(--u)); padding: 0 calc(10 * var(--u)) calc(4 * var(--u)); }
+#skillwin .skw-body.jobs-on .skw-jobs { padding: 0; overflow: visible; }
+
+#skillwin .jobs-h.jc-h {
+  margin: calc(10 * var(--u)) 0 0; text-align: center; font: 600 calc(20 * var(--u)) / 1.35 'Mitr', sans-serif; color: #1f2547;
+}
+#skillwin .jobs.jc-row {
+  display: flex; justify-content: center; align-items: flex-start; gap: calc(16 * var(--u)); margin: 0;
+  padding: calc(24 * var(--u)) 0 0;
+}
+
+/* ---------- one card: thin navy line, gold band, dark inner line, cream ---------- */
+#skillwin .job.jc-card {
+  --jc: #6a6078;
+  position: relative; display: block; flex: none; padding: 0; gap: 0; text-align: left;
+  width: calc(277 * var(--u)); height: calc(746 * var(--u)); box-sizing: border-box;
+  border-radius: calc(12 * var(--u)); border: calc(2 * var(--u)) solid #1d1f3a; background: #fcf6e6;
+  box-shadow: inset 0 0 0 calc(1.5 * var(--u)) #fff6dc, inset 0 0 0 calc(4.6 * var(--u)) #e3ae52, inset 0 0 0 calc(5.9 * var(--u)) #5a3a20,
+    0 calc(5 * var(--u)) 0 rgba(0, 0, 0, 0.28);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+#skillwin .job.jc-card.locked { opacity: 1; }
+#skillwin .job.jc-card.on {
+  transform: translateY(calc(-7 * var(--u))); border-color: #8a5a14;
+  box-shadow: inset 0 0 0 calc(1.5 * var(--u)) #fff6dc, inset 0 0 0 calc(5 * var(--u)) #f6c84e, inset 0 0 0 calc(6.2 * var(--u)) #6a4210,
+    0 0 0 calc(4 * var(--u)) #ffd35a, 0 0 calc(24 * var(--u)) rgba(255, 200, 70, 0.9), 0 calc(10 * var(--u)) 0 rgba(0, 0, 0, 0.2);
+}
+
+/* the painting, inside the frame */
+.jc-art {
+  position: absolute; z-index: 1; left: calc(6 * var(--u)); right: calc(6 * var(--u)); top: calc(6 * var(--u)); height: calc(338 * var(--u));
+  overflow: hidden; border-radius: calc(7 * var(--u)) calc(7 * var(--u)) 0 0;
+  background: radial-gradient(ellipse at 50% 60%, color-mix(in srgb, var(--jc) 60%, #1b1530) 0%, #1b1530 75%);
+}
+.jc-art img, #skillwin .jc-art .jc-rig {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0;
+  border: 0; border-radius: 0; background: none;
+}
+.jc-desc {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: calc(26 * var(--u)) calc(12 * var(--u)) calc(40 * var(--u));
+  background: linear-gradient(transparent, rgba(16, 12, 30, 0.92) 30%); color: #fff;
+  font: 500 calc(15 * var(--u)) / 1.45 'Mitr', sans-serif; text-shadow: 0 1px 2px #000;
+  transform: translateY(100%); transition: transform 0.2s ease;
+}
+.jc-card.on .jc-desc { transform: none; }
+
+/* the gold gem mount over the top edge, the gold stars in the corners, the gold curls by the ribbon */
+.jc-mount { position: absolute; z-index: 4; left: 50%; top: calc(-18 * var(--u)); width: calc(66 * var(--u)); height: calc(48 * var(--u)); transform: translateX(-50%); }
+.jc-gemf { fill: var(--jc); }
+.jc-cstar { position: absolute; z-index: 3; top: calc(11 * var(--u)); width: calc(20 * var(--u)); height: calc(20 * var(--u)); }
+.jc-cstar.l { left: calc(13 * var(--u)); }
+.jc-cstar.r { right: calc(13 * var(--u)); }
+.jc-curl { position: absolute; z-index: 2; top: calc(352 * var(--u)); width: calc(16 * var(--u)); height: calc(34 * var(--u)); }
+.jc-curl.l { left: calc(-8 * var(--u)); }
+.jc-curl.r { right: calc(-8 * var(--u)); transform: scaleX(-1); }
+
+/* the arched name ribbon */
+.jc-ribbon { position: absolute; z-index: 3; left: calc(-2 * var(--u)); width: calc(281 * var(--u)); top: calc(314 * var(--u)); height: calc(66 * var(--u)); }
+.jc-rsvg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.jc-rsvg path { stroke: #2a2440; stroke-width: 3; stroke-linejoin: round; }
+.jc-tail { fill: color-mix(in srgb, var(--jc) 68%, #000); }
+.jc-fold { fill: color-mix(in srgb, var(--jc) 40%, #000); }
+.jc-plate { fill: var(--jc); }
+.jc-rsvg path.jc-pline { fill: none; stroke: rgba(255, 238, 220, 0.6); stroke-width: 1.8; }
+.jc-ribbon span {
+  position: absolute; left: calc(56 * var(--u)); width: calc(169 * var(--u)); top: calc(9 * var(--u)); height: calc(44 * var(--u));
+  display: grid; place-items: center; white-space: nowrap;
+  font: 800 calc(31 * var(--u) * var(--fit, 1)) / 1 'Mitr', sans-serif; color: #fff; letter-spacing: 0.01em;
+  -webkit-text-stroke: calc(6 * var(--u)) #2a1c2a; paint-order: stroke fill;
+}
+.jc-ribbon.mid span { font-size: calc(25 * var(--u) * var(--fit, 1)); }
+.jc-ribbon.long span { font-size: calc(20 * var(--u) * var(--fit, 1)); }
+
+/* role and weapon chips: light blue pills, a line icon in a white circle */
+.jc-chips { position: absolute; left: calc(12 * var(--u)); right: calc(12 * var(--u)); top: calc(386 * var(--u)); display: flex; justify-content: center; gap: calc(9 * var(--u)); }
+.jc-chip {
+  display: flex; align-items: center; gap: calc(6 * var(--u)); flex: 1 1 auto; min-width: 0; height: calc(30 * var(--u));
+  padding: 0 calc(12 * var(--u)) 0 calc(3 * var(--u)); border-radius: calc(15 * var(--u));
+  background: linear-gradient(#e9f0fa, #d3dff0);
+}
+.jc-chip b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 calc(15 * var(--u) * var(--fit, 1)) / 1 'Mitr', sans-serif; color: #1f2547; }
+.jc-ic {
+  flex: none; display: grid; place-items: center; width: calc(24 * var(--u)); height: calc(24 * var(--u)); border-radius: 50%;
+  background: #fff; border: calc(1.6 * var(--u)) solid #2a2f52;
+}
+.jc-ic svg { width: calc(16 * var(--u)); height: calc(16 * var(--u)); fill: none; stroke: #22274a; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+
+/* โจมตี / ป้องกัน / เล่นง่าย */
+.jc-rates {
+  position: absolute; left: calc(26 * var(--u)); right: calc(16 * var(--u)); top: calc(420 * var(--u));
+  display: grid; grid-template-columns: calc(92 * var(--u)) 1fr; grid-auto-rows: calc(25.5 * var(--u)); align-items: center;
+}
+.jc-rates b { font: 700 calc(18 * var(--u)) / 1 'Mitr', sans-serif; color: #1f2547; }
+.jc-rates span { display: flex; gap: calc(4.5 * var(--u)); }
+.jc-rates svg { width: calc(21 * var(--u)); height: calc(21 * var(--u)); fill: #b7b3bd; stroke: #8f8a99; stroke-width: 2.6; stroke-linejoin: round; }
+.jc-rates svg.on { fill: #fdbf2c; stroke: #b9720f; }
+
+/* signature skills */
+.jc-sk { position: absolute; left: calc(10 * var(--u)); right: calc(10 * var(--u)); top: calc(504 * var(--u)); display: flex; justify-content: center; gap: calc(6 * var(--u)); }
+.jc-sk img {
+  width: calc(59 * var(--u)); height: calc(59 * var(--u)); border-radius: calc(8 * var(--u)); object-fit: cover;
+  border: calc(2.5 * var(--u)) solid #1f2547; box-shadow: 0 calc(2 * var(--u)) 0 rgba(0, 0, 0, 0.22);
+}
+.jc-sk.n3, .jc-sk.n2, .jc-sk.n1 { gap: calc(14 * var(--u)); }
+.jc-sk.n3 img, .jc-sk.n2 img, .jc-sk.n1 img { width: calc(68 * var(--u)); }
+
+/* ต่อไปเป็นได้: the next jobs' heads */
+.jc-later { position: absolute; left: calc(16 * var(--u)); right: calc(16 * var(--u)); top: calc(572 * var(--u)); display: flex; align-items: center; gap: calc(8 * var(--u)); }
+.jc-later b { font: 600 calc(15 * var(--u)) / 1.2 'Mitr', sans-serif; color: #1f2547; white-space: nowrap; }
+.jc-later::after { content: ''; flex: 1; height: calc(1.5 * var(--u)); background: #d9ccb0; }
+.jc-faces { position: absolute; left: calc(6 * var(--u)); right: calc(6 * var(--u)); top: calc(592 * var(--u)); display: flex; justify-content: space-around; }
+.jc-faces.n1, .jc-faces.n2 { justify-content: center; gap: calc(16 * var(--u)); }
+.jc-faces figure { display: flex; flex-direction: column; align-items: center; width: calc(64 * var(--u)); margin: 0; }
+.jc-face {
+  display: block; flex: none; width: calc(58 * var(--u)); height: calc(58 * var(--u)); border-radius: 50%; overflow: hidden;
+  background: #dde5ef; border: calc(2 * var(--u)) solid #2a2f52; box-shadow: inset 0 0 0 calc(2 * var(--u)) rgba(255, 255, 255, 0.6);
+}
+.jc-face img { display: block; width: 100%; height: 100%; }
+.jc-faces figcaption { margin-top: calc(3 * var(--u)); text-align: center; font: 600 calc(13 * var(--u)) / 1.15 'Mitr', sans-serif; color: #1f2547; overflow-wrap: anywhere; }
+.jc-text {
+  position: absolute; left: calc(18 * var(--u)); right: calc(18 * var(--u)); top: calc(574 * var(--u)); height: calc(100 * var(--u)); overflow: hidden;
+  font: 400 calc(14.5 * var(--u)) / 1.45 'Mitr', sans-serif; color: #3a3550;
+}
+
+/* the button: a blue pill, gold on the card being pointed at */
+#skillwin .jc-card .big.job-go {
+  position: absolute; left: calc(12 * var(--u)); right: calc(12 * var(--u)); top: calc(684 * var(--u)); width: auto; height: calc(50 * var(--u)); margin: 0;
+  padding: 0 calc(6 * var(--u)); border-radius: calc(13 * var(--u)); border: calc(2.5 * var(--u)) solid #1b2350;
+  background: linear-gradient(#8ad5fc 0%, #4aa6ea 46%, #2a72cb 100%);
+  box-shadow: inset 0 calc(2.5 * var(--u)) 0 rgba(255, 255, 255, 0.55), inset 0 calc(-3 * var(--u)) 0 rgba(0, 0, 0, 0.18);
+  font: 800 calc(21 * var(--u) * var(--fit, 1)) / 1 'Mitr', sans-serif; color: #fff; -webkit-text-stroke: calc(5 * var(--u)) #16204a; paint-order: stroke fill;
+  white-space: nowrap; overflow: hidden;
+}
+#skillwin .jc-card.on .big.job-go:not(:disabled) {
+  background: linear-gradient(#fff2b0 0%, #f7c94e 50%, #e29a22 100%); border-color: #6a4210; -webkit-text-stroke-color: #5a3208;
+}
+#skillwin .jc-card .big.job-go[data-armed] { color: #3a2208; -webkit-text-stroke: 0; }
+#skillwin .jc-card .big.job-go:disabled {
+  background: linear-gradient(#eceaf0, #c9c5d2); border-color: #6a6078; color: #6a6078; -webkit-text-stroke: 0; box-shadow: none;
+}
+
+/* one card (a 2nd job's class 3): the job's path and what it brings, beside the card */
+.jc-info {
+  flex: none; align-self: stretch; width: calc(520 * var(--u)); margin-left: calc(14 * var(--u)); padding: calc(18 * var(--u)) calc(22 * var(--u));
+  border-radius: calc(14 * var(--u)); background: #fcf6e6; border: calc(2 * var(--u)) solid #1d1f3a; color: #1f2547;
+  box-shadow: inset 0 0 0 calc(1.5 * var(--u)) #fff6dc, inset 0 0 0 calc(4.6 * var(--u)) #e3ae52, inset 0 0 0 calc(5.9 * var(--u)) #5a3a20;
+}
+.jc-info h3 { margin: 0 0 calc(10 * var(--u)); font: 700 calc(21 * var(--u)) / 1.3 'Mitr', sans-serif; }
+.jc-info h3 + * { margin-bottom: calc(22 * var(--u)); }
+.jc-path { display: flex; align-items: flex-start; justify-content: space-between; }
+.jc-path figure { display: flex; flex-direction: column; align-items: center; width: calc(110 * var(--u)); margin: 0; }
+.jc-path .jc-face { width: calc(88 * var(--u)); height: calc(88 * var(--u)); }
+.jc-path figure.on .jc-face { box-shadow: 0 0 0 calc(4 * var(--u)) #ffd35a, 0 0 calc(16 * var(--u)) rgba(255, 205, 80, 0.9); }
+.jc-path figcaption { margin-top: calc(6 * var(--u)); text-align: center; font: 600 calc(15 * var(--u)) / 1.25 'Mitr', sans-serif; }
+.jc-path b { align-self: center; margin-top: calc(-26 * var(--u)); font: 800 calc(30 * var(--u)) / 1 'Mitr', sans-serif; color: #c99a2a; }
+.jc-info ul { margin: 0; padding: 0; list-style: none; }
+.jc-info li { position: relative; padding-left: calc(26 * var(--u)); margin-bottom: calc(8 * var(--u)); font: 500 calc(17 * var(--u)) / 1.45 'Mitr', sans-serif; }
+.jc-info li::before {
+  content: ''; position: absolute; left: 0; top: calc(6 * var(--u)); width: calc(15 * var(--u)); height: calc(15 * var(--u)); background: #f2b632;
+  clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+
+/* a mouse: pointing lifts a card, turns its button gold and slides its text up over the painting (a touch screen keeps
+   :hover on the last card touched, so there a tap does it: .on, jobcards.js) */
+@media (hover: hover) {
+  #skillwin .job.jc-card:hover {
+    transform: translateY(calc(-7 * var(--u))); border-color: #8a5a14;
+    box-shadow: inset 0 0 0 calc(1.5 * var(--u)) #fff6dc, inset 0 0 0 calc(5 * var(--u)) #f6c84e, inset 0 0 0 calc(6.2 * var(--u)) #6a4210,
+      0 0 0 calc(4 * var(--u)) #ffd35a, 0 0 calc(24 * var(--u)) rgba(255, 200, 70, 0.9), 0 calc(10 * var(--u)) 0 rgba(0, 0, 0, 0.2);
+  }
+  .jc-art:hover .jc-desc { transform: none; }
+  #skillwin .jc-card:hover .big.job-go:not(:disabled) {
+    background: linear-gradient(#fff2b0 0%, #f7c94e 50%, #e29a22 100%); border-color: #6a4210; -webkit-text-stroke-color: #5a3208;
+  }
+}
+
+/* ---------- phones and tablets held upright (html.mob-port, the full-screen sheet of css/portrait.css) ----------
+   a carousel: one card in the middle, its neighbours peeking on both sides, each swipe stops on a card. The cards get their
+   own --u so a card fits the screen's height (the sheet's title, the job line, the tabs and the header line above it take
+   about 250 sheet-u) and never grows wider than 1/400 of the screen: the card stays the mockup's card, only its size
+   changes. */
+html.mob-port .skw-win:has(.skw-body.jobs-on) { width: auto; }
+html.mob-port #skillwin .skw-body.jobs-on { height: auto; padding: 0 0 calc(4 * var(--u)); }
+html.mob-port #skillwin .skw-body.jobs-on .skw-jobs {
+  --pu: var(--u); overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain;
+}
+html.mob-port #skillwin .skw-body.jobs-on .skw-jobs::-webkit-scrollbar { display: none; }
+html.mob-port #skillwin .jobs-h.jc-h { position: sticky; left: 0; margin: 0; padding: calc(8 * var(--u)) calc(12 * var(--u)) 0; font-size: calc(17 * var(--u)); }
+html.mob-port #skillwin .jobs.jc-row {
+  --u: max(0.38px, min(calc(100vw / 400), calc((100dvh - 250 * var(--pu)) / 790)));
+  justify-content: flex-start; gap: calc(14 * var(--u));
+  padding: calc(26 * var(--u)) calc(50% - 138.5 * var(--u)) calc(16 * var(--u));
+}
+html.mob-port #skillwin .jc-card { scroll-snap-align: center; scroll-snap-stop: always; }
+/* one card (class 3): the card in the middle, its path and what it brings under it; the sheet scrolls down */
+html.mob-port #skillwin .skw-body.jobs-on .skw-jobs:has(.jc-row.n1) { overflow: visible; scroll-snap-type: none; }
+html.mob-port #skillwin .jobs.jc-row.n1 { flex-direction: column; align-items: center; padding-left: calc(12 * var(--u)); padding-right: calc(12 * var(--u)); }
+html.mob-port #skillwin .jc-row.n1 .jc-info { width: auto; align-self: stretch; margin: calc(18 * var(--u)) 0 0; }
+html.mob-port #skillwin .jc-row.n1 .jc-path figure { width: calc(96 * var(--u)); }
+html.mob-port #skillwin .jc-row.n1 .jc-path .jc-face { width: calc(80 * var(--u)); height: calc(80 * var(--u)); }
+
+/* ---------- phones held sideways (html.mob-land): the height is short, so the job line above the tabs goes and the
+   cards take what is left (the window is scaled to the screen by skillwin.js fit()) ---------- */
+html.mob-land .skw-win:has(.skw-body.jobs-on) .skw-sub { display: none; }
+html.mob-land #skillwin .jobs-h.jc-h { margin-top: calc(6 * var(--u)); }

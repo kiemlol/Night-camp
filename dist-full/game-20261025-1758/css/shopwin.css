@@ -1,0 +1,163 @@
+/* shopwin.css — Uncle Coco's shop / the material pouch (js/shopwin.js), page 6 layout "A"
+   (assets/gen/nightcamp_pg_shop_a_raw.png): Uncle Coco behind his counter on the left, the tabs, the materials and
+   the picked one's dark card on the right. Sizes follow the mockup at the same window width (1 mockup px = 1.055u).
+   The window's look is css/kui.css. */
+.sp-wrap { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); transform-origin: 50% 50%; }
+.sp-win { width: calc(1410 * var(--u)); }
+.sp-coins {
+  position: absolute; right: calc(68 * var(--u)); top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: calc(8 * var(--u));
+  min-width: calc(206 * var(--u)); height: calc(46 * var(--u)); padding: 0 calc(22 * var(--u)) 0 calc(6 * var(--u)); border-radius: calc(23 * var(--u)); box-sizing: border-box;
+  background: linear-gradient(#fffaf0, #f1e5c7); border: calc(3.5 * var(--u)) solid var(--ink); -webkit-text-stroke: 0;
+}
+.sp-coins img { width: calc(38 * var(--u)); height: calc(38 * var(--u)); object-fit: contain; }
+.sp-coins b { flex: 1; text-align: center; font: 800 calc(26 * var(--u)) / 1 'Baloo 2', 'Mitr', sans-serif; color: var(--ink); letter-spacing: 0; }
+.sp-coins.bump { animation: sp-bump 0.35s ease-out; }
+@keyframes sp-bump { 40% { transform: translateY(-50%) scale(1.12); } }
+.sp-body { display: grid; grid-template-columns: calc(496 * var(--u)) minmax(0, 1fr); height: calc(640 * var(--u)); }
+
+/* ---------- Uncle Coco ---------- */
+.sp-art { position: relative; background-size: 122% auto; background-position: 66% 45%; background-repeat: no-repeat; background-color: #2a2f4d; border-right: calc(4 * var(--u)) solid var(--ink); }
+.sp-art.away::after { content: ''; position: absolute; inset: 0; background: rgba(20, 24, 50, 0.28); pointer-events: none; }
+.sp-bubble {
+  position: absolute; z-index: 1; left: 52%; top: 11%; max-width: calc(210 * var(--u)); padding: calc(10 * var(--u)) calc(18 * var(--u));
+  border-radius: calc(22 * var(--u)); border: calc(4 * var(--u)) solid var(--ink); background: #fffaf0; color: var(--ink);
+  font: 700 calc(21 * var(--u)) / 1.35 'Mitr', sans-serif; text-align: center; box-shadow: 0 calc(4 * var(--u)) 0 rgba(0, 0, 0, 0.25);
+}
+.sp-bubble::after {
+  content: ''; position: absolute; left: calc(26 * var(--u)); bottom: calc(-19 * var(--u)); width: calc(22 * var(--u)); height: calc(22 * var(--u));
+  background: #fffaf0; border-right: calc(4 * var(--u)) solid var(--ink); border-bottom: calc(4 * var(--u)) solid var(--ink);
+  transform: skewX(28deg) rotate(38deg); border-radius: 0 0 calc(6 * var(--u)) 0;
+}
+.sp-bubble.pop { animation: sp-pop 0.3s ease-out; }
+@keyframes sp-pop { 0% { transform: scale(0.85); } 60% { transform: scale(1.06); } }
+
+/* ---------- the right side ---------- */
+.sp-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: calc(16 * var(--u)) calc(16 * var(--u)) calc(16 * var(--u)) calc(10 * var(--u)); }
+.sp-tabs { flex-shrink: 0; padding: 0 calc(10 * var(--u)); border-bottom-color: #cdbd98; }
+.sp-tabs .kw-tab { min-width: calc(150 * var(--u)); font-size: calc(22 * var(--u)); padding: calc(5 * var(--u)) calc(24 * var(--u)); }
+.sp-tabs .kw-tab:disabled { cursor: default; opacity: 0.55; }
+.sp-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: calc(12 * var(--u)) calc(12 * var(--u)) calc(14 * var(--u)); border: calc(3 * var(--u)) solid #cdbd98; border-top: 0; border-radius: 0 0 calc(18 * var(--u)) calc(18 * var(--u)); background: #f3eadb; }
+
+/* sell: the materials | the card */
+.sp-sell { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) calc(352 * var(--u)); grid-template-rows: minmax(0, 1fr); gap: calc(12 * var(--u)); }
+.sp-left { display: flex; flex-direction: column; min-height: 0; }
+.sp-grid {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: calc(12 * var(--u)); align-content: start;
+  height: calc(372 * var(--u)); padding: calc(6 * var(--u)) calc(6 * var(--u)) calc(6 * var(--u)) calc(4 * var(--u));
+}
+.sp-cell {
+  position: relative; display: grid; place-items: center; aspect-ratio: 1; min-width: 0; padding: 0; cursor: pointer;
+  border: calc(4 * var(--u)) solid var(--ink); border-radius: calc(16 * var(--u));
+  box-shadow: inset 0 calc(-5 * var(--u)) 0 rgba(0, 0, 0, 0.1), inset 0 calc(3 * var(--u)) 0 rgba(255, 255, 255, 0.6), 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.18);
+  transition: transform 0.08s;
+}
+.sp-cell:hover { transform: translateY(calc(-3 * var(--u))); }
+.r-blue.sp-cell, .sp-cimg.r-blue, .sp-gimg.r-blue { background: linear-gradient(#e6f4ff, #a9d3f5); }
+.r-rare.sp-cell, .sp-cimg.r-rare, .sp-gimg.r-rare { background: linear-gradient(#f1e6ff, #c6a4f5); }
+.r-gold.sp-cell, .sp-cimg.r-gold, .sp-gimg.r-gold { background: linear-gradient(#fff5c9, #f5cc55); }
+.sp-cell img { position: absolute; left: 11%; top: 11%; width: 78%; height: 78%; object-fit: contain; filter: drop-shadow(0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.18)); }
+.sp-cell b { position: absolute; right: calc(7 * var(--u)); bottom: calc(1 * var(--u)); font: 800 calc(22 * var(--u)) / 1.2 'Baloo 2', sans-serif; color: #fff; -webkit-text-stroke: calc(5 * var(--u)) var(--ink); paint-order: stroke fill; }
+.sp-cell.sel { box-shadow: 0 0 0 calc(4 * var(--u)) #fff, 0 0 0 calc(7 * var(--u)) #3b8fdc, inset 0 calc(-5 * var(--u)) 0 rgba(0, 0, 0, 0.1); }
+.sp-lock { position: absolute; left: calc(5 * var(--u)); top: calc(5 * var(--u)); display: grid; place-items: center; width: calc(24 * var(--u)); height: calc(24 * var(--u)); border-radius: 50%; background: #fffaf0; border: calc(2.5 * var(--u)) solid var(--ink); }
+.sp-lock svg { width: calc(12 * var(--u)); height: calc(14 * var(--u)); }
+.sp-empty { display: grid; place-items: center; height: calc(360 * var(--u)); text-align: center; font: 500 calc(18 * var(--u)) / 1.6 'Mitr', sans-serif; color: #6a6078; }
+.sp-sum { margin-top: auto; padding-top: calc(12 * var(--u)); text-align: center; font: 600 calc(21 * var(--u)) / 1.4 'Mitr', sans-serif; }
+.sp-sum em { font-style: normal; font-weight: 700; color: #c98a00; }
+.sp-all { display: flex; width: calc(300 * var(--u)); height: calc(60 * var(--u)); margin: calc(10 * var(--u)) auto 0; font-size: calc(22 * var(--u)); }
+.sp-card { display: flex; flex-direction: column; min-height: 0; padding: calc(16 * var(--u)) calc(18 * var(--u)) calc(18 * var(--u)); }
+/* The fixed-height desktop window must contain the card. Scroll long details and the walk/sell actions
+   inside it instead of letting this grid item push the whole right side below the window's clipped edge. */
+#shopwin .sp-card { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #74b6ec #1a1f35; }
+#shopwin .sp-card > * { flex-shrink: 0; }
+.sp-cimg {
+  flex: none; display: grid; place-items: center; height: calc(200 * var(--u)); border-radius: calc(16 * var(--u));
+  border: calc(3 * var(--u)) solid #363d63; background: radial-gradient(ellipse at 50% 60%, #2c3354, #1a1f35) !important;
+}
+.sp-cimg.r-rare { box-shadow: inset 0 0 calc(30 * var(--u)) rgba(198, 164, 245, 0.45); }
+.sp-cimg.r-gold { box-shadow: inset 0 0 calc(30 * var(--u)) rgba(245, 204, 85, 0.4); }
+.sp-cimg img { width: calc(160 * var(--u)); height: calc(160 * var(--u)); object-fit: contain; filter: drop-shadow(0 calc(4 * var(--u)) 0 rgba(0, 0, 0, 0.25)); }
+.sp-cname { margin-top: calc(12 * var(--u)); font: 700 calc(33 * var(--u)) / 1.2 'Mitr', sans-serif; color: #fff; }
+.sp-cname.rare { color: #d8b8ff; }
+.sp-from { font: 500 calc(20 * var(--u)) / 1.45 'Mitr', sans-serif; color: #7fcaf8; }
+.sp-from span { color: #aab2cf; }
+.sp-desc { margin-top: calc(4 * var(--u)); font: 400 calc(14.5 * var(--u)) / 1.45 'Mitr', sans-serif; color: #b9c0e0; }
+.sp-line { font: 500 calc(21 * var(--u)) / 1.55 'Mitr', sans-serif; color: #eef0ff; }
+.sp-line:first-of-type { margin-top: calc(10 * var(--u)); padding-top: calc(10 * var(--u)); border-top: calc(2 * var(--u)) solid #3a4268; }
+.sp-line em { font-style: normal; font-weight: 700; color: #ffd060; }
+.sp-btns { display: flex; gap: calc(8 * var(--u)); margin-top: auto; padding-top: calc(10 * var(--u)); }
+.sp-btns .kw-btn { flex: 1; height: calc(48 * var(--u)); padding: 0 calc(6 * var(--u)); font-size: calc(18 * var(--u)); border-radius: calc(13 * var(--u)); }
+.sp-btns .kw-btn:disabled { filter: grayscale(0.8); opacity: 0.55; }
+.sp-hint { margin-top: auto; padding-top: calc(10 * var(--u)); font: 400 calc(15 * var(--u)) / 1.45 'Mitr', sans-serif; color: #b9c0e0; }
+.sp-cempty { margin: auto; text-align: center; color: #b9c0e0; }
+
+/* ขายอุปกรณ์ (js/shopwin.js renderGear): the pieces as cream rows (icon · name, slot, grade tag · price), the materials' card */
+.sp-glist { display: flex; flex-direction: column; gap: calc(8 * var(--u)); height: calc(372 * var(--u)); padding: calc(4 * var(--u)) calc(8 * var(--u)) calc(4 * var(--u)) calc(2 * var(--u)); }
+.sp-gitem {
+  flex: none; display: grid; grid-template-columns: calc(64 * var(--u)) minmax(0, 1fr) auto; align-items: center; gap: calc(12 * var(--u));
+  padding: calc(6 * var(--u)) calc(14 * var(--u)) calc(6 * var(--u)) calc(6 * var(--u)); text-align: left; cursor: pointer; color: var(--ink);
+  border-radius: calc(16 * var(--u)); background: #fffaf0; border: calc(3 * var(--u)) solid #d8c8a4; transition: transform 0.08s;
+}
+.sp-gitem:hover { transform: translateY(calc(-2 * var(--u))); border-color: #7fcaf8; }
+.sp-gitem.sel { border-color: #3b8fdc; box-shadow: 0 0 0 calc(3 * var(--u)) #a9d3f5; }
+.sp-gimg { display: grid; place-items: center; width: calc(64 * var(--u)); height: calc(64 * var(--u)); border-radius: calc(12 * var(--u)); border: calc(3 * var(--u)) solid var(--ink); box-sizing: border-box; }
+.sp-gimg img { width: 84%; height: 84%; object-fit: contain; }
+.sp-gt { display: flex; flex-direction: column; min-width: 0; }
+.sp-gt b { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 700 calc(20 * var(--u)) / 1.3 'Mitr', sans-serif; }
+.sp-gt small { font: 400 calc(15 * var(--u)) / 1.4 'Mitr', sans-serif; color: #6a6078; }
+.sp-gprice { display: flex; align-items: center; gap: calc(6 * var(--u)); font: 800 calc(22 * var(--u)) / 1 'Baloo 2', sans-serif; }
+.sp-gprice img { width: calc(26 * var(--u)); height: calc(26 * var(--u)); }
+.sp-all.on { box-shadow: 0 0 0 calc(3 * var(--u)) #fff, 0 0 0 calc(6 * var(--u)) #3b8fdc; }
+.sp-gleft .sp-go { margin-top: 0; }
+.sp-grows { display: flex; flex-direction: column; margin-top: calc(8 * var(--u)); font: 500 calc(17 * var(--u)) / 1.45 'Mitr', sans-serif; }
+.sp-from .gt-tag { vertical-align: middle; }
+/* the bag's bulk sale card (NC.gearBulkCard, css/inventory.css's iv- parts) inside his dark card */
+.sp-gbulkcard .iv-acts { flex-wrap: wrap; }
+.sp-gbulkcard .iv-lines { max-height: calc(150 * var(--u)); overflow-y: auto; }
+
+/* buy */
+.sp-buy { display: grid; gap: calc(14 * var(--u)); align-content: start; }
+.sp-pot {
+  display: grid; grid-template-columns: calc(96 * var(--u)) minmax(0, 1fr) auto auto; align-items: center; gap: calc(16 * var(--u));
+  padding: calc(12 * var(--u)) calc(16 * var(--u)); border-radius: calc(18 * var(--u)); background: #fffaf0; border: calc(3 * var(--u)) solid #d8c8a4;
+}
+.sp-pimg { display: grid; place-items: center; width: calc(96 * var(--u)); height: calc(96 * var(--u)); border-radius: calc(16 * var(--u)); border: calc(4 * var(--u)) solid var(--ink); background: linear-gradient(#e6f4ff, #a9d3f5); box-sizing: border-box; }
+.sp-pimg img { width: 78%; height: 78%; object-fit: contain; }
+.sp-pt { display: flex; flex-direction: column; min-width: 0; font: 400 calc(17 * var(--u)) / 1.45 'Mitr', sans-serif; }
+.sp-pt b { font: 700 calc(24 * var(--u)) / 1.3 'Mitr', sans-serif; }
+.sp-pt small { font-size: calc(15 * var(--u)); color: #6a6078; }
+.sp-price { display: flex; align-items: center; gap: calc(6 * var(--u)); font: 800 calc(26 * var(--u)) / 1 'Baloo 2', sans-serif; }
+.sp-price img { width: calc(32 * var(--u)); height: calc(32 * var(--u)); }
+.sp-pbtns { display: flex; gap: calc(8 * var(--u)); }
+.sp-pbtns .kw-btn { height: calc(48 * var(--u)); font-size: calc(18 * var(--u)); }
+.sp-note { font: 400 calc(15 * var(--u)) / 1.5 'Mitr', sans-serif; color: #6a6078; }
+/* three sizes of each potion (js/potions.js): tighter rows that scroll */
+.sp-buy.many { gap: calc(8 * var(--u)); overflow-y: auto; min-height: 0; padding-right: calc(4 * var(--u)); }
+.sp-buy.many .sp-pot { grid-template-columns: calc(66 * var(--u)) minmax(0, 1fr) auto auto; gap: calc(12 * var(--u)); padding: calc(8 * var(--u)) calc(12 * var(--u)); border-radius: calc(14 * var(--u)); }
+.sp-buy.many .sp-pimg { width: calc(66 * var(--u)); height: calc(66 * var(--u)); border-width: calc(3 * var(--u)); border-radius: calc(12 * var(--u)); }
+.sp-buy.many .sp-pimg img { width: 84%; height: 84%; }
+.sp-pimg.red { background: linear-gradient(#fff0f3, #f6bccb); }
+/* ต้มยา (js/brew.js): the junk a batch takes, what it saves */
+.sp-brew .sp-bparts img { width: calc(20 * var(--u)); height: calc(20 * var(--u)); vertical-align: middle; margin: 0 calc(2 * var(--u)) 0 calc(4 * var(--u)); }
+.sp-brew .sp-pt i { font-style: normal; font-weight: 600; }
+.sp-brew .sp-pt i.good { color: #2f8f4e; }
+.sp-brew .sp-pt i.bad { color: #c2454f; }
+.sp-buy.many .sp-pt { font-size: calc(14 * var(--u)); line-height: 1.35; }
+.sp-buy.many .sp-pt b { font-size: calc(20 * var(--u)); }
+.sp-buy.many .sp-pt small { font-size: calc(13 * var(--u)); }
+.sp-buy.many .sp-price { font-size: calc(22 * var(--u)); }
+.sp-buy.many .sp-price img { width: calc(26 * var(--u)); height: calc(26 * var(--u)); }
+.sp-buy.many .sp-pbtns { gap: calc(6 * var(--u)); }
+.sp-buy.many .sp-pbtns .kw-btn { height: calc(42 * var(--u)); font-size: calc(16 * var(--u)); padding: 0 calc(10 * var(--u)); }
+
+/* reset */
+.sp-reset { display: grid; grid-template-columns: calc(120 * var(--u)) minmax(0, 1fr); gap: calc(20 * var(--u)); align-content: start; }
+.sp-rimg { display: grid; place-items: center; width: calc(120 * var(--u)); height: calc(120 * var(--u)); border-radius: calc(20 * var(--u)); border: calc(4 * var(--u)) solid var(--ink); background: linear-gradient(#f1e6ff, #c6a4f5); box-sizing: border-box; }
+.sp-rimg img { width: 80%; height: 80%; object-fit: contain; }
+.sp-rt { display: flex; flex-direction: column; gap: calc(8 * var(--u)); font: 400 calc(18 * var(--u)) / 1.5 'Mitr', sans-serif; }
+.sp-rt b { font: 700 calc(25 * var(--u)) / 1.3 'Mitr', sans-serif; }
+.sp-rt em { font-style: normal; font-weight: 700; color: #2f7fd6; }
+.sp-rt .kw-btn { align-self: flex-start; height: calc(54 * var(--u)); padding: 0 calc(30 * var(--u)); font-size: calc(21 * var(--u)); margin-top: calc(6 * var(--u)); }
+.sp-reset .sp-note { grid-column: 1 / -1; }
+/* (away from Uncle Coco the walk card goes first, shopwin.js: a row of its own; in the 120 px picture column it pushed the
+   picture over and the words into that column, one word a line - Discord #122) */
+.sp-reset > .sp-go { grid-column: 1 / -1; margin-bottom: 0; }

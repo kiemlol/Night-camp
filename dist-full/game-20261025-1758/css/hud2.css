@@ -1,0 +1,87 @@
+/* hud2.css — the new top-right corner (round minimap in a wooden ring, sky window, time plaque, zone ribbon), the
+   party list under the hero's frame and the party window (js/minimap.js, js/party.js). Sizes in --u like style.css. */
+
+/* ---------- minimap corner ---------- */
+.tr { right: calc(12 * var(--u)); top: calc(4 * var(--u)); width: calc(262 * var(--u)); }
+.tr .minimap {
+  position: relative; width: calc(262 * var(--u)); height: calc(274.5 * var(--u)); overflow: visible;
+  border: 0; border-radius: 0; box-shadow: none; background: none;
+}
+.tr .minimap canvas {
+  position: absolute; left: 14.05%; top: 20%; width: 72.1%; height: 68.9%; border-radius: 50%;
+}
+.tr .mm-ring {
+  position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+  filter: drop-shadow(0 calc(4 * var(--u)) 0 rgba(0, 0, 0, 0.28));
+}
+/* the sky window: left of the ring, the time on a plaque under it */
+.tr .dial {
+  position: absolute; left: calc(-104 * var(--u)); top: calc(78 * var(--u)); width: calc(108 * var(--u)); height: calc(117.5 * var(--u));
+  margin: 0; z-index: 2;
+}
+.tr .dial canvas { position: absolute; left: 14.9%; top: 19.9%; width: 70.2%; height: 64.5%; border-radius: 50%; }
+.tr .sky-ring {
+  position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+  filter: drop-shadow(0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.28));
+}
+.tr .time {
+  top: auto; bottom: calc(-40 * var(--u)); left: 50%; transform: translateX(-50%); z-index: 3;
+  min-width: calc(112 * var(--u)); padding: calc(5 * var(--u)) calc(16 * var(--u)) calc(3 * var(--u));
+  background: url(../assets/ui/mm_plaque.png) center / 100% 100% no-repeat; border: 0; box-shadow: none; border-radius: 0;
+  font: 800 calc(20 * var(--u)) / 1.35 'Baloo 2', sans-serif; text-align: center; color: #fff4d8;
+  -webkit-text-stroke: calc(4 * var(--u)) var(--ink); paint-order: stroke fill;
+}
+/* the zone on a ribbon under the ring */
+.tr .zonelbl {
+  position: relative; z-index: 2; width: calc(262 * var(--u)); height: calc(102 * var(--u)); margin: calc(-40 * var(--u)) 0 0;
+  display: flex; align-items: center; justify-content: center; padding: 0 calc(40 * var(--u)) calc(26 * var(--u));
+  background: url(../assets/ui/mm_banner.png) center / contain no-repeat;
+  font: 600 calc(18 * var(--u)) 'Mitr', sans-serif; color: #fff4d8; white-space: nowrap; overflow: hidden;
+  -webkit-text-stroke: calc(4 * var(--u)) var(--ink); paint-order: stroke fill;
+}
+.tr .zonelbl:empty { background: none; }
+
+/* ---------- the party list (under the hero's frame) ---------- */
+.partybox {
+  position: absolute; left: calc(16 * var(--u)); top: calc(168 * var(--u)); display: flex; flex-direction: column;
+  gap: calc(8 * var(--u));
+}
+.partybox[hidden] { display: none; }
+.pm {
+  display: flex; align-items: center; gap: calc(8 * var(--u)); width: calc(272 * var(--u));
+  padding: calc(4 * var(--u)) calc(12 * var(--u)) calc(5 * var(--u)) calc(4 * var(--u));
+  border-radius: calc(40 * var(--u)) calc(14 * var(--u)) calc(14 * var(--u)) calc(40 * var(--u));
+  background: linear-gradient(#3d3848, #2e2a38); border: calc(4 * var(--u)) solid var(--ink);
+  box-shadow: inset 0 0 0 calc(2 * var(--u)) #a88a55, 0 calc(4 * var(--u)) 0 rgba(0, 0, 0, 0.25);
+}
+.pm-face {
+  flex: none; width: calc(52 * var(--u)); height: calc(52 * var(--u)); border-radius: 50%; overflow: hidden;
+  border: calc(3 * var(--u)) solid var(--ink); background: #f3e7cf;
+}
+.pm-face canvas { display: block; width: 100%; height: 100%; }
+.pm-body { flex: 1; min-width: 0; }
+.pm-top { display: flex; justify-content: space-between; align-items: baseline; gap: calc(6 * var(--u)); white-space: nowrap; }
+.pm-name { font: 600 calc(19 * var(--u)) 'Mitr', sans-serif; -webkit-text-stroke: calc(4 * var(--u)) var(--ink); paint-order: stroke fill; }
+.pm-job { font: 500 calc(13 * var(--u)) 'Mitr', sans-serif; color: #d9d2c4; }
+.pm-job b { font: 800 calc(15 * var(--u)) 'Baloo 2', sans-serif; color: #ffd873; }
+.pm-bar {
+  position: relative; height: calc(15 * var(--u)); margin-top: calc(2 * var(--u)); border-radius: 99px; overflow: hidden;
+  background: #241f2e; border: calc(2 * var(--u)) solid var(--ink);
+}
+.pm-bar.sp { height: calc(8 * var(--u)); margin-top: calc(3 * var(--u)); }
+.pm-bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; border-radius: 99px; background: linear-gradient(#93e883, #4fb24a); }
+.pm-bar.sp i { background: linear-gradient(#94ccff, #4d8fe0); }
+.pm-bar em {
+  position: absolute; inset: 0; font: 800 calc(12 * var(--u)) / calc(11.5 * var(--u)) 'Baloo 2', 'Mitr', sans-serif; font-style: normal;
+  text-align: center; color: #fff; -webkit-text-stroke: calc(3 * var(--u)) var(--ink); paint-order: stroke fill;
+}
+.pm.low .pm-bar.hp i { background: linear-gradient(#ff8f8f, #d84a4a); }
+.pm.down { filter: grayscale(0.85) brightness(0.8); }
+
+@media (max-aspect-ratio: 7/5) {
+  .partybox { top: calc(160 * var(--u)); }
+}
+
+/* ---------- the job choice: five first jobs in one row (the priest: js/priest.js) ---------- */
+.jobs { grid-template-columns: repeat(5, 1fr); }
+@media (max-aspect-ratio: 7/5) { .jobs { grid-template-columns: repeat(3, 1fr); } }
