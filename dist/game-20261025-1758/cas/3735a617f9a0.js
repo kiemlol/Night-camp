@@ -14,7 +14,7 @@
   if (!O || !O.enabled) return;
   const N = NC.Nakama, store = O.store;
   const KEY_SERVER = 'nightcamp.online.server', KEY_HEROES = 'nightcamp.online.heroes:', KEY_LAST = 'nightcamp.online.lastPlayed';
-  const LOCAL_URL = 'http://127.0.0.1:7350';
+  const LOCAL_URL = location.origin;
   const onLocalhost = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   const S = (NC.OnlineServers = {});
   const norm = (u) => String(u || '').replace(/\/+$/, '');
