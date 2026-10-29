@@ -258,6 +258,7 @@ const mime = {
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json",
   ".css": "text/css",
+  ".mjs": "text/javascript",
   ".png": "image/png",
   ".webp": "image/webp",
   ".jpg": "image/jpeg",
@@ -377,7 +378,11 @@ const server = http.createServer(async (req, res) => {
         });
         return res.end();
       }
-      const relative = decodeURIComponent(route).replace(/^\/+/, "");
+      if (route === "/studio") {
+        res.writeHead(302, { location: "/studio/" });
+        return res.end();
+      }
+      const relative = route === "/studio/" ? "studio/index.html" : decodeURIComponent(route).replace(/^\/+/, "");
       let file = path.resolve(CLIENT_DIR, relative);
       requireValue(file.startsWith(CLIENT_DIR + path.sep), "invalid_path");
       if (!fs.existsSync(file)) {
@@ -389,7 +394,7 @@ const server = http.createServer(async (req, res) => {
         file = full;
       }
       if (fs.existsSync(file) && fs.statSync(file).isFile()) {
-        if (path.basename(file) === "index.html") {
+        if (path.basename(file) === "index.html" && !relative.startsWith("studio/")) {
           let html = fs.readFileSync(file, "utf8");
           html = html.replace(
             /(<meta\s+name="nc-online-servers"\s+content=")[^"]*(")/,

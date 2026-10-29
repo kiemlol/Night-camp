@@ -182,6 +182,15 @@ test("HTTP + two WebSocket players, command replay, invalid frames, restart and 
   ).text();
   assert.ok(html.includes("/backend-ui.js"));
   assert.ok(html.includes('nc-online-servers" content="' + base));
+  const studio = await fetch(base + "/studio");
+  assert.equal(studio.status, 200);
+  assert.ok(studio.url.endsWith("/studio/"));
+  const studioHtml = await studio.text();
+  assert.ok(studioHtml.includes("CUTOUT STUDIO"));
+  assert.ok(!studioHtml.includes("/backend-ui.js"));
+  const studioModule = await fetch(base + "/studio/model.mjs");
+  assert.equal(studioModule.status, 200);
+  assert.match(studioModule.headers.get("content-type"), /javascript/);
   const email = await post(
     "/v2/account/authenticate/email?create=true",
     { email: "test@example.invalid", password: "correct-password" },

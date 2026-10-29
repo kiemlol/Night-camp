@@ -56,6 +56,38 @@ HTTPS, hoặc 7350 nếu thử bằng HTTP. Volume `server/runtime/` giữ dữ 
 restart/rebuild. Sao lưu cả thư mục này; `.session-secret` giữ cho phiên đăng
 nhập còn hợp lệ sau restart. Không chạy nhiều replica dùng chung file JSON.
 
+## Cutout Studio v1
+
+Sau khi chạy server, mở **http://localhost:7350/studio/** (hoặc `/studio/` trên
+domain đã deploy). Studio chạy riêng với game và không sửa dữ liệu người chơi.
+
+- Thư viện 49 rig đầy đủ và 366 ảnh bộ phận có metadata khớp từ manifest.
+- Xem trước bằng renderer cutout của game; đổi rig/ảnh đầu, thân, hai tay, hai chân.
+- Thêm ảnh PNG/WebP, chỉnh kích thước và điểm neo bằng kéo thả hoặc nhập số.
+- Chỉnh pose bằng góc hoặc kéo tay/chân/đầu; Shift + kéo để gập khớp.
+- Tạo keyframe từ mẫu đứng/đi/chạy, nạp clip Pose Studio đã có, scrub/phát timeline,
+  đổi đường cong chuyển động, ghi/xóa/đổi thời điểm keyframe, undo/redo.
+- Lưu nháp trong trình duyệt, tải/mở project JSON có kèm ảnh mới và xuất game bundle.
+
+Thay đổi pose cần bấm **Ghi pose** để cập nhật keyframe. Lưu project trước khi
+xóa dữ liệu trình duyệt. Tạo rig mới bằng cách nhân bản rig có sẵn rồi thay các
+ảnh; v1 giữ cấu trúc sáu bộ phận, chưa hỗ trợ sửa mesh có trọng số hay rig Spine.
+
+Để giải nén bundle xuất từ Studio (thư mục đích phải chưa tồn tại):
+
+```bash
+node tools/install-cutout-bundle.mjs hero.game-bundle.json exported-hero
+```
+
+Kết quả gồm `cutout-export.js`, ảnh mới và bản project. Copy vào client mục tiêu;
+giữ các ảnh gốc được tham chiếu. Nạp script sau `manifest.js` và
+`poselib_data.js`, trước bước nạp sprite và `poselib.js`. Tạo item trỏ tới rig mới
+và gắn clip `studio:<tên_clip>` vào trạng thái di chuyển mong muốn. Studio không
+tự áp dụng thay đổi lên nhân vật đang chơi. Khi tích hợp game dùng bundle `cas/`,
+cần cập nhật entry/bundle tương ứng, không chỉ sửa bản `js/` tham khảo.
+
+Tái tạo danh mục Studio khi thay manifest: `node tools/build-studio-catalog.mjs`.
+
 ## Những hệ thống đã có
 
 - Ba ô nhân vật, mật khẩu email được băm scrypt, phiên ký HMAC, refresh/logout,
