@@ -121,6 +121,12 @@ tại [dist/cutout-demo/README.md](dist/cutout-demo/README.md).
 Sau khi chạy server, mở **http://localhost:7350/studio/** (hoặc `/studio/` trên
 domain đã deploy). Studio chạy riêng với game và không sửa dữ liệu người chơi.
 
+Trên điện thoại/tablet (rộng tối đa 900 px), Studio mặc định mở **Preview asset**.
+Bấm **☰** góc phải để chuyển riêng từng mục: nhân vật/ảnh, điểm neo/xương,
+phụ kiện, animation, frame/timeline, chỉnh tư thế hoặc project/thư viện.
+Preview và nút Phát/Ghi pose luôn hiện khi chỉnh; chỉ vùng công cụ cuộn riêng.
+Xoay ngang đặt preview bên trái, công cụ bên phải. Máy tính giữ bố cục ba cột.
+
 - Thư viện 49 rig đầy đủ và 366 ảnh bộ phận có metadata khớp từ manifest.
 - Xem trước bằng renderer cutout của game; đổi rig/ảnh đầu, thân, hai tay, hai chân.
 - Thêm ảnh PNG/WebP, chỉnh kích thước và điểm neo bằng kéo thả hoặc nhập số.

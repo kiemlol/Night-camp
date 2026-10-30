@@ -7,7 +7,7 @@ export function mountLibrary(initial,actions){
  const $=id=>panel.querySelector('#'+id);
  const opener=el('button','▦ Toàn bộ thư viện');opener.id='browseLibrary';
  const refresh=el('button','↻ Tải lại GitHub');refresh.id='refreshLibrary';refresh.onclick=async()=>{refresh.disabled=true;try{await actions.refresh()}finally{refresh.disabled=false}};
- const nav=document.querySelector('header nav');nav.prepend(opener,refresh);
+ const nav=document.getElementById('projectActions')||document.querySelector('header nav');nav.prepend(opener,refresh);
  const report=error=>{const p=el('p','Lỗi: '+error.message);p.style.color='#ffb39e';$('ab-preview').append(p)};
  const run=fn=>async()=>{try{await fn()}catch(e){report(e)}};
  opener.onclick=()=>{panel.showModal();render()};$('ab-close').onclick=()=>{panel.close();clearPreview()};

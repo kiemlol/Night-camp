@@ -1,0 +1,73 @@
+.mobile-only,.mobile-preview-controls{display:none}
+.studio-section+.studio-section{margin-top:25px}
+.studio-mobile-menu{color:#dce3ec;background:#19222e;border:1px solid #435269;border-radius:16px;padding:16px;width:min(340px,calc(100vw - 24px));max-height:calc(100dvh - 90px);margin:0;position:fixed;inset:calc(env(safe-area-inset-top,0px) + 64px) 12px auto auto;overflow:auto;box-shadow:0 20px 80px #0009}
+.studio-mobile-menu::backdrop{background:#070c16bb;backdrop-filter:blur(4px)}
+.mobile-menu-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.mobile-menu-heading h2{margin:0;color:var(--accent)}
+.mobile-menu-heading button{width:44px;height:44px}
+.studio-mobile-menu nav{display:grid;gap:6px}
+.studio-mobile-menu nav button{display:flex;gap:14px;align-items:center;min-height:48px;text-align:left;padding:10px 14px}
+.studio-mobile-menu nav button span{width:20px;text-align:center;color:var(--accent)}
+.studio-mobile-menu nav button[aria-current=page]{background:#d3ed9218;border-color:var(--accent);color:var(--accent)}
+.studio-mobile-menu p{font-size:11px;color:var(--muted);margin:14px 0 0}
+@media(max-width:900px){
+ body.studio-mobile{height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column;overscroll-behavior:none}
+ .studio-mobile>header{flex:none;min-height:60px;padding:calc(6px + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 6px max(12px,env(safe-area-inset-left,0px));flex-wrap:nowrap;gap:8px;background:#10161e}
+ .studio-mobile header strong{font-size:11px;letter-spacing:1.7px}
+ .studio-mobile header small{display:none}
+ .studio-mobile .mark{font-size:19px;margin-right:4px}
+ #mobileTabTitle{display:block;margin-left:27px;color:#b6c4d6;font-size:11px;line-height:1.25}
+ #mobileMenuButton{display:block;flex:none;width:44px;height:44px;font-size:25px;padding:0;color:var(--accent);border-color:#4a5b72;background:#202c3b}
+ .studio-mobile main{flex:1;min-height:0;height:auto;width:100%;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:'viewbar' 'stage' 'dock';overflow:hidden}
+ .studio-mobile:not([data-mobile-tab=preview]) main{grid-template-rows:auto minmax(100px,33%) auto minmax(0,1fr);grid-template-areas:'viewbar' 'stage' 'dock' 'panel'}
+ .studio-mobile aside.library,.studio-mobile aside.inspector,.studio-mobile .workspace{display:contents}
+ .studio-mobile .viewbar{grid-area:viewbar;padding:6px 12px;min-width:0;gap:4px;flex-wrap:nowrap}
+ .studio-mobile .viewbar .badge{display:none}
+ .studio-mobile .viewbar>div{width:100%;justify-content:space-between;gap:8px}
+ .studio-mobile .viewbar label{min-height:30px;font-size:12px}
+ .studio-mobile .viewbar input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}
+ .studio-mobile .viewbar input[type=range]{width:100px;height:28px;padding:0;accent-color:var(--accent)}
+ .studio-mobile .stage{grid-area:stage;min-height:0;overflow:hidden}
+ .studio-mobile .stageNote{bottom:6px;font-size:10px;line-height:1.25;padding:0 12px}
+ .studio-mobile:not([data-mobile-tab=preview]) .stageNote{display:none}
+ .studio-mobile .mobile-preview-controls{display:block;grid-area:dock;padding:6px 10px 0;border-top:1px solid var(--line);background:#19222e}
+ .studio-mobile .toolbar{gap:6px;flex-wrap:wrap}
+ .studio-mobile .toolbar button{min-height:40px;font-size:11px;padding:6px 8px}
+ .studio-mobile .toolbar label{font-size:0;gap:0;margin-left:auto}
+ .studio-mobile .toolbar select{font-size:12px;min-height:40px;width:50px;padding:6px}
+ .studio-mobile #clock{font-size:11px;white-space:nowrap}
+ .studio-mobile #deleteKey{margin-bottom:12px}
+ .studio-mobile #scrub{display:block;height:28px;margin:0;padding:0}
+ .studio-mobile .mobile-editor-panel{grid-area:panel;min-width:0;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:16px max(16px,env(safe-area-inset-right,0px)) 28px max(16px,env(safe-area-inset-left,0px));margin:0;border:0;border-top:1px solid #38475a;background:#171f2a;scrollbar-gutter:stable}
+ .studio-mobile .mobile-editor-panel[hidden]{display:none}
+ .studio-mobile .mobile-editor-panel h2{margin:0 0 14px}
+ .studio-mobile .mobile-editor-panel h2.mobile-only{display:block}
+ .studio-mobile .mobile-editor-panel label{font-size:12px}
+ .studio-mobile .mobile-editor-panel button{min-height:44px}
+ /* 16px avoids Safari zooming the whole editor when a number/text field opens. */
+ .studio-mobile input:not([type=checkbox]):not([type=range]),.studio-mobile select{font-size:16px;min-height:42px}
+ .studio-mobile .channel{grid-template-columns:minmax(0,1fr) 100px;gap:12px;margin-bottom:10px}
+ .studio-mobile .channel input{width:100px;padding:8px}
+ .studio-mobile #keys{max-height:none;overflow:visible}
+ .studio-mobile #keys button{font-size:12px;padding:8px}
+ .studio-mobile .creation-tools{padding-bottom:14px;margin-bottom:14px}
+ .studio-mobile .creation-tools>button{flex:1 1 145px}
+ .studio-mobile .creation-tools label{flex-wrap:wrap}
+ .studio-mobile #anchor{display:block;max-width:360px;margin:0 auto 12px}
+ .studio-mobile #attachmentPreview{display:block;max-width:320px;margin:auto}
+ .studio-mobile #projectActions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .studio-mobile #projectActions button{margin:0;text-align:left;padding:12px;min-width:0}
+ .studio-mobile #projectActions #export,.studio-mobile #projectActions #browseLibrary{grid-column:1/-1}
+ .studio-mobile>footer{flex:none;height:auto;min-height:26px;padding:5px 12px calc(5px + env(safe-area-inset-bottom,0px));font-size:10px;min-width:0}
+ .studio-mobile>footer #status{white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+ .studio-mobile>footer>span:last-child{display:none}
+ .studio-mobile .timeline-dialog,.studio-mobile .asset-browser{max-height:90dvh}
+}
+@media(max-width:900px) and (max-height:500px){
+ .studio-mobile>header{min-height:48px;padding-top:2px;padding-bottom:2px}
+ #mobileTabTitle{display:none}
+ .studio-mobile:not([data-mobile-tab=preview]) main{grid-template-columns:44% minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:'viewbar panel' 'stage panel' 'dock panel'}
+ .studio-mobile .mobile-editor-panel{border-top:0;border-left:1px solid #38475a}
+ .studio-mobile .stageNote{display:none}
+ .studio-mobile .viewbar input[type=range]{width:60px}
+}
