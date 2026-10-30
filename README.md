@@ -126,6 +126,14 @@ Bấm **☰** góc phải để chuyển riêng từng mục: nhân vật/ảnh,
 phụ kiện, animation, frame/timeline, chỉnh tư thế hoặc project/thư viện.
 Preview và nút Phát/Ghi pose luôn hiện khi chỉnh; chỉ vùng công cụ cuộn riêng.
 Xoay ngang đặt preview bên trái, công cụ bên phải. Máy tính giữ bố cục ba cột.
+Tab **Điểm neo & xương** có bộ chọn sáu bộ phận riêng, đồng bộ với tab nhân vật.
+
+Khi nạp clip Pose Studio, Studio giữ đường cong `snap/back`, bổ sung đoạn nối
+cuối chu kỳ và giữ cả các key gốc nằm ngoài thời lượng bị khai báo thiếu.
+24 clip `shot`/`loop` được chuyển từ pose sống của engine gốc sang chu kỳ thở/lắc
+6,8 giây gồm 205 key chỉnh được; lưu/xuất không cần hiệu ứng ẩn của game gốc.
+Các clip nguồn chỉ có một pose tĩnh được ghi rõ trong danh sách, không tự tạo
+thành động tác đi/chạy không có trong dữ liệu. Có thể tắt **Phát ngay sau khi nạp**.
 
 - Thư viện 49 rig đầy đủ và 366 ảnh bộ phận có metadata khớp từ manifest.
 - Xem trước bằng renderer cutout của game; đổi rig/ảnh đầu, thân, hai tay, hai chân.

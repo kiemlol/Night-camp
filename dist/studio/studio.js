@@ -8,6 +8,7 @@ import {mountTimelineTools} from './timeline-ui.mjs';
 import {mountAccessories} from './accessory-ui.mjs';
 import {screenDelta} from './attachments.mjs';
 import {mountMobileNavigation} from './mobile-ui.mjs';
+import {importPoseClip,poseClipDescription} from './pose-library.mjs';
 const $=id=>document.getElementById(id), NC=window.NC;
 let source, libraryUI;
 const status=msg=>$('status').textContent=msg;
@@ -19,6 +20,9 @@ let catalog, drawError=false, jointPositions={},anchorRect;
 const ctx=$('stage').getContext('2d'), ac=$('anchor').getContext('2d');
 $('upload').insertAdjacentHTML('afterend','<label><input id="autoSlice" type="checkbox" checked> Tự cắt các mảnh rời khi tải ảnh</label><button id="resources">▦ Tài nguyên đã cắt (0)</button>');
 $('anchor').insertAdjacentHTML('afterend','<label>Lấn vào thân (vai / hông)<input id="overlap" type="number" min="0" max="40" step="0.5" value="0"></label><p class="joint-info">Kéo vòng khuỷu/gối để gập. Trong ảnh bên dưới, có thể chỉnh cả elbow/knee. Đổi kích thước sẽ giữ tỷ lệ các khớp.</p>');
+$('anchor').insertAdjacentHTML('beforebegin','<label id="anchorPartPicker">Bộ phận cần chỉnh neo<select id="anchorPart"></select></label>');
+$('existing').closest('label').insertAdjacentHTML('afterend','<p class="hint" id="existingClipInfo" role="status"></p><label><input id="playLoadedClip" type="checkbox" checked> Phát ngay sau khi nạp clip</label>');
+$('curve').append(new Option('Bật nhanh (snap)','snap'),new Option('Vượt rồi về (back)','back'));
 document.querySelector('.stageNote').textContent='Kéo bàn tay/chân để đặt vị trí · Vòng khuỷu/gối để gập · Vai/hông để quay · Ghi pose để lưu';
 const safe=fn=>(...args)=>{try{return Promise.resolve(fn(...args)).catch(e=>status('Lỗi: '+e.message))}catch(e){status('Lỗi: '+e.message);return Promise.resolve()}};
 function options(el,rows){el.replaceChildren(...rows.map(([value,text])=>{const o=document.createElement('option');o.value=value;o.textContent=text;return o}))}
@@ -46,7 +50,7 @@ function renderKeys(){const c=state.project.clip;$('keys').replaceChildren(...c.
 function pausePlayback(){state.playing=false;$('play').textContent='▶ Phát'}
 function selectKey(i){pausePlayback();state.key=i;state.time=state.project.clip.keys[i].t;setPose();renderKeys()}
 function renderMeta(){const c=state.project.clip;$('clipName').value=c.name;$('kind').value=c.kind;$('duration').value=c.dur;$('hit').value=c.hit;renderKeys();renderPart();renderChannels();accessoryUI.refresh().catch(e=>status('Lỗi phụ kiện: '+e.message))}
-function renderPart(){const s=state.project.parts[state.part];$('part').value=state.part;$('sw').value=s.w;$('sh').value=s.h;$('overlap').value=s.overlap??0;$('overlap').disabled=!/^(arm|leg)/.test(state.part);options($('joint'),Object.keys(s.joints).map(k=>[k,k]));jointInputs();const re=new RegExp('_'+state.part+'(?:_v[0-9]+)?$');const candidates=Object.entries(catalog.sprites).filter(([n])=>re.test(n)).map(([n])=>[n,n]);options($('sprite'),[['','— Chọn ảnh thay thế —'],...candidates]);$('resources').textContent='▦ Tài nguyên đã cắt ('+(state.project.resources?.length||0)+')';}
+function renderPart(){const s=state.project.parts[state.part];$('part').value=state.part;$('anchorPart').value=state.part;$('sw').value=s.w;$('sh').value=s.h;$('overlap').value=s.overlap??0;$('overlap').disabled=!/^(arm|leg)/.test(state.part);options($('joint'),Object.keys(s.joints).map(k=>[k,k]));jointInputs();const re=new RegExp('_'+state.part+'(?:_v[0-9]+)?$');const candidates=Object.entries(catalog.sprites).filter(([n])=>re.test(n)).map(([n])=>[n,n]);options($('sprite'),[['','— Chọn ảnh thay thế —'],...candidates]);$('resources').textContent='▦ Tài nguyên đã cắt ('+(state.project.resources?.length||0)+')';}
 function jointInputs(){const j=state.project.parts[state.part].joints[$('joint').value];if(j){$('jx').value=j[0];$('jy').value=j[1]}}
 async function adopt(p){validate(p);state.project=structuredClone(p);state.playing=false;state.key=0;state.time=0;await syncRig();const defaults=NC.Anim.setup(animationContext(0));for(const key of state.project.clip.keys)key.P={...defaults,...key.P};setPose();renderMeta();persist()}
 async function loadRig(name){checkpoint();const p=structuredClone(state.project);p.rig=name;p.parts=Object.fromEntries(PARTS.map(part=>[part,structuredClone(catalog.sprites[`rig_${name}_${part}`])]));await adopt(p)}
@@ -74,8 +78,10 @@ mountTimelineTools({
 mountMobileNavigation();
 for(const [k,label] of Object.entries(channels)){const row=document.createElement('div');row.className='channel';const l=document.createElement('label');l.htmlFor='ch_'+k;l.textContent=label;const n=document.createElement('input');n.type='number';n.step=angular(k)?1:.5;n.id='ch_'+k;row.append(l,n);$('channels').append(row);n.onchange=()=>{if(!Number.isFinite(n.valueAsNumber))return;state.playing=false;state.pose[k]=n.valueAsNumber*(angular(k)?Math.PI/180:1);status('Pose chưa ghi — bấm Ghi pose để lưu vào clip')}}
 options($('part'),PARTS.map(p=>[p,labels[p]]));
+options($('anchorPart'),PARTS.map(p=>[p,labels[p]]));
 $('partList').replaceChildren(...PARTS.map(part=>{const b=document.createElement('button');b.textContent=labels[part];b.onclick=()=>{state.part=part;renderPart()};return b}));
 event('part','change',()=>{state.part=$('part').value;renderPart()});event('joint','change',jointInputs);
+event('anchorPart','change',()=>{state.part=$('anchorPart').value;renderPart()});
 event('rig','change',()=>loadRig($('rig').value));
 event('newRig','click',()=>{const name=prompt('Tên rig mới (chữ Latin, số, dấu _):','custom_hero');if(!name)return;if(!/^[a-zA-Z0-9_-]{1,60}$/.test(name))throw Error('Tên rig chỉ dùng chữ Latin, số, _ và -');checkpoint();state.project.rig=name;persist();status('Rig mới: '+name+' — thay ảnh từng bộ phận rồi lưu project')});
 event('sprite','change',async()=>{if(!$('sprite').value)return;checkpoint();state.project.parts[state.part]=structuredClone(catalog.sprites[$('sprite').value]);await syncRig();renderPart();persist()});
@@ -87,7 +93,16 @@ event('curve','change',()=>{checkpoint();state.project.clip.keys[state.key].curv
 event('scrub','input',()=>{state.playing=false;state.time=+$('scrub').value;state.key=state.project.clip.keys.reduce((best,k,i)=>Math.abs(k.t-state.time)<Math.abs(state.project.clip.keys[best].t-state.time)?i:best,0);setPose();renderKeys()});
 event('play','click',()=>{state.playing=!state.playing;if(state.time>=state.project.clip.dur)state.time=0;$('play').textContent=state.playing?'Ⅱ Dừng':'▶ Phát'});
 for(const id of ['clipName','kind','duration','hit'])event(id,'change',()=>{const c=structuredClone(state.project.clip);c.name=$('clipName').value.trim();c.kind=$('kind').value;const dur=$('duration').valueAsNumber;if(!Number.isFinite(dur)||dur<.1||dur>30)throw Error('Thời lượng từ 0.1 đến 30 giây');const scale=dur/c.dur;c.keys.forEach(k=>k.t*=scale);c.dur=dur;c.hit=Math.min(dur,$('hit').valueAsNumber);validate({...state.project,clip:c});checkpoint();state.project.clip=c;state.time=Math.min(state.time,dur);renderMeta();persist()});
-event('loadClip','click',()=>{const source=NC.POSE_LIB[$('existing').value];if(!source)return;checkpoint();const c=structuredClone(source);c.hit=Math.max(0,Math.min(c.dur,c.hit??c.dur*.4));c.keys.forEach(k=>{if(!['lin','in','out','inout','step'].includes(k.curve))k.curve='inout'});state.project.clip=c;selectKey(0);renderMeta();persist()});
+function describeExistingClip(){const clip=NC.POSE_LIB?.[$('existing').value];$('existingClipInfo').textContent=clip?poseClipDescription(clip)+'. Nạp clip sẽ thay animation đang mở; có thể hoàn tác.':''}
+event('existing','change',describeExistingClip);
+event('loadClip','click',()=>{
+ const data=NC.POSE_LIB?.[$('existing').value];if(!data)throw Error('Hãy chọn clip có sẵn');
+ const {clip,notes,description}=importPoseClip(data,NC.Anim.setup(animationContext(0)));
+ validate({...state.project,clip});checkpoint();state.project.clip=clip;drawError=false;selectKey(0);renderMeta();persist();
+ if($('playLoadedClip').checked&&clip.keys.length>1){state.playing=true;$('play').textContent='Ⅱ Dừng'}
+ $('existingClipInfo').textContent=description+(notes.length?'. '+notes.join('. '):'')+'.';
+ status('Đã nạp '+clip.name+' · '+clip.keys.length+' key'+(notes.length?' · '+notes.join('. '):''));
+});
 event('save','click',async()=>{validate(state.project);const p=await portableProject();download(p.rig+'.cutout.json',JSON.stringify(p,null,2));status('Đã lưu project kèm đủ sáu ảnh; mở lại không cần kho ảnh GitHub.')});
 event('open','click',()=>$('projectFile').click());event('projectFile','change',async()=>{const f=$('projectFile').files[0];if(!f)return;if(f.size>30*1024*1024)throw Error('Project tối đa 30 MB');const p=validate(JSON.parse(await f.text()));checkpoint();await adopt(p);$('projectFile').value=''});
 const sheetImporter=mountSheetImporter({store:async(resources,assignments)=>{checkpoint();state.project.resources||=[];state.project.resources.push(...resources);for(const [part,r]of Object.entries(assignments))state.project.parts[part].src=r.src;await syncRig();renderPart();persist();status('Đã lưu tài nguyên và gán '+Object.keys(assignments).length+' bộ phận. Chỉnh kích thước/điểm neo nếu cần.')}});
@@ -130,7 +145,7 @@ async function reloadSource(){
   const next=await connectSource();source=next;catalog=next.catalog;NC.POSE_LIB=next.poses;state.images.clear();
   accessoryUI.setCatalog(next.accessories);
   options($('rig'),catalog.rigs.map(n=>[n,n]));
-  options($('existing'),Object.entries(NC.POSE_LIB||{}).map(([id,c])=>[id,c.name+' · '+c.kind]));
+  options($('existing'),Object.entries(NC.POSE_LIB||{}).map(([id,c])=>[id,c.name+' · '+poseClipDescription(c)]));describeExistingClip();
   const current=$('preset').value;
   options($('preset'),Object.keys({...NC.Anim.BASE,...NC.Anim.CLIPS}).map(id=>[id,id]));$('preset').value=current||'idle';
   if(libraryUI)libraryUI.update(source);else libraryUI=mountLibrary(source,{

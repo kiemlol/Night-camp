@@ -1,11 +1,12 @@
 import {validateAttachments} from './attachments.mjs';
 export const PARTS = ['head','torso','armF','armB','legF','legB'];
-export const CURVES = { lin:t=>t, in:t=>t*t, out:t=>1-(1-t)**2, inout:t=>t<.5?2*t*t:1-2*(1-t)**2, step:()=>0 };
+export const CURVES = { lin:t=>t, in:t=>t*t, out:t=>1-(1-t)**2, inout:t=>t<.5?2*t*t:1-2*(1-t)**2, snap:t=>1-(1-t)**4, back:t=>{const u=t-1;return u*u*(3.2*u+2.2)+1}, step:()=>0 };
 export function sample(clip, time) {
   const keys = [...clip.keys].sort((a,b)=>a.t-b.t);
   if (!keys.length) throw Error('Clip cần ít nhất một keyframe');
   if(time<=keys[0].t)return structuredClone(keys[0].P);
   for(let i=1;i<keys.length;i++)if(time<=keys[i].t){
+    if(time===keys[i].t)return structuredClone(keys[i].P);
     const a=keys[i-1],b=keys[i],u=(CURVES[a.curve]||CURVES.inout)((time-a.t)/(b.t-a.t));
     return Object.fromEntries([...new Set([...Object.keys(a.P),...Object.keys(b.P)])].map(k=>[k,typeof a.P[k]==='boolean'||typeof b.P[k]==='boolean'?(u<.5?a.P[k]:b.P[k]):(a.P[k]??b.P[k])+((b.P[k]??a.P[k])-(a.P[k]??b.P[k]))*u]));
   }

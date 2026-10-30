@@ -54,6 +54,7 @@
  .studio-mobile .creation-tools>button{flex:1 1 145px}
  .studio-mobile .creation-tools label{flex-wrap:wrap}
  .studio-mobile #anchor{display:block;max-width:360px;margin:0 auto 12px}
+ .studio-mobile #anchorPartPicker{position:sticky;top:-16px;z-index:2;padding:10px 0;background:#171f2a;border-bottom:1px solid var(--line)}
  .studio-mobile #attachmentPreview{display:block;max-width:320px;margin:auto}
  .studio-mobile #projectActions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
  .studio-mobile #projectActions button{margin:0;text-align:left;padding:12px;min-width:0}
