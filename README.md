@@ -135,6 +135,14 @@ cuối chu kỳ và giữ cả các key gốc nằm ngoài thời lượng bị 
 Các clip nguồn chỉ có một pose tĩnh được ghi rõ trong danh sách, không tự tạo
 thành động tác đi/chạy không có trong dữ liệu. Có thể tắt **Phát ngay sau khi nạp**.
 
+**Thú cưng cutout:** bấm nút ở thanh công cụ hoặc mục cùng tên trong menu ☰.
+Có 7 rig (sói, chim ưng, wyvern, đèn lồng, ba dạng rối) và 29 clip mẫu; chỉnh
+xương cha/con, điểm neo, ảnh, thứ tự lớp, pose và keyframe. Project/nháp pet tách
+riêng với nhân vật; có thể tạo pet mới từ rig có sẵn và tải ảnh riêng.
+Xuất bundle kèm ảnh, bộ phát ES module hoặc một file HTML preview offline.
+Chưa hỗ trợ mesh/Spine, biến dạng có trọng số, AI triệu hồi hay combat online.
+Xem [hướng dẫn Pet Studio](dist/studio/pets/README.md) để tích hợp game khác.
+
 - Thư viện 49 rig đầy đủ và 366 ảnh bộ phận có metadata khớp từ manifest.
 - Xem trước bằng renderer cutout của game; đổi rig/ảnh đầu, thân, hai tay, hai chân.
 - Thêm ảnh PNG/WebP, chỉnh kích thước và điểm neo bằng kéo thả hoặc nhập số.

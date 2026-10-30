@@ -1,4 +1,6 @@
 .mobile-only,.mobile-preview-controls{display:none}
+.pet-mode-dialog{position:fixed;inset:0;margin:0;padding:0;width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;border:0;border-radius:0;background:#10161e;overflow:hidden}
+.pet-mode-dialog iframe{display:block;width:100%;height:100%;border:0}
 .studio-section+.studio-section{margin-top:25px}
 .studio-mobile-menu{color:#dce3ec;background:#19222e;border:1px solid #435269;border-radius:16px;padding:16px;width:min(340px,calc(100vw - 24px));max-height:calc(100dvh - 90px);margin:0;position:fixed;inset:calc(env(safe-area-inset-top,0px) + 64px) 12px auto auto;overflow:auto;box-shadow:0 20px 80px #0009}
 .studio-mobile-menu::backdrop{background:#070c16bb;backdrop-filter:blur(4px)}

@@ -29,6 +29,7 @@ export function mountMobileNavigation(){
  const deleteKey=$('deleteKey'),deleteHome=document.createComment('desktop delete key');deleteKey.before(deleteHome);
  const tabs=[
   {id:'preview',label:'Preview asset',icon:'◉'},
+  {id:'pets',label:'Thú cưng cutout',icon:'♧',action:()=>document.getElementById('petStudioButton').click()},
   {id:'character',label:'Nhân vật & ảnh bộ phận',icon:'✦',panel:character},
   {id:'anchors',label:'Điểm neo & xương',icon:'◇',panel:anchors},
   {id:'accessories',label:'Phụ kiện & vũ khí',icon:'♧',panel:accessories},
@@ -62,7 +63,8 @@ export function mountMobileNavigation(){
   else{navHome.after(nav);toolbarHome.after(toolbar);scrubHome.after(scrub);deleteHome.after(deleteKey);close()}
  }
  function select(id){
-  if(!tabs.some(t=>t.id===id))return;
+  const tab=tabs.find(t=>t.id===id);if(!tab)return;
+  if(tab.action){close();tab.action();return}
   current=id;close();render();
   // Each tab keeps its scroll position; the document itself never scrolls.
  }

@@ -6,6 +6,7 @@ on:
       - 'dist-full/**'
       - 'dist/game-*/**'
       - 'tools/build-studio-catalog.mjs'
+      - 'tools/build-pet-studio.mjs'
       - 'server/data-catalog/catalog.json'
   workflow_dispatch:
 permissions:
@@ -22,9 +23,10 @@ jobs:
         with:
           node-version: '22'
       - run: node tools/build-studio-catalog.mjs
+      - run: node tools/build-pet-studio.mjs
       - name: Commit updated library data
         run: |
-          git add dist/studio/catalog.json dist/studio/library-index.json dist/studio/poses.json dist/studio/accessories.json
+          git add dist/studio/catalog.json dist/studio/library-index.json dist/studio/poses.json dist/studio/accessories.json dist/studio/pets/catalog.json
           if git diff --cached --quiet; then exit 0; fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'

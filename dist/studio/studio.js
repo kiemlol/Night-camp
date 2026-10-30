@@ -9,6 +9,7 @@ import {mountAccessories} from './accessory-ui.mjs';
 import {screenDelta} from './attachments.mjs';
 import {mountMobileNavigation} from './mobile-ui.mjs';
 import {importPoseClip,poseClipDescription} from './pose-library.mjs';
+import {mountPetEditor} from './pet-entry.mjs';
 const $=id=>document.getElementById(id), NC=window.NC;
 let source, libraryUI;
 const status=msg=>$('status').textContent=msg;
@@ -75,6 +76,7 @@ mountTimelineTools({
   const result=copyPoseToFrames(state.project.clip,captured.index,targets,captured.pose);checkpoint();state.project.clip=result.clip;selectKey(captured.index);renderMeta();persist();status('Đã sao chép tư thế frame '+(captured.index+1)+' sang '+result.count+' frame; giữ nguyên thời điểm và đường cong.');
  },
 });
+mountPetEditor(pausePlayback);
 mountMobileNavigation();
 for(const [k,label] of Object.entries(channels)){const row=document.createElement('div');row.className='channel';const l=document.createElement('label');l.htmlFor='ch_'+k;l.textContent=label;const n=document.createElement('input');n.type='number';n.step=angular(k)?1:.5;n.id='ch_'+k;row.append(l,n);$('channels').append(row);n.onchange=()=>{if(!Number.isFinite(n.valueAsNumber))return;state.playing=false;state.pose[k]=n.valueAsNumber*(angular(k)?Math.PI/180:1);status('Pose chưa ghi — bấm Ghi pose để lưu vào clip')}}
 options($('part'),PARTS.map(p=>[p,labels[p]]));
@@ -139,7 +141,7 @@ function render(){
  }catch(e){drawError=true;status('Lỗi render: '+e.message);console.error(e)}
 }
 function drawJointHints(){if(!$('bones').checked||!state.rig||drawError)return;ctx.save();ctx.lineWidth=2;ctx.strokeStyle='#ffbe84';for(const limb of Object.values(LIMBS)){const p=jointPositions[limb.middle];if(p){ctx.beginPath();ctx.arc(...p,7,0,Math.PI*2);ctx.stroke()}}ctx.restore()}
-let last=0;function frame(now){const dt=Math.min(.1,(now-last)/1000);last=now;if(state.playing&&state.project){const c=state.project.clip;state.time+=dt*+$('speed').value;if(state.time>c.dur){if(c.kind==='loop'||c.kind==='walk')state.time%=c.dur;else{state.time=c.dur;state.playing=false;$('play').textContent='▶ Phát'}}setPose();$('scrub').value=state.time;$('clock').textContent=state.time.toFixed(2)+' s'}render();drawJointHints();requestAnimationFrame(frame)}
+let last=0;function frame(now){const dt=Math.min(.1,(now-last)/1000);last=now;if(state.playing&&state.project){const c=state.project.clip;state.time+=dt*+$('speed').value;if(state.time>c.dur){if(c.kind==='loop'||c.kind==='walk')state.time%=c.dur;else{state.time=c.dur;state.playing=false;$('play').textContent='▶ Phát'}}setPose();$('scrub').value=state.time;$('clock').textContent=state.time.toFixed(2)+' s'}if(!$('petStudioDialog')?.open){render();drawJointHints()}requestAnimationFrame(frame)}
 async function reloadSource(){
   status('Đang đọc thư viện…');
   const next=await connectSource();source=next;catalog=next.catalog;NC.POSE_LIB=next.poses;state.images.clear();
