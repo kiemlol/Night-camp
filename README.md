@@ -58,6 +58,19 @@ nhập còn hợp lệ sau restart. Không chạy nhiều replica dùng chung fi
 
 ## Cutout Studio v1
 
+Studio hỗ trợ đọc dữ liệu trực tiếp từ GitHub khi `window.STUDIO_GITHUB=true`.
+Nút **Toàn bộ thư viện** duyệt hợp nhất file trong `dist-full/<build>` và
+`dist/<build>`; tìm ảnh/map, nghe âm thanh, tải mã nguồn/rig, xem tên clip Spine.
+Phần editor chỉ chỉnh rig cutout sáu bộ phận; rig Spine hiện xem dữ liệu/tải file.
+Nút **Tải lại GitHub** kiểm tra commit mới và nạp lại danh mục/ảnh/pose, không ghi
+ngược vào repo. Dữ liệu một phiên được ghim theo commit để tránh trộn phiên bản.
+Nếu API GitHub giới hạn lượt, giao diện báo dùng commit đã đọc trước hoặc main.
+Lưu/xuất project hiện nhúng cả sáu ảnh, gồm ảnh gốc đã chọn trong thư viện.
+
+Workflow `.github/workflows/studio-library.yml` tái tạo danh mục khi asset trong
+hai kho thay đổi. Nếu Actions bị tắt hoặc chặn quyền ghi, chạy thủ công
+`node tools/build-studio-catalog.mjs` rồi commit/push ba file dữ liệu Studio.
+
 Demo thử rig độc lập: mở **/cutout-demo/** trên cùng server. Có Traveler, nút
 đi/chạy/đánh, hình nộm nhận hit, hiện xương và mở project/bundle từ Studio.
 Có thể copy riêng `dist/cutout-demo/` sang static hosting; thư mục chứa đủ ảnh,

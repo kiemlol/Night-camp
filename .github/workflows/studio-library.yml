@@ -1,0 +1,32 @@
+name: Update Studio asset library
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'dist-full/**'
+      - 'dist/game-*/**'
+      - 'tools/build-studio-catalog.mjs'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: studio-library
+  cancel-in-progress: false
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tools/build-studio-catalog.mjs
+      - name: Commit updated library data
+        run: |
+          git add dist/studio/catalog.json dist/studio/library-index.json dist/studio/poses.json
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "Refresh Studio asset library"
+          git pull --rebase origin main
+          git push origin HEAD:main
