@@ -85,7 +85,18 @@ event('stage','pointermove',e=>{if(!drag)return;e.preventDefault();const r=$('st
  renderChannels();status('Đang chỉnh '+(limb?labels[limb.part]:'đầu')+'. Kéo vòng khuỷu/gối để gập; bấm Ghi pose khi xong.');});
 for(const name of ['pointerup','pointercancel','lostpointercapture'])event('stage',name,()=>{if(drag){drag=null;renderPart()}document.body.classList.remove('rig-dragging')});
 for(const id of ['stage','anchor'])for(const name of ['contextmenu','selectstart','dragstart'])$(id).addEventListener(name,e=>e.preventDefault());
-function render(){const canvas=$('stage'),r=canvas.getBoundingClientRect(),dpr=window.devicePixelRatio||1;if(canvas.width!==Math.round(r.width*dpr)||canvas.height!==Math.round(r.height*dpr)){canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr)}ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,r.width,r.height);const x=r.width/2,y=r.height*.78;ctx.strokeStyle='#344253';ctx.lineWidth=1;for(let gx=x%40;gx<r.width;gx+=40){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,r.height);ctx.stroke()}ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(r.width,y);ctx.stroke();if(!state.rig||drawError)return;try{const P={...state.pose,face:state.face};NC.drawRig(ctx,state.rig,state.equip,P,x,y,{scale:state.zoom,noWeapon:true});jointPositions=NC.rigJoints(state.equip,P,x,y,state.zoom);if($('bones').checked){ctx.strokeStyle='#d3ed9299';ctx.lineWidth=1.5;for(const chain of chains){ctx.beginPath();chain.forEach((key,i)=>ctx[i?'lineTo':'moveTo'](...jointPositions[key]));ctx.stroke()}for(const p of Object.values(jointPositions)){ctx.fillStyle='#d3ed92';ctx.beginPath();ctx.arc(...p,3.5,0,7);ctx.fill()}}drawAnchor()}catch(e){drawError=true;status('Lỗi render: '+e.message);console.error(e)}}
+function render(){
+ const canvas=$('stage'),r=canvas.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+ if(canvas.width!==Math.round(r.width*dpr)||canvas.height!==Math.round(r.height*dpr)){canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr)}
+ ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,r.width,r.height);const x=r.width/2,y=r.height*.78;
+ ctx.strokeStyle='#344253';ctx.lineWidth=1;for(let gx=x%40;gx<r.width;gx+=40){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,r.height);ctx.stroke()}
+ ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(r.width,y);ctx.stroke();if(!state.rig||drawError)return;
+ try{const P={...state.pose,face:state.face};NC.drawRig(ctx,state.rig,state.equip,P,x,y,{scale:state.zoom,noWeapon:true});jointPositions=NC.rigJoints(state.equip,P,x,y,state.zoom);
+  if($('bones').checked){ctx.strokeStyle='#d3ed9299';ctx.lineWidth=1.5;for(const chain of chains){ctx.beginPath();chain.forEach((key,i)=>ctx[i?'lineTo':'moveTo'](...jointPositions[key]));ctx.stroke()}
+   for(const [name,p] of Object.entries(jointPositions)){if(name==='wHand'||name==='wTip')continue;ctx.fillStyle='#d3ed92';ctx.beginPath();ctx.arc(...p,3.5,0,7);ctx.fill()}
+  }drawAnchor();
+ }catch(e){drawError=true;status('Lỗi render: '+e.message);console.error(e)}
+}
 function drawJointHints(){if(!$('bones').checked||!state.rig||drawError)return;ctx.save();ctx.lineWidth=2;ctx.strokeStyle='#ffbe84';for(const limb of Object.values(LIMBS)){const p=jointPositions[limb.middle];if(p){ctx.beginPath();ctx.arc(...p,7,0,Math.PI*2);ctx.stroke()}}ctx.restore()}
 let last=0;function frame(now){const dt=Math.min(.1,(now-last)/1000);last=now;if(state.playing&&state.project){const c=state.project.clip;state.time+=dt*+$('speed').value;if(state.time>c.dur){if(c.kind==='loop'||c.kind==='walk')state.time%=c.dur;else{state.time=c.dur;state.playing=false;$('play').textContent='▶ Phát'}}setPose();$('scrub').value=state.time;$('clock').textContent=state.time.toFixed(2)+' s'}render();drawJointHints();requestAnimationFrame(frame)}
 async function reloadSource(){
