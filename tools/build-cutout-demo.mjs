@@ -1,0 +1,31 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+const root=path.resolve(import.meta.dirname,'..'), target=path.join(root,'dist/cutout-demo');
+const source=path.join(root,'dist-full/game-20261025-1758');
+fs.mkdirSync(path.join(target,'assets'),{recursive:true});
+fs.mkdirSync(path.join(target,'runtime'),{recursive:true});
+const catalog=JSON.parse(fs.readFileSync(path.join(root,'dist/studio/catalog.json'),'utf8'));
+const parts=Object.fromEntries(['head','torso','armF','armB','legF','legB'].map(p=>[p,catalog.sprites['rig_traveler_'+p]]));
+const NC={clamp:(v,a,b)=>Math.max(a,Math.min(b,v)),lerp:(a,b,t)=>a+(b-a)*t};
+const context=vm.createContext({NC,window:{NC}});
+vm.runInContext(fs.readFileSync(path.join(source,'assets/manifest.js'),'utf8'),context);
+vm.runInContext(fs.readFileSync(path.join(source,'js/anim.js'),'utf8'),context);
+const weapon={grip:.12,wtype:'sword',sprite:'sword',restAng:1.2,stance:-.7};
+const angle=s=>Math.atan2(s.joints.hand[1]-s.joints.shoulder[1],s.joints.hand[0]-s.joints.shoulder[0]);
+const c={W:weapon,rF:angle(parts.armF),rB:angle(parts.armB),al:0,wl:80,wlen:90,moving:false,hurt:0};
+const attack='swing1';
+if(!NC.Anim.CLIPS[attack])throw Error('Missing attack clip');
+const clips={};
+for(const [id,animation,dur,kind] of [['idle','idle',3.2,'loop'],['walk','walk',1,'walk'],['run','run',.65,'walk'],['attack',attack,NC.Anim.CLIPS[attack].dur,'attack']]){
+ const count=Math.ceil(dur*30),keys=Array.from({length:count+1},(_,i)=>{const t=i/count*dur;const P=NC.Anim.sample(animation,t,{...c,walk:t/dur*Math.PI*2});return {t,curve:'lin',P}});
+ if(kind!=='attack')keys.at(-1).P=structuredClone(keys[0].P);
+ const hit=NC.Anim.CLIPS[attack].ev?.find(e=>e[1]==='hit')?.[0]??dur*.4;
+ clips[id]={name:id,kind,dur,hit:kind==='attack'?hit:0,keys};
+}
+const sword=NC.ASSET_MANIFEST.sword;
+for(const s of [...Object.values(parts),sword])fs.copyFileSync(path.join(source,s.src),path.join(target,s.src));
+fs.copyFileSync(path.join(source,'js/avatar.js'),path.join(target,'runtime/avatar.js'));
+fs.copyFileSync(path.join(root,'dist/studio/model.mjs'),path.join(target,'runtime/model.mjs'));
+fs.writeFileSync(path.join(target,'traveler.character.json'),JSON.stringify({format:'cutout-character-v1',rig:'traveler',parts,weapon:{...weapon,spriteData:sword},clips}));
+console.log('Built independent traveler demo: 6 cutout parts, sword, 4 baked clips, local renderer.');

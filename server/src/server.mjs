@@ -378,11 +378,11 @@ const server = http.createServer(async (req, res) => {
         });
         return res.end();
       }
-      if (route === "/studio") {
-        res.writeHead(302, { location: "/studio/" });
+      if (route === "/studio" || route === "/cutout-demo") {
+        res.writeHead(302, { location: route + "/" });
         return res.end();
       }
-      const relative = route === "/studio/" ? "studio/index.html" : decodeURIComponent(route).replace(/^\/+/, "");
+      const relative = route === "/studio/" ? "studio/index.html" : route === "/cutout-demo/" ? "cutout-demo/index.html" : decodeURIComponent(route).replace(/^\/+/, "");
       let file = path.resolve(CLIENT_DIR, relative);
       requireValue(file.startsWith(CLIENT_DIR + path.sep), "invalid_path");
       if (!fs.existsSync(file)) {
@@ -394,7 +394,7 @@ const server = http.createServer(async (req, res) => {
         file = full;
       }
       if (fs.existsSync(file) && fs.statSync(file).isFile()) {
-        if (path.basename(file) === "index.html" && !relative.startsWith("studio/")) {
+        if (path.basename(file) === "index.html" && !relative.startsWith("studio/") && !relative.startsWith("cutout-demo/")) {
           let html = fs.readFileSync(file, "utf8");
           html = html.replace(
             /(<meta\s+name="nc-online-servers"\s+content=")[^"]*(")/,

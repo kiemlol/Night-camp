@@ -191,6 +191,12 @@ test("HTTP + two WebSocket players, command replay, invalid frames, restart and 
   const studioModule = await fetch(base + "/studio/model.mjs");
   assert.equal(studioModule.status, 200);
   assert.match(studioModule.headers.get("content-type"), /javascript/);
+  const demo = await fetch(base + "/cutout-demo");
+  assert.equal(demo.status, 200);
+  assert.ok(demo.url.endsWith("/cutout-demo/"));
+  const demoHtml = await demo.text();
+  assert.ok(demoHtml.includes("CUTOUT PLAYGROUND"));
+  assert.ok(!demoHtml.includes("/backend-ui.js"));
   const email = await post(
     "/v2/account/authenticate/email?create=true",
     { email: "test@example.invalid", password: "correct-password" },

@@ -58,6 +58,12 @@ nhập còn hợp lệ sau restart. Không chạy nhiều replica dùng chung fi
 
 ## Cutout Studio v1
 
+Demo thử rig độc lập: mở **/cutout-demo/** trên cùng server. Có Traveler, nút
+đi/chạy/đánh, hình nộm nhận hit, hiện xương và mở project/bundle từ Studio.
+Có thể copy riêng `dist/cutout-demo/` sang static hosting; thư mục chứa đủ ảnh,
+dữ liệu và runtime để chạy không cần client/backend Night Camp. Xem hướng dẫn
+tại [dist/cutout-demo/README.md](dist/cutout-demo/README.md).
+
 Sau khi chạy server, mở **http://localhost:7350/studio/** (hoặc `/studio/` trên
 domain đã deploy). Studio chạy riêng với game và không sửa dữ liệu người chơi.
 

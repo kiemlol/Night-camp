@@ -1,0 +1,1084 @@
+/* avatar.js — builds and draws the hero's skeleton, the way Spine / DragonBones style 2D games do it.
+
+   BONES: pelvis -> torso (lean, breathing) -> neck -> head (+ hat)
+                  torso -> shoulders -> upper arm -> ELBOW -> forearm + hand -> weapon
+          pelvis -> hips -> thigh -> KNEE -> shin (+ shoe)
+   The PICTURES are the rig pieces cut by tools/rigcut.py. Arms and legs are single drawings that BEND at the elbow /
+   knee like a Spine weighted mesh: the limb is split into a rigid upper part, a rigid lower part and a band in between
+   whose triangles are blended between the two bones, so the joint bends smoothly instead of breaking.
+   More Spine ideas: IK constraints put the far hand on the weapon's handle for two-handed grips, either hand on a spot
+   of the body (a hand on the hip, a hand on the hilt) and the near hand on the handle of a weapon planted in the ground;
+   the feet are kept on the ground (the pelvis drops when the knees bend or the legs spread).
+   Poses come from anim.js; equipment only chooses which picture sits on which bone:
+     hair -> head piece (tools/hairs.py) · top -> torso + arms · pants -> the legs with their boots (js/lowerbody.js; no shoes slot since js/lowermerge.js)
+     hat -> on the head (hides the hair under it) · glasses -> on the eyes, under the hat · weapon -> in the near hand / at the belt / on the back */
+(function () {
+  'use strict';
+  const NC = window.NC;
+  const PARTS = ['head', 'torso', 'armF', 'armB', 'legF', 'legB'];
+  // long cloth of some outfits: a skirt (a tabard, a robe's lower part), or a body: a long outfit drawn as ONE garment,
+  // collar to hem (drawn instead of the torso + skirt). (capes are items of their own: equip.cape)
+  const CLOTH = ['skirt', 'body'];
+  const SKIRT_UP = 11, CAPE_AT = [-3, 10]; // the skirt hangs from this far above the pelvis (under the belt), the cape from below the neck
+  const TUCK = 9; // legs are pinned this much higher so their tops hide under the tunic (keeps chibi proportions)
+  const RIG_SCALE = 0.87; // the pieces come out a little larger than the old whole-body sprite; match its height
+  const ELBOW = 0.45, KNEE = 0.47; // where the joint sits along the limb picture (shoulder->hand, hip->sole)
+  const GRIP_MIN = 1.22; // (the grip rule in solve(): a handle at least ~70 degrees across the forearm)
+  NC.GRIPFIX = true;
+  const rigs = {};
+
+  const angOf = (a, b) => Math.atan2(b[1] - a[1], b[0] - a[0]);
+  const rotV = (v, r) => { const c = Math.cos(r), s = Math.sin(r); return [v[0] * c - v[1] * s, v[0] * s + v[1] * c]; };
+  const add = (a, b) => [a[0] + b[0], a[1] + b[1]];
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+  const dirV = (a, len) => [Math.cos(a) * len, Math.sin(a) * len];
+  const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+  const lerpAng = (a, b, t) => a + wrap(b - a) * t;
+  const smooth = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
+  // a long outfit (equip.robe) is worn as the top, the trousers AND the shoes: its own torso, sleeves, skirt, and legs
+  // drawn whole with their boots (never cut into trousers + shoes)
+  const item = (equip, slot) => {
+    const robe = equip.robe && NC.ITEMS[equip.robe];
+    if (robe && (slot === 'top' || slot === 'pants')) return robe;
+    if (robe && slot === 'shoes') return null;
+    return (equip[slot] && NC.ITEMS[equip[slot]]) || null;
+  };
+
+  NC.getRig = function (name) {
+    if (name in rigs) return rigs[name];
+    const P = {};
+    for (const part of PARTS) {
+      const s = NC.SPR['rig_' + name + '_' + part];
+      if (!s || !s.joints) return (rigs[name] = null);
+      P[part] = s;
+    }
+    for (const part of CLOTH) { // long cloth of some outfits (bosses): a robe / tabard skirt, a cape
+      const s = NC.SPR['rig_' + name + '_' + part];
+      if (s && s.joints) P[part] = s;
+    }
+    const J = (part, j) => P[part].joints[j];
+    return (rigs[name] = {
+      name, P,
+      // direction each arm points in as drawn; poses give absolute directions
+      rest: { armF: angOf(J('armF', 'shoulder'), J('armF', 'hand')), armB: angOf(J('armB', 'shoulder'), J('armB', 'hand')) },
+    });
+  };
+  const topRig = (equip) => NC.getRig((item(equip, 'top') || { rig: 'traveler' }).rig);
+  const headOf = (equip, rig) => {
+    const r = equip.robe && NC.ITEMS[equip.robe];
+    if (r && r.ownHead && rig.P.head) return rig.P.head; // a costume with its own head (js/leocat.js: the kitten's face in its hood)
+    const h = item(equip, 'hair'); return (h && NC.SPR[h.head]) || rig.P.head;
+  };
+
+  // everything anim.js needs to know about this hero to build a pose
+  NC.animCtx = function (equip, extra) {
+    const rig = topRig(equip);
+    const R = rig ? rig.rest : { armF: 1.8, armB: 1.33 };
+    const W = NC.ITEMS[equip.weapon], L = wLens(W, 0);
+    const top = item(equip, 'top');
+    return Object.assign({ al: 0, rF: R.armF, rB: R.armB, W, wl: L.tip, wlen: L.tip + L.butt, walk: 0, moving: false, hurt: 0, carry: top && top.carry,
+      front: !!(rig && rig.P.torso.front) }, extra || {});
+  };
+
+  // a limb picture with its two joints and the bend point between them
+  function limb(s, pivot, end, frac) {
+    const p = s.joints[pivot], e = s.joints[end];
+    // (a piece may say where its own knee / elbow is: the bend on a plain spot like the knee guard, not across the
+    // straps of an armoured greave: tools/falcon_cut.py socket)
+    const own = s.joints[pivot === 'hip' ? 'knee' : 'elbow'];
+    const J = own || [p[0] + (e[0] - p[0]) * frac, p[1] + (e[1] - p[1]) * frac];
+    return { s, piv: p, end: e, J, rest: angOf(p, e), L1: Math.hypot(J[0] - p[0], J[1] - p[1]), L2: Math.hypot(e[0] - J[0], e[1] - J[1]) };
+  }
+
+  // two-bone IK: upper-arm direction and elbow flexion that put the hand on target T (hand beyond reach: arm straight).
+  // side 1: the elbow drops below / behind the line to the target (the usual bend); side -1: it points forward (seen in
+  // 3/4 view, an elbow turned out to the side, like a hand on the hip)
+  function ik2(S, T, L1, L2, side) {
+    const k = side || 1, base = angOf(S, T);
+    const d = NC.clamp(Math.hypot(T[0] - S[0], T[1] - S[1]), Math.abs(L1 - L2) + 0.01, L1 + L2 - 0.01);
+    const alpha = Math.acos(NC.clamp((L1 * L1 + d * d - L2 * L2) / (2 * L1 * d), -1, 1));
+    const inner = Math.acos(NC.clamp((L1 * L1 + L2 * L2 - d * d) / (2 * L1 * L2), -1, 1));
+    return { up: base + k * alpha, flex: k * (Math.PI - inner) };
+  }
+
+  // how far a weapon reaches past the hand (tip) and behind it (butt), in rig units
+  function wLens(W, gAdj) {
+    const s = W && NC.SPR[W.sprite], len = s ? s.h * 0.95 : 80, g = (W ? W.grip : 0.1) + (gAdj || 0);
+    return { tip: len * (1 - g), butt: len * g };
+  }
+
+  // ---------------- skeleton: joint positions for a pose, in the rig frame (facing right, feet at y = 0) ----------------
+  function solve(rig, equip, P, W) {
+    const T = rig.P.torso, tj = T.joints, pel0 = tj.pelvis;
+    const pants = item(equip, 'pants');
+    // (NC.lowerLeg: trousers and boots in one piece, walking or standing, js/lowerbody.js)
+    const legSpr = (w) => (pants && pants.slot !== 'robe' && ((NC.lowerLeg && NC.lowerLeg(pants, w)) || NC.SPR['pants_' + pants.rig + '_' + w])) || rig.P[w];
+    const aF = limb(rig.P.armF, 'shoulder', 'hand', ELBOW), aB = limb(rig.P.armB, 'shoulder', 'hand', ELBOW);
+    const lF = limb(legSpr('legF'), 'hip', 'foot', KNEE), lB = limb(legSpr('legB'), 'hip', 'foot', KNEE);
+    const fk = (L, at, rot, bend) => {
+      const knee = add(at, rotV(sub(L.J, L.piv), rot));
+      return { at, rot, bend, J: knee, end: add(knee, rotV(sub(L.end, L.J), rot + bend)) };
+    };
+    // legs hang from the pelvis; then the pelvis is lowered/raised until the lower foot touches the ground
+    const hipRel = (j) => [j[0] - pel0[0], j[1] - pel0[1] - TUCK];
+    let legN = fk(lF, hipRel(tj.hipL), -P.legF, P.kF), legFar = fk(lB, hipRel(tj.hipR), -P.legB, P.kB);
+    const ground = Math.max(legN.end[1], legFar.end[1]);
+    const pel = [P.x, -ground + P.y];
+    const hip = (j) => add(pel, hipRel(j));
+    legN = fk(lF, hip(tj.hipL), -P.legF, P.kF); legFar = fk(lB, hip(tj.hipR), -P.legB, P.kB);
+
+    const onTorso = (j) => add(pel, rotV([j[0] - pel0[0], (j[1] - pel0[1]) * P.breathe], P.lean));
+    // arms: the near arm holds the weapon; the far one may be driven by IK onto the handle
+    const arm = (L, at, dirA, flex) => {
+      const rot = dirA - L.rest;
+      const elbow = add(at, rotV(sub(L.J, L.piv), rot));
+      return { at, rot, bend: -flex, J: elbow, end: add(elbow, rotV(sub(L.end, L.J), rot - flex)) };
+    };
+    // near hand: FK from the pose, pulled by IK onto a spot of the body (hk: hx, hy from the pelvis, turning with the
+    // torso) and/or onto a fixed spot in the world (plant: pX, pY from the feet; a weapon standing in the ground)
+    const shN = onTorso(tj.shoulderL), shF = onTorso(tj.shoulderR);
+    let aFdir = P.aF, eF = P.eF, planted = null;
+    const reach = (T, w) => { const s = ik2(shN, T, aF.L1, aF.L2); aFdir = lerpAng(aFdir, s.up, w); eF = NC.lerp(eF, s.flex, w); };
+    if (P.hk > 0.01) reach(onTorso([pel0[0] + P.hx, pel0[1] + P.hy]), Math.min(1, P.hk));
+    if (P.plant > 0.01) { planted = [P.pX, P.pY]; reach(planted, Math.min(1, P.plant)); }
+    // far hand: FK, or on a spot of the body (bk: bx, by; elbow turned out)
+    let aBdir = P.aB, eB = P.eB;
+    if (P.bk > 0.01) {
+      const s = ik2(shF, onTorso([pel0[0] + P.bx, pel0[1] + P.by]), aB.L1, aB.L2, -1);
+      aBdir = lerpAng(aBdir, s.up, Math.min(1, P.bk)); eB = NC.lerp(eB, s.flex, Math.min(1, P.bk));
+    }
+    let armN = arm(aF, shN, aFdir, eF), armFar = arm(aB, shF, aBdir, eB);
+    // (holdK: how much the weapon is in the hand, eased out as it is put away or hidden, so nothing jumps when it is)
+    const holdK = NC.clamp(1 - 2 * (P.tuck || 0), 0, 1) * NC.clamp(1 - (P.wHide || 0), 0, 1);
+    // the grip rule (2026-10-06, the user: the fist doesn't hold the weapon the real way): a closed fist can only hold a
+    // handle that crosses the forearm. When a pose has the weapon running along the forearm (less than GRIP_MIN apart,
+    // as lines), the elbow turns the forearm across the handle (the shoulder too when the elbow can't bend that far);
+    // the weapon keeps its angle and moves with the hand. Not for a hand pinned to the body or the ground (hk / plant).
+    // ?gripfix=0: off
+    // (a spear or staff thrust straight ahead keeps its line: the shaft lies along the forearm in a real thrust)
+    // (and not while the other hand holds the handle too, P.ik: moving this hand would pull the handle out of that one.
+    // Each of these lets the rule go gradually, so the arm never jumps when a pose crosses into one)
+    const ruleK = holdK * NC.clamp(1 - (P.act || 0), 0, 1) * NC.clamp(1 - (P.ik || 0) / 0.3, 0, 1) * NC.clamp(1 - (P.hk || 0), 0, 1) *
+      NC.clamp(1 - (P.plant || 0), 0, 1) * (W && W.style === 'thrust' ? NC.clamp((Math.abs(wrap(P.wAng)) - 0.45) / 0.3, 0, 1) : 1) *
+      (W && NC.gripFree && NC.gripFree(W) ? 0 : 1); // (weapons held in line with the forearm on purpose: js/griphand.js)
+    if (NC.GRIPFIX && W && ruleK > 0 && !P.wBehind) {
+      const far = (P.wFar || 0) > 0.5, A = far ? armFar : armN, L = far ? aB : aF;
+      const fa = Math.atan2(A.end[1] - A.J[1], A.end[0] - A.J[0]);
+      let d = wrap(P.wAng - fa);                                   // the handle against the forearm, as lines:
+      if (d > Math.PI / 2) d -= Math.PI; else if (d <= -Math.PI / 2) d += Math.PI;   // -90..90 degrees
+      // (it lets go while an attack plays, P.act from anim.js: a swing passing the arm's line would make the arm jump;
+      // the attacks are posed right in their clips instead)
+      const gmin = (NC.GRIP_MIN || GRIP_MIN) * ruleK; // (NC.GRIP_MIN: a test override)
+      if (Math.abs(d) < gmin) {
+        // turn the forearm away from the handle's line (an exactly parallel one: the way that bends the elbow more)
+        const dz = Math.abs(d) < 1e-3 ? -1 : Math.sign(d), turn = -dz * (gmin - Math.abs(d));
+        const dir0 = far ? aBdir : aFdir, flex0 = far ? eB : eF;
+        const flex = NC.clamp(flex0 - turn, -0.1, 2.55), dir = dir0 + turn - (flex0 - flex);
+        if (far) armFar = arm(aB, shF, dir, flex); else armN = arm(aF, shN, dir, flex);
+      }
+    }
+    // (grip hands, js/griphand.js: a near arm drawn with holding pieces turns its hand at the wrist so the handle lies
+    // across the palm, and the weapon sits in the grip, not in the middle of a closed fist)
+    const gripN = NC.gripOf && W && P.tuck < 0.5 && !P.wBehind && (P.wHide || 0) < 0.99 && !((P.wFar || 0) > 0.5) ? NC.gripOf(aF.s) : null;
+    if (gripN) {
+      const g = NC.gripTurn(armN, aF, gripN, P.wAng);
+      armN.grip = [NC.lerp(armN.end[0], g[0], holdK), NC.lerp(armN.end[1], g[1], holdK)]; armN.wr *= holdK;
+    }
+    // which hand holds the weapon: the near one, or the far one (wFar: animation templates made that way, with the
+    // weapon arm behind the body). The other hand can join it on the handle (ik): two-handed weapons further down the
+    // handle, one-handed ones as two fists stacked on the grip
+    const wu = NC.clamp(P.wFar || 0, 0, 1);
+    let hand = add(armN.grip || armN.end, dirV(P.wAng, P.wPush));
+    if (planted) hand = [NC.lerp(hand[0], planted[0], Math.min(1, P.plant)), NC.lerp(hand[1], planted[1], Math.min(1, P.plant))];
+    if (wu > 0) {
+      const hf = add(armFar.end, dirV(P.wAng, P.wPush));
+      hand = [NC.lerp(hand[0], hf[0], wu), NC.lerp(hand[1], hf[1], wu)];
+    }
+    const holding = P.tuck < 0.5 && !P.wBehind;
+    if (P.ik > 0.01 && holding) {
+      const target = sub(hand, dirV(P.wAng, (W.grip2 || 7) * (P.wLen || 1))), k = Math.min(1, P.ik);
+      if (wu > 0.5) { // the near hand joins the far one
+        const s = ik2(shN, target, aF.L1, aF.L2);
+        armN = arm(aF, shN, lerpAng(aFdir, s.up, k), NC.lerp(eF, s.flex, k));
+      } else {
+        // (gripAhead: a fishing rod in the near hand; the far hand goes this far AHEAD on the rod, out in front where it
+        // shows, not back to the butt behind the torso: js/life_fish.js)
+        const s = ik2(shF, W.gripAhead ? add(hand, dirV(P.wAng, W.gripAhead * (P.wLen || 1))) : target, aB.L1, aB.L2);
+        armFar = arm(aB, shF, lerpAng(aBdir, s.up, k), NC.lerp(eB, s.flex, k));
+      }
+    }
+    return { pel, pel0, onTorso, lF, lB, aF, aB, legN, legFar, armN, armFar, hand, farW: wu > 0.5, neck: onTorso(tj.neck), gripN };
+  }
+
+  // ---------------- drawing ----------------
+  const pic = (s, o) => (o.silhouette ? NC.tinted(s.name, o.silhouette) : NC.dyePic ? NC.dyePic(s) : s.img);   // (js/dye.js: a dyed piece's recoloured picture)
+
+  function paint(ctx, s, dx, dy, o) {
+    ctx.drawImage(pic(s, o), dx, dy, s.w, s.h);
+    if (o.tint && o.tint[1] > 0) {
+      const a = ctx.globalAlpha;
+      ctx.globalAlpha = a * o.tint[1];
+      ctx.drawImage(NC.tinted(s.name, o.tint[0]), dx, dy, s.w, s.h);
+      ctx.globalAlpha = a;
+    }
+  }
+
+  // a cape that flutters (item.wave { swing, ripple, speed }: js/voidcomet.js; the user: "ผ้าคลุมอยากให้พริ้วไหว"): drawn
+  // as a grid of textured triangles. Two motions, both nothing at the shoulders and most at the hem: a slow SWING, the
+  // lower cloth lagging back and forth (a quarter wave down its length, not an S: that read as jelly), and a RIPPLE
+  // running along the hem towards the back (the hem's edge lifting and falling across its width). Running (run 0..1)
+  // swings it wider and ripples it faster.
+  function waveCloth(ctx, s, dx, dy, o, W, run) {
+    const img = pic(s, o), iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+    if (!iw || !ih) return;
+    const t = NC.game && NC.game.time !== undefined ? NC.game.time : performance.now() / 1000, sp = (W.speed || 1) * (1 + 1.2 * run);   // (the game's clock: it stops with the game)
+    const S = (W.swing || 3) * (1 + 1.1 * run), B = (W.ripple || 1.5) * (1 + 1.4 * run), C = 5, R = 8;
+    const at = (u, v) => {
+      const e = v * v, sw = S * e * Math.sin(t * 2.1 * sp - v * 1.3) + S * 0.25 * e * Math.sin(t * 3.7 * sp + 0.8);
+      const rip = B * Math.pow(v, 1.6) * (Math.sin(t * 4.2 * sp + u * 7.5 - v * 1.5) + 0.35 * Math.sin(t * 6.9 * sp + u * 13 + 1.1));
+      return [dx + u * s.w + sw, dy + v * s.h + rip];
+    };
+    const P = [];
+    for (let j = 0; j <= R; j++) { const row = []; for (let i = 0; i <= C; i++) row.push(at(i / C, j / R)); P.push(row); }
+    const draw = (im) => {
+      for (let j = 0; j < R; j++)
+        for (let i = 0; i < C; i++) {
+          const u0 = (i / C) * iw, u1 = ((i + 1) / C) * iw, v0 = (j / R) * ih, v1 = ((j + 1) / R) * ih;
+          const a = P[j][i], b = P[j][i + 1], c = P[j + 1][i + 1], d = P[j + 1][i];
+          tri(ctx, im, [u0, v0], [u1, v0], [u1, v1], a, b, c);
+          tri(ctx, im, [u0, v0], [u1, v1], [u0, v1], a, c, d);
+        }
+    };
+    draw(img);
+    if (o.tint && o.tint[1] > 0) { const a = ctx.globalAlpha; ctx.globalAlpha = a * o.tint[1]; draw(NC.tinted(s.name, o.tint[0])); ctx.globalAlpha = a; }
+  }
+
+  // one textured triangle: the source triangle s (image pixels) mapped onto d (current units)
+  function tri(ctx, img, s0, s1, s2, d0, d1, d2) {
+    const den = (s1[0] - s0[0]) * (s2[1] - s0[1]) - (s2[0] - s0[0]) * (s1[1] - s0[1]);
+    if (Math.abs(den) < 1e-6) return;
+    const a = ((d1[0] - d0[0]) * (s2[1] - s0[1]) - (d2[0] - d0[0]) * (s1[1] - s0[1])) / den;
+    const b = ((d1[1] - d0[1]) * (s2[1] - s0[1]) - (d2[1] - d0[1]) * (s1[1] - s0[1])) / den;
+    const c = ((d2[0] - d0[0]) * (s1[0] - s0[0]) - (d1[0] - d0[0]) * (s2[0] - s0[0])) / den;
+    const d = ((d2[1] - d0[1]) * (s1[0] - s0[0]) - (d1[1] - d0[1]) * (s2[0] - s0[0])) / den;
+    const e = d0[0] - a * s0[0] - c * s0[1], f = d0[1] - b * s0[0] - d * s0[1];
+    // the triangle grown outward a little on EVERY EDGE, so neighbours overlap and no seam shows between them. (Moving the
+    // corners away from the middle barely moved the long edges of the thin band triangles: faint lines showed across a
+    // bent elbow, the user, 2026-10-12, "ตรงข้อต่อแขนนี้มันเป็นแบบนี้"; the same fix as the Pose Studio kit's rig.js)
+    const cx = (d0[0] + d1[0] + d2[0]) / 3, cy = (d0[1] + d1[1] + d2[1]) / 3, D = [d0, d1, d2], GROW = 0.6;
+    const normal = (p, q) => {
+      const ex = q[0] - p[0], ey = q[1] - p[1], l = Math.hypot(ex, ey) || 1;
+      let nx = -ey / l, ny = ex / l;
+      if (nx * ((p[0] + q[0]) / 2 - cx) + ny * ((p[1] + q[1]) / 2 - cy) < 0) { nx = -nx; ny = -ny; }
+      return [nx, ny];
+    };
+    const N = [normal(d0, d1), normal(d1, d2), normal(d2, d0)];
+    const grow = (k) => {
+      const p = N[(k + 2) % 3], q = N[k], dd = 1 + p[0] * q[0] + p[1] * q[1];
+      let mx = (p[0] + q[0]) / Math.max(dd, 0.05), my = (p[1] + q[1]) / Math.max(dd, 0.05);
+      const ml = Math.hypot(mx, my); if (ml > 4) { mx *= 4 / ml; my *= 4 / ml; }
+      return [D[k][0] + mx * GROW, D[k][1] + my * GROW];
+    };
+    const g0 = grow(0), g1 = grow(1), g2 = grow(2);
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(g0[0], g0[1]); ctx.lineTo(g1[0], g1[1]); ctx.lineTo(g2[0], g2[1]); ctx.closePath();
+    ctx.clip();
+    ctx.transform(a, b, c, d, e, f);
+    ctx.drawImage(img, 0, 0);
+    ctx.restore();
+  }
+
+  /* a long outfit drawn as ONE garment (rig_<name>_body, collar to hem, joints.waist = under the belt): above the
+     waist it is the torso (the torso's own transform); below it the cloth bends away towards the swing of the legs
+     (rot, flared by sx at the hem), like a Spine mesh weighted from the torso bone to a cloth bone. One picture, so
+     the top and the skirt can never come apart or show a seam. */
+  function drawBody(ctx, s, S, P, rot, sx, o) {
+    const J = s.joints, bp = J.pelvis, wj = J.waist, br = P.breathe || 1, lean = P.lean || 0;
+    const ca = Math.cos(lean), sa = Math.sin(lean), cr = Math.cos(rot), sr = Math.sin(rot);
+    const onT = (x, y) => { const X = x - bp[0], Y = (y - bp[1]) * br; return [S.pel[0] + X * ca - Y * sa, S.pel[1] + X * sa + Y * ca]; };
+    const H = onT(wj[0], wj[1]), len = Math.max(1, s.h - wj[1]);
+    const at = (x, y) => {
+      const t = onT(x, y);
+      if (y <= wj[1]) return t;
+      const X = (x - wj[0]) * sx, Y = y - wj[1], f = Math.min(1, Y / len);
+      return [t[0] + (H[0] + X * cr - Y * sr - t[0]) * f, t[1] + (H[1] + X * sr + Y * cr - t[1]) * f];
+    };
+    const draw = (img) => {
+      // above the waist: the torso, rigid
+      ctx.save();
+      ctx.translate(S.pel[0], S.pel[1]); ctx.rotate(lean); ctx.scale(1, br);
+      if (!o.noBend) { ctx.beginPath(); ctx.rect(-bp[0] - 1, -bp[1] - 1, s.w + 2, wj[1] + 1.4); ctx.clip(); }
+      ctx.drawImage(img, -bp[0], -bp[1], s.w, s.h);
+      ctx.restore();
+      if (o.noBend) return; // (ghosts / onion skins: all of it rigid)
+      // below: rows blending from the torso to the cloth (each row maps straight, so two columns are plenty)
+      const kx = img.width / s.w, ky = img.height / s.h, y0 = wj[1] - 0.4, ROWS = Math.max(4, Math.ceil(len / 3)), COLS = 2;
+      let prev = null;
+      for (let i = 0; i <= ROWS; i++) {
+        const y = y0 + ((s.h + 0.5 - y0) * i) / ROWS, row = [];
+        for (let j = 0; j <= COLS; j++) { const x = -0.5 + ((s.w + 1) * j) / COLS; row.push({ s: [x * kx, y * ky], d: at(x, y) }); }
+        if (prev)
+          for (let j = 0; j < COLS; j++) {
+            const a = prev[j], b = row[j], c = row[j + 1], d = prev[j + 1];
+            tri(ctx, img, a.s, b.s, c.s, a.d, b.d, c.d);
+            tri(ctx, img, a.s, c.s, d.s, a.d, c.d, d.d);
+          }
+        prev = row;
+      }
+    };
+    const img0 = pic(s, o);
+    if (!bodyCached(ctx, s, img0, S.pel, lean, br, rot, sx, o)) draw(img0);
+    if (o.tint && o.tint[1] > 0) {
+      const a = ctx.globalAlpha, ti = NC.tinted(s.name, o.tint[0]);
+      ctx.globalAlpha = a * o.tint[1];
+      if (!bodyCached(ctx, s, ti, S.pel, lean, br, rot, sx, o)) draw(ti);
+      ctx.globalAlpha = a;
+    }
+  }
+  /* a long outfit from the bend cache (2026-10-18, phase 1 "แคชชุดคลุม"): drawBody's rows are clipped triangles (the most
+     clips left in a crowd after the limbs went into the cache). In the torso's own frame (the pelvis at 0, the lean taken
+     out) the garment depends only on the breath, the skirt's turn against the lean and its flare, so it is drawn once
+     per (breath 0.004, turn BEND_STEP, flare 0.02) into a small canvas and put down turned by the lean. NC.Perf.cloth */
+  function bodyCached(ctx, s, img, pel, lean, br, rot, sx, o) {
+    if (o.noBend || !BC.on || !(NC.Perf && NC.Perf.cloth)) return false;
+    const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+    if (!iw || !ih) return false;
+    const J = s.joints, bp = J.pelvis, wj = J.waist;
+    const m = ctx.getTransform(), scr = Math.max(Math.hypot(m.a, m.b), Math.hypot(m.c, m.d));
+    const R = Math.min(iw / s.w, 8, Math.pow(2, Math.ceil(Math.log2(Math.max(0.25, scr * 1.15)) * 2) / 2));
+    const brq = Math.round(br / 0.004) * 0.004, dq = Math.round((rot - lean) / BEND_STEP) * BEND_STEP, sxq = Math.round(sx / 0.02) * 0.02;
+    const key = 'body|' + brq.toFixed(3) + '|' + dq.toFixed(4) + '|' + sxq.toFixed(2) + '|' + R;
+    let M = BENT.get(img);
+    if (!M) BENT.set(img, (M = new Map()));
+    let e = M.get(key);
+    if (e) { BENT_LRU.delete(e.id); BENT_LRU.set(e.id, e); }
+    else {
+      const len = Math.max(1, s.h - wj[1]), cr = Math.cos(dq), sr = Math.sin(dq);
+      const onT = (x, y) => [x - bp[0], (y - bp[1]) * brq], H = onT(wj[0], wj[1]);
+      const at = (x, y) => {
+        const t = onT(x, y);
+        if (y <= wj[1]) return t;
+        const X = (x - wj[0]) * sxq, Y = y - wj[1], f = Math.min(1, Y / len);
+        return [t[0] + (H[0] + X * cr - Y * sr - t[0]) * f, t[1] + (H[1] + X * sr + Y * cr - t[1]) * f];
+      };
+      // the rows as drawBody makes them, and the box round the torso part and every row point
+      const kx = iw / s.w, ky = ih / s.h, ys = wj[1] - 0.4, ROWS = Math.max(4, Math.ceil(len / 3)), COLS = 2, rows = [];
+      let x0 = -bp[0] - 1, y0 = -(bp[1] + 1) * brq, x1 = s.w - bp[0] + 1, y1 = (wj[1] - bp[1] + 0.4) * brq;
+      for (let i = 0; i <= ROWS; i++) {
+        const y = ys + ((s.h + 0.5 - ys) * i) / ROWS, row = [];
+        for (let j = 0; j <= COLS; j++) {
+          const x = -0.5 + ((s.w + 1) * j) / COLS, d = at(x, y);
+          row.push({ s: [x * kx, y * ky], d });
+          if (d[0] < x0) x0 = d[0]; if (d[0] > x1) x1 = d[0]; if (d[1] < y0) y0 = d[1]; if (d[1] > y1) y1 = d[1];
+        }
+        rows.push(row);
+      }
+      x0 -= 2; y0 -= 2; x1 += 2; y1 += 2;
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.ceil((x1 - x0) * R)); c.height = Math.max(1, Math.ceil((y1 - y0) * R));
+      const cx = c.getContext('2d');
+      cx.imageSmoothingQuality = 'high';
+      cx.setTransform(R, 0, 0, R, -x0 * R, -y0 * R);
+      // above the waist: the torso, rigid (drawBody's clip at the waist)
+      cx.save(); cx.scale(1, brq);
+      cx.beginPath(); cx.rect(-bp[0] - 1, -bp[1] - 1, s.w + 2, wj[1] + 1.4); cx.clip();
+      cx.drawImage(img, -bp[0], -bp[1], s.w, s.h);
+      cx.restore();
+      for (let i = 1; i < rows.length; i++)
+        for (let j = 0; j < COLS; j++) {
+          const a = rows[i - 1][j], b = rows[i][j], cc = rows[i][j + 1], d = rows[i - 1][j + 1];
+          tri(cx, img, a.s, b.s, cc.s, a.d, b.d, cc.d);
+          tri(cx, img, a.s, cc.s, d.s, a.d, cc.d, d.d);
+        }
+      e = { id: ++bentSeq, c, x: x0, y: y0, w: c.width / R, h: c.height / R, bytes: c.width * c.height * 4, M, key };
+      M.set(key, e); BENT_LRU.set(e.id, e); BC.bytes += e.bytes; BC.made++;
+      for (const [id, v] of BENT_LRU) { if (BC.bytes <= BEND_MB * 1048576) break; BENT_LRU.delete(id); v.M.delete(v.key); BC.bytes -= v.bytes; }
+      BC.entries = BENT_LRU.size;
+    }
+    ctx.save();
+    ctx.translate(pel[0], pel[1]); ctx.rotate(lean);
+    ctx.drawImage(e.c, e.x, e.y, e.w, e.h);
+    ctx.restore();
+    return true;
+  }
+
+  function clipQuad(ctx, q) {
+    ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]);
+    for (let i = 1; i < 4; i++) ctx.lineTo(q[i][0], q[i][1]);
+    ctx.closePath(); ctx.clip();
+  }
+
+  /* a limb picture bent at its joint, like a Spine mesh weighted to two bones. The current transform has the limb's
+     pivot joint at the origin with the upper bone's rotation applied; `bend` turns the lower bone around the joint. */
+  /* bent limbs from a cache (2026-10-18, the user: "ทำไงให้ลื่นจัดๆ" -> "ทำข้อ 1+2 เลย (แคชแขนขาที่งอ ...)"): a bent limb is two
+     clipped pictures and 16 clipped triangles (bentRaw), the costliest part of drawing a cut-out hero (a CPU profile of a
+     30-hero fight: 14.5% of the game's time). Each limb picture bent by an angle (steps of BEND_STEP) is drawn once into a
+     small canvas at about the size it shows (px a unit in half-octave steps up, at most the picture's own) and from then
+     on put down as one picture. Oldest out first past BEND_MB. ?bendcache=0 off (NC.BendCache.on, also at run time). */
+  const BEND_STEP = (1.2 * Math.PI) / 180, BEND_MB = 48;
+  const BC = (NC.BendCache = { on: true, bytes: 0, made: 0, entries: 0 });
+  const BENT = new WeakMap(), BENT_LRU = new Map();   // the picture -> its bent copies; every copy, least recently used first
+  let bentSeq = 0;
+  function bentImage(ctx, L, img, bend) {
+    const s = L.s, piv = L.piv;
+    if (Math.abs(bend) < 0.02) { ctx.drawImage(img, -piv[0], -piv[1], s.w, s.h); return; }
+    const iw = img.naturalWidth || img.width;
+    if (!BC.on || !iw) { bentRaw(ctx, L, img, bend); return; }
+    const m = ctx.getTransform(), scr = Math.max(Math.hypot(m.a, m.b), Math.hypot(m.c, m.d));
+    const R = Math.min(iw / s.w, 8, Math.pow(2, Math.ceil(Math.log2(Math.max(0.25, scr * 1.15)) * 2) / 2));
+    const bq = Math.round(bend / BEND_STEP) * BEND_STEP;
+    const key = bq.toFixed(4) + '|' + R + '|' + L.J[0] + ',' + L.J[1] + '|' + piv[0] + ',' + piv[1];
+    let M = BENT.get(img);
+    if (!M) BENT.set(img, (M = new Map()));
+    let e = M.get(key);
+    if (e) { BENT_LRU.delete(e.id); BENT_LRU.set(e.id, e); }
+    else {
+      // the bent picture's box (limb units, the pivot at 0): the picture, and the picture turned about the joint
+      const jx = L.J[0] - piv[0], jy = L.J[1] - piv[1], cb = Math.cos(bq), sb = Math.sin(bq);
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (const [X, Y] of [[-piv[0], -piv[1]], [s.w - piv[0], -piv[1]], [-piv[0], s.h - piv[1]], [s.w - piv[0], s.h - piv[1]]])
+        for (const [px, py] of [[X, Y], [jx + (X - jx) * cb - (Y - jy) * sb, jy + (X - jx) * sb + (Y - jy) * cb]]) {
+          if (px < x0) x0 = px; if (px > x1) x1 = px; if (py < y0) y0 = py; if (py > y1) y1 = py;
+        }
+      x0 -= 2; y0 -= 2; x1 += 2; y1 += 2;
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.ceil((x1 - x0) * R)); c.height = Math.max(1, Math.ceil((y1 - y0) * R));
+      const cx = c.getContext('2d');
+      cx.imageSmoothingQuality = 'high';
+      cx.setTransform(R, 0, 0, R, -x0 * R, -y0 * R);
+      bentRaw(cx, L, img, bq);
+      e = { id: ++bentSeq, c, x: x0, y: y0, w: c.width / R, h: c.height / R, bytes: c.width * c.height * 4, M, key };
+      M.set(key, e); BENT_LRU.set(e.id, e); BC.bytes += e.bytes; BC.made++;
+      for (const [id, v] of BENT_LRU) { if (BC.bytes <= BEND_MB * 1048576) break; BENT_LRU.delete(id); v.M.delete(v.key); BC.bytes -= v.bytes; }
+      BC.entries = BENT_LRU.size;
+    }
+    ctx.drawImage(e.c, e.x, e.y, e.w, e.h);
+  }
+  function bentRaw(ctx, L, img, bend) {
+    const s = L.s, piv = L.piv;
+    const kx = img.width / s.w, ky = img.height / s.h;
+    const ax = L.end[0] - piv[0], ay = L.end[1] - piv[1], len = Math.hypot(ax, ay);
+    const dx = ax / len, dy = ay / len, nx = -dy, ny = dx;
+    // the picture's corners measured along (u) and across (v) the limb
+    let u0 = Infinity, u1 = -Infinity, v0 = Infinity, v1 = -Infinity;
+    for (const [x, y] of [[0, 0], [s.w, 0], [0, s.h], [s.w, s.h]]) {
+      const X = x - piv[0], Y = y - piv[1], u = X * dx + Y * dy, v = X * nx + Y * ny;
+      u0 = Math.min(u0, u); u1 = Math.max(u1, u); v0 = Math.min(v0, v); v1 = Math.max(v1, v);
+    }
+    u0 -= 1; u1 += 1; v0 -= 1; v1 += 1;
+    const uJ = Math.hypot(L.J[0] - piv[0], L.J[1] - piv[1]); // the joint lies on the limb's axis
+    const half = Math.max(3, len * 0.12), ua = uJ - half, ub = uJ + half;
+    const Jx = dx * uJ, Jy = dy * uJ, cb = Math.cos(bend), sb = Math.sin(bend);
+    const at = (u, v) => [u * dx + v * nx, u * dy + v * ny];
+    const turn = (p) => [Jx + (p[0] - Jx) * cb - (p[1] - Jy) * sb, Jy + (p[0] - Jx) * sb + (p[1] - Jy) * cb];
+    // upper part: follows the upper bone only
+    ctx.save();
+    clipQuad(ctx, [at(u0, v0), at(ua + 0.6, v0), at(ua + 0.6, v1), at(u0, v1)]);
+    ctx.drawImage(img, -piv[0], -piv[1], s.w, s.h);
+    ctx.restore();
+    // lower part: follows the lower bone only
+    ctx.save();
+    clipQuad(ctx, [turn(at(ub - 0.6, v0)), turn(at(u1, v0)), turn(at(u1, v1)), turn(at(ub - 0.6, v1))]);
+    ctx.translate(Jx, Jy); ctx.rotate(bend); ctx.translate(-Jx, -Jy);
+    ctx.drawImage(img, -piv[0], -piv[1], s.w, s.h);
+    ctx.restore();
+    // the band around the joint: a small mesh whose vertices blend between the two bones
+    const ROWS = 4, COLS = 2, grid = [];
+    for (let i = 0; i <= ROWS; i++) {
+      const u = ua + ((ub - ua) * i) / ROWS, w = smooth(i / ROWS), row = [];
+      for (let j = 0; j <= COLS; j++) {
+        const v = v0 + ((v1 - v0) * j) / COLS, p = at(u, v), q = turn(p);
+        row.push({ s: [(p[0] + piv[0]) * kx, (p[1] + piv[1]) * ky], d: [p[0] + (q[0] - p[0]) * w, p[1] + (q[1] - p[1]) * w] });
+      }
+      grid.push(row);
+    }
+    for (let i = 0; i < ROWS; i++)
+      for (let j = 0; j < COLS; j++) {
+        const a = grid[i][j], b = grid[i + 1][j], c = grid[i + 1][j + 1], d = grid[i][j + 1];
+        tri(ctx, img, a.s, b.s, c.s, a.d, b.d, c.d);
+        tri(ctx, img, a.s, c.s, d.s, a.d, c.d, d.d);
+      }
+  }
+
+  // one piece of a grip hand (js/griphand.js): a picture the size of the arm's, drawn in the forearm's frame and turned
+  // about the wrist by bone.wr
+  function gripPiece(ctx, L, bone, o, name) {
+    const s = NC.SPR[name];
+    if (!s || !bone.grip) return;
+    ctx.save();
+    ctx.translate(bone.at[0], bone.at[1]);
+    ctx.rotate(bone.rot);
+    const bend = o.noBend ? 0 : bone.bend, jx = L.J[0] - L.piv[0], jy = L.J[1] - L.piv[1];
+    ctx.translate(jx, jy); ctx.rotate(bend); ctx.translate(-jx, -jy);
+    const wx = bone.wristPic[0] - L.piv[0], wy = bone.wristPic[1] - L.piv[1];
+    ctx.translate(wx, wy); ctx.rotate(bone.wr); ctx.translate(-wx, -wy);
+    const off = s.off || [0, 0]; // (the piece's canvas is the arm's, grown by off on every side: tools/grip_cut.py)
+    paint(ctx, s, -L.piv[0] - off[0], -L.piv[1] - off[1], o);
+    ctx.restore();
+  }
+
+  function drawLimb(ctx, L, bone, o, attach, wide) {
+    ctx.save();
+    ctx.translate(bone.at[0], bone.at[1]);
+    ctx.rotate(bone.rot);
+    if (wide && wide !== 1) ctx.scale(wide, 1); // (a chubby costume's balloon trousers: wider, not longer)
+    const bend = o.noBend ? 0 : bone.bend;
+    const LS = (bone.grip && NC.SPR[L.s.name + '_nofist']) || L.s; // (gripping: the arm without its fist, js/griphand.js)
+    bentImage(ctx, L, pic(LS, o), bend);
+    if (o.tint && o.tint[1] > 0) {
+      const a = ctx.globalAlpha;
+      ctx.globalAlpha = a * o.tint[1];
+      bentImage(ctx, L, NC.tinted(LS.name, o.tint[0]), bend);
+      ctx.globalAlpha = a;
+    }
+    // a joint cap (L.s.cap: an armoured knee guard cut out of its own leg, tools/falcon_cut.py kneecaps): drawn over the
+    // bend, turned half way between the two bones, the way cutout games lay a knee pad over the joint, so the band
+    // stretched under a deep bend never shows
+    const cap = L.s.cap && NC.SPR[L.s.cap];
+    if (cap && cap.joints) {
+      const c = cap.joints.c;
+      ctx.save();
+      ctx.translate(L.J[0] - L.piv[0], L.J[1] - L.piv[1]); ctx.rotate(bend / 2);
+      paint(ctx, cap, -c[0], -c[1], o);
+      ctx.restore();
+    }
+    if (attach) {
+      // things riding on the lower bone (the shoe on the shin)
+      const jx = L.J[0] - L.piv[0], jy = L.J[1] - L.piv[1];
+      ctx.translate(jx, jy); ctx.rotate(bend); ctx.translate(-jx, -jy);
+      attach();
+    }
+    ctx.restore();
+  }
+
+  NC.drawWeapon = function (ctx, W, hx, hy, ang, o) {
+    o = o || {};
+    const s = NC.SPR[W.sprite];
+    if (!s) return;
+    const k = (o.scale || 1) * 0.95, w = s.w * k, h = s.h * k;
+    ctx.save();
+    ctx.translate(hx, hy);
+    ctx.rotate(ang + Math.PI / 2); // the sprite points up; turn it to point along ang
+    if (o.len !== undefined && o.len !== 1) ctx.scale(1, o.len); // foreshortened: swinging towards the camera
+    const grip = o.grip === undefined ? W.grip : o.grip;
+    // (o.sayaOnly: just the empty scabbard, the sword being out: W.saya below)
+    if (!o.sayaOnly) ctx.drawImage(o.silhouette ? NC.tinted(s.name, o.silhouette) : s.img, -s.ax * w, -h * (1 - grip), w, h);
+    if (W.sheath && W.sheath.draw && o.sheath > 0.5 && !o.silhouette) W.sheath.draw(ctx, W, s, w, h, grip, o); // (a scabbard drawn its own way: the katanas, js/samurai.js)
+    else if (W.sheath && o.sheath > 0.5 && !o.silhouette) {
+      // sheathed: a brown leather scabbard over the blade, a gold throat under the guard and a gold chape at the tip
+      const sh = W.sheath, y = (f) => h * grip - f * h, x0 = (sh.x0 - s.ax) * w, x1 = (sh.x1 - s.ax) * w, top = y(sh.from), tip = y(0.99);
+      const r = (x1 - x0) / 2, cx = (x0 + x1) / 2, lw = Math.max(1.2, w * 0.06);
+      const body = () => { ctx.beginPath(); ctx.moveTo(x0, top); ctx.lineTo(x1, top); ctx.lineTo(x1, tip + r); ctx.arc(cx, tip + r, r, 0, Math.PI, true); ctx.closePath(); };
+      ctx.fillStyle = '#6e4428'; body(); ctx.fill();
+      ctx.fillStyle = 'rgba(255,220,170,0.22)'; ctx.fillRect(x0 + r * 0.35, top, r * 0.45, tip + r - top);
+      ctx.fillStyle = '#d6a643'; ctx.fillRect(x0, top - h * 0.035, x1 - x0, h * 0.035);
+      ctx.beginPath(); ctx.moveTo(x0, tip + r * 1.1); ctx.lineTo(x1, tip + r * 1.1); ctx.lineTo(x1, tip + r); ctx.arc(cx, tip + r, r, 0, Math.PI, true); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#231a33'; ctx.lineWidth = lw; body(); ctx.stroke();
+    }
+    ctx.restore();
+  };
+
+  const TAIL_AT = [11, 7]; // a costume tail's root: this far behind and above the pelvis joint (torso units)
+
+  const WISP_PAL = ['#ff4f8a', '#ff9ec4', '#fff0f6']; // a fox fire's colours (outer, middle, core)
+
+  // a head seen only inside a hood's outline (hat.hood: its _fill picture, placed like the hood): no hair pokes out
+  const maskCv = document.createElement('canvas'), maskCtx = maskCv.getContext('2d');
+  function paintMasked(ctx, s, fill, b, img) {
+    const W = img.width, H = img.height, k = W / s.w;
+    if (cutCv.width !== W || cutCv.height !== H) { cutCv.width = W; cutCv.height = H; } else cutCtx.clearRect(0, 0, W, H);
+    if (maskCv.width !== W || maskCv.height !== H) { maskCv.width = W; maskCv.height = H; } else maskCtx.clearRect(0, 0, W, H);
+    maskCtx.save();
+    if (b.rot) { maskCtx.translate(b.cx * k, b.band * k); maskCtx.rotate(b.rot); maskCtx.translate(-b.cx * k, -b.band * k); } // (a turned hood: js/hatpair.js)
+    maskCtx.drawImage(fill.img, b.x * k, b.y * k, b.w * k, b.h * k);
+    maskCtx.restore();
+    cutCtx.globalCompositeOperation = 'source-over';
+    cutCtx.drawImage(img, 0, 0);
+    cutCtx.globalCompositeOperation = 'destination-in';
+    cutCtx.drawImage(maskCv, 0, 0);
+    cutCtx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(cutCv, 0, 0, s.w, s.h);
+  }
+
+  // a head with everything above cutY (head units) removed: the hair that a worn hat covers (b: a turned hat's box, the
+  // cut line turns with it round the middle of its band)
+  const cutCv = document.createElement('canvas'), cutCtx = cutCv.getContext('2d');
+  function paintCut(ctx, s, cutY, img, b) {
+    const W = img.width, H = img.height, k = W / s.w;
+    if (cutCv.width !== W || cutCv.height !== H) { cutCv.width = W; cutCv.height = H; } else cutCtx.clearRect(0, 0, W, H);
+    cutCtx.globalCompositeOperation = 'source-over';
+    cutCtx.drawImage(img, 0, 0);
+    cutCtx.globalCompositeOperation = 'destination-out';
+    if (b && b.rot) {
+      cutCtx.save(); cutCtx.translate(b.cx * k, cutY * k); cutCtx.rotate(b.rot);
+      cutCtx.fillRect(-3 * W, -3 * H, 6 * W, 3 * H);
+      cutCtx.restore();
+    } else cutCtx.fillRect(0, 0, W, Math.max(0, Math.round(cutY * k)));
+    ctx.drawImage(cutCv, 0, 0, s.w, s.h);
+  }
+
+  // ---------------- hats, rigged the way a 2D rigger does it ----------------
+  // head bone -> hat_root (the pivot: on the crown, the top middle of the head; on the rim it would slide the hat off
+  // when it turns) -> the hat body (with its top: ears, pom, tip), which may move a little (secondary motion), and the
+  // front rim / fold (hat.rim: its upper edge, from tools/hat_parts.py), fixed on the head and drawn over the body so the
+  // body's lower edge hides under it. Draw order: head (hair under the hat cut away) -> body -> rim; a flower crown
+  // (hat.back) is a ring: its back half goes behind the head. A hood (hat.rimBehind) is the other way round: its top
+  // covers the top of the hair, the part below the rim line (the sides and the back around the face) hangs behind the
+  // head, so the face and the hair at the sides stay in front of it.
+  const HAT_CROWN = 0.25, HAT_OVERLAP = 0.06;
+  function hatPart(ctx, hat, b, part, P, o) {
+    const R = hat.rim;
+    if (part === 'rim' && !R) return; // not split: the body is the whole hat
+    const X = (f) => b.x + f * b.w, Y = (f) => b.y + f * b.h;
+    ctx.save();
+    hatTurn(ctx, b);
+    if (part === 'body') {
+      const rot = (P.hatRot || 0) * (hat.soft || 0), sq = 1 + ((P.hatSq || 1) - 1) * (hat.soft || 0);
+      if (rot) { ctx.translate(b.px, b.crown); ctx.rotate(rot); ctx.translate(-b.px, -b.crown); }
+      if (sq !== 1) { ctx.translate(b.cx, b.band); ctx.scale(1 + (1 - sq) * 0.5, sq); ctx.translate(-b.cx, -b.band); }
+      if (R) {
+        ctx.beginPath(); ctx.moveTo(X(-0.1), Y(-0.2)); ctx.lineTo(X(1.1), Y(-0.2)); ctx.lineTo(X(1.1), Y(R[R.length - 1][1] + HAT_OVERLAP));
+        for (let i = R.length - 1; i >= 0; i--) ctx.lineTo(X(R[i][0]), Y(R[i][1] + HAT_OVERLAP));
+        ctx.lineTo(X(-0.1), Y(R[0][1] + HAT_OVERLAP)); ctx.closePath(); ctx.clip();
+      }
+    } else {
+      ctx.beginPath(); ctx.moveTo(X(-0.1), Y(R[0][1]));
+      for (const p of R) ctx.lineTo(X(p[0]), Y(p[1]));
+      ctx.lineTo(X(1.1), Y(R[R.length - 1][1])); ctx.lineTo(X(1.1), Y(1.2)); ctx.lineTo(X(-0.1), Y(1.2)); ctx.closePath(); ctx.clip();
+    }
+    ctx.drawImage(pic(b.hs, o), b.x, b.y, b.w, b.h);
+    if (o.tint && o.tint[1] > 0) { ctx.globalAlpha *= o.tint[1]; ctx.drawImage(NC.tinted(b.hs.name, o.tint[0]), b.x, b.y, b.w, b.h); }
+    ctx.restore();
+  }
+
+  // secondary motion of a worn hat: a damped spring per hero (state s), fed by how the head moves (vx: the hero's
+  // speed along the way it faces, world px/s). The hat lags a little behind quick turns of the head, tips back when
+  // setting off and forward when stopping, squashes onto the head on a landing, then settles. Never more than a few
+  // degrees: it follows the head, it doesn't swing on its own. Result in the pose: hatRot, hatSq (x how soft the hat is).
+  const HAT_K = 380, HAT_C = 17;
+  NC.hatSpring = function (s, equip, P, vx, dt) {
+    const hat = item(equip, 'hat'), rig = topRig(equip);
+    if (!hat || !hat.soft || !rig) { s.init = false; P.hatRot = 0; P.hatSq = 1; return; }
+    if (!(dt > 0)) { P.hatRot = s.a || 0; P.hatSq = 1 - (s.q || 0); return; } // paused: hold
+    const S = solve(rig, equip, P, NC.ITEMS[equip.weapon]);
+    s.px = (s.px || 0) + ((vx || 0) * dt) / RIG_SCALE;
+    const ang = (P.rot || 0) + P.lean * 0.45 + (P.head || 0), x = S.neck[0] + s.px, y = S.neck[1] + (P.headY || 0);
+    if (!s.init) Object.assign(s, { init: true, ang, x, y, va: 0, vx: 0, vy: 0, a: 0, av: 0, q: 0, qv: 0 });
+    // velocities smoothed over ~0.05 s: every running step jiggling the hat would read as a loose hat; setting off,
+    // stopping, a swing or a landing still come through
+    const f = 1 - Math.exp(-dt / 0.05);
+    const va = NC.lerp(s.va, (ang - s.ang) / dt, f), vX = NC.lerp(s.vx, (x - s.x) / dt, f), vY = NC.lerp(s.vy, (y - s.y) / dt, f);
+    const aa = NC.clamp((va - s.va) / dt, -200, 200), ax = NC.clamp((vX - s.vx) / dt, -6000, 6000), ay = NC.clamp((vY - s.vy) / dt, -40000, 40000);
+    Object.assign(s, { ang, x, y, va, vx: vX, vy: vY });
+    s.av += (-HAT_K * s.a - HAT_C * s.av - 0.3 * aa - 0.009 * ax) * dt; s.a = NC.clamp(s.a + s.av * dt, -0.1, 0.1);
+    s.qv += (-HAT_K * s.q - HAT_C * s.qv - 0.0008 * ay) * dt; s.q = NC.clamp(s.q + s.qv * dt, -0.05, 0.07);
+    P.hatRot = s.a; P.hatSq = 1 - s.q;
+  };
+
+  // hat on a head box ([centre x, top y, width] as fractions of the head sprite); the hat's band (brim) sits at seat
+  function hatBox(hat, sprite) {
+    const hs = NC.SPR[hat.sprite], hb = sprite.head || [0.5, 0, 0.8];
+    const headW = hb[2] * sprite.w, w = headW * hat.fit, h = hs.h * (w / hs.w);
+    const cx = hb[0] * sprite.w + (hat.dx || 0) * headW;
+    const band = hb[1] * sprite.h + hat.seat * headW;
+    // px, crown: the hat's pivot (hat_root), the top middle of the HEAD (not of the hat: a hat set further back still
+    // turns around the head). hw: the head's width; rot: a hat turned on this hair (js/hatpair.js: degrees -> radians)
+    return { hs, x: cx - hs.ax * w, y: band - (hs.brim === undefined ? 1 : hs.brim) * h, w, h, band, cx, px: hb[0] * sprite.w, crown: hb[1] * sprite.h + HAT_CROWN * headW,
+      hw: headW, rot: hat.rot ? (hat.rot * Math.PI) / 180 : 0 };
+  }
+  // a turned hat (b.rot) turns round the middle of its band
+  function hatTurn(ctx, b) { if (b.rot) { ctx.translate(b.cx, b.band); ctx.rotate(b.rot); ctx.translate(-b.cx, -b.band); } }
+  // where the hair under a clipping hat is cut: just over its band, moved by the pair's trim (head widths, + = lower)
+  const hatCut = (hat, b) => b.band - b.h * 0.04 + (hat.trim || 0) * b.hw;
+
+  // where a weapon sits: in the hand, or blended towards its belt / back spot
+  function weaponSpot(S, P, W) {
+    const u = W.tuck ? P.tuck || 0 : 0, g = W.grip + (P.gAdj || 0);
+    if (u <= 0) return { x: S.hand[0], y: S.hand[1], ang: P.wAng, grip: g };
+    const at = W.tuck.at || [7, -9]; // where it is kept (from the pelvis, turning with the torso): the belt, or the back
+    const belt = S.onTorso([S.pel0[0] + at[0], S.pel0[1] + at[1]]);
+    const spot = {
+      x: NC.lerp(S.hand[0], belt[0], u), y: NC.lerp(S.hand[1], belt[1], u),
+      ang: P.wAng + wrap(W.tuck.ang + P.lean - P.wAng) * u, grip: NC.lerp(g, W.tuck.grip, u),
+    };
+    if (u > 0.5) offGround(spot, W);
+    return spot;
+  }
+  // a weapon kept at the hip or on the back swings up instead of dragging through the ground: a run lowers the hips and
+  // leans the body, which hung axe and hammer heads among the boots (audit 2026-09-28). The ground is y = 0 in the rig.
+  function offGround(spot, W) {
+    const s = NC.SPR[W.sprite], len = s ? s.h * 0.95 : 80, tip = len * (1 - spot.grip), butt = len * spot.grip;
+    const low = (a) => spot.y + Math.max(Math.sin(a) * tip, -Math.sin(a) * butt);
+    let a = spot.ang;
+    for (let i = 0; i < 40 && low(a) > -2; i++) a = low(a + 0.04) < low(a - 0.04) ? a + 0.04 : a - 0.04;
+    spot.ang = a;
+  }
+
+  // a spin is drawn like a cut-out turning around: the body narrows, flips over to face the other way and widens
+  // again. It never gets thinner than 30% (a paper-thin hero reads as a glitch, a quick flip reads as a turn)
+  function turnX(P) {
+    if (!P.turn) return 1;
+    const c = Math.cos(P.turn);
+    return (c < 0 ? -1 : 1) * (0.3 + 0.7 * Math.pow(Math.abs(c), 0.6));
+  }
+
+  // the rig-frame -> world transform used for a drawing: feet at (x, y)
+  function rootXf(P, x, y, scale) {
+    const k = (scale || 1) * RIG_SCALE, f = (P.face < 0 ? -1 : 1) * turnX(P), sq = P.sq || 1, sx = 1 + (1 - sq) * 0.6;
+    const c = Math.cos(P.rot || 0), s = Math.sin(P.rot || 0);
+    return (p) => {
+      const X = p[0] * sx, Y = p[1] * sq;
+      return [x + f * k * (X * c - Y * s), y + k * (X * s + Y * c)];
+    };
+  }
+
+  // the weapon in world space (for the swing trail and hit effects): the hand, the blade's base and its tip
+  NC.weaponLine = function (equip, P, x, y, scale) {
+    const rig = topRig(equip), W = NC.ITEMS[equip.weapon], s = W && NC.SPR[W.sprite];
+    if (!rig || !s) return null;
+    const S = solve(rig, equip, P, W), spot = weaponSpot(S, P, W);
+    const len = s.h * 0.95 * (1 - spot.grip) * (P.wLen || 1), h = [spot.x, spot.y];
+    const toW = rootXf(P, x, y, scale);
+    return { hand: toW(h), base: toW(add(h, dirV(spot.ang, len * 0.3))), tip: toW(add(h, dirV(spot.ang, len * 0.98))) };
+  };
+
+  NC.drawRig = function (ctx, rig, equip, P, x, y, o) {
+    o = o || {};
+    const W = NC.ITEMS[equip.weapon];
+    const S = solve(rig, equip, P, W);
+    ctx.save();
+    ctx.translate(x, y);
+    const k = (o.scale || 1) * RIG_SCALE;
+    ctx.scale((P.face < 0 ? -k : k) * turnX(P), k);
+    if (P.rot) ctx.rotate(P.rot);
+    if (P.sq && P.sq !== 1) ctx.scale(1 + (1 - P.sq) * 0.6, P.sq);
+    ctx.globalAlpha *= (o.alpha === undefined ? 1 : o.alpha) * (P.fade === undefined ? 1 : P.fade);
+
+    const spot = weaponSpot(S, P, W);
+    // (the rig transform already carries the scale, so the weapon is drawn at scale 1 inside it)
+    const hide = NC.clamp(P.wHide || 0, 0, 1); // put away (not shown until it is drawn to attack)
+    const underRobe = !!(equip.robe && W && W.tuck && P.tuck > 0.5); // kept at the waist under a long robe: hidden in it
+    let weapon = () => {
+      if (o.noWeapon || hide > 0.99 || underRobe) return;
+      const a = ctx.globalAlpha;
+      ctx.globalAlpha = a * (1 - hide);
+      // (W.saya, a katana: in its scabbard while the hand rests on the hilt or it is kept at the belt)
+      const sheathed = P.wSheath || (W.saya && ((P.hk || 0) > 0.5 || P.tuck > 0.5) ? 1 : 0);
+      NC.drawWeapon(ctx, W, spot.x, spot.y, spot.ang, Object.assign({}, o, { grip: spot.grip, scale: 1, len: P.wLen, sheath: sheathed }));
+      if (W.bow && !(W.bowNoStow && P.tuck > 0.5)) bowString(ctx, W, spot, S, P, o); // (bowNoStow: js/wcatalog.js's wide bows show no string while slung, it would cross the body)
+      ctx.globalAlpha = a;
+    };
+    if (P.plant > 0.5 && P.pG < 50 && Math.sin(spot.ang) > 0.3) {
+      // a blade driven into the ground: everything past the ground line is buried, with a little hole where it goes in
+      const draw = weapon, gx = spot.x + (Math.cos(spot.ang) * (P.pG - spot.y)) / Math.sin(spot.ang);
+      weapon = () => {
+        if (o.noWeapon) return;
+        if (!o.silhouette) { ctx.fillStyle = 'rgba(20,14,30,0.35)'; ctx.beginPath(); ctx.ellipse(gx, P.pG, 11, 3.5, 0, 0, Math.PI * 2); ctx.fill(); }
+        ctx.save(); ctx.beginPath(); ctx.rect(gx - 400, P.pG - 600, 800, 600); ctx.clip(); draw(); ctx.restore();
+      };
+    }
+    // the trousers' own boots (no shoes slot since js/lowermerge.js): only on a trouser piece cut without them; the
+    // one-piece legs (js/lowerbody.js, or the outfit's whole leg) have them drawn in
+    const pantsIt = item(equip, 'pants');
+    const chub = (equip.robe && NC.ITEMS[equip.robe] && NC.ITEMS[equip.robe].chub) || null; // (fashion.js: round, puffy costumes)
+    const leg = (L, bone, which) => {
+      const ss = pantsIt && pantsIt.slot !== 'robe' && L.s.name.startsWith('pants_') && NC.SPR['shoes_' + pantsIt.rig + '_' + which];
+      drawLimb(ctx, L, bone, o, ss ? () => {
+        const f = L.end, sf = ss.joints.foot;
+        paint(ctx, ss, f[0] - L.piv[0] - sf[0], f[1] - L.piv[1] - sf[1], o);
+      } : null, chub && chub.legs);
+    };
+
+    // an outfit drawn facing the viewer (torso.front: the class line-up) has both arms at its sides, in front of the
+    // body and its cape (and what the far hand holds, like the archer's bow); a 3/4 one hides the far arm behind the body
+    const front = !!rig.P.torso.front, farHeld = S.farW && P.tuck < 0.5 && !P.wBehind;
+    // behind the body: carried behind, slung across the back, or in the far hand
+    const behind = P.wBehind || (farHeld && !front) || (W && W.tuck && W.tuck.back && P.tuck > 0.5);
+    // long cloth (robes, tabards, capes): hung from the torso, but they keep hanging down (only part of the body's lean),
+    // trail back in a stride and flare over spread legs. The cape goes behind everything, the skirt over the legs.
+    const TJ = rig.P.torso.joints, legF = P.legF || 0, legB = P.legB || 0;
+    const spread = Math.abs(legF - legB), stride = (legF + legB) / 2;
+    // sitting (both legs out in front, rest.js): the long cloth lies forward over the legs, the cape drapes behind
+    const sit = NC.clamp((Math.min(legF, legB) - 0.7) / 0.7, 0, 1);
+    const cloth = (s, at, joint, rot, sx, sk, wave) => {
+      const j = s.joints[joint];
+      ctx.save(); ctx.translate(at[0], at[1]); ctx.rotate(rot);
+      if (sk) ctx.transform(1, 0, sk, 1, 0, 0); // (sheared: the top stays at the shoulders, the hem trails back)
+      ctx.scale(sx, 1);
+      if (wave) waveCloth(ctx, s, -j[0], -j[1], o, wave, NC.clamp(spread * 1.3 + Math.abs(P.lean || 0) * 2, 0, 1) * (1 - sit));
+      else paint(ctx, s, -j[0], -j[1], o);
+      ctx.restore();
+    };
+    const capeIt = item(equip, 'cape'), capeS = capeIt && NC.SPR[capeIt.sprite];
+    // (capeIt.trail: a cape whose hem trails back behind the hero, like the night falcon's feather cape: js/falconset.js)
+    if (capeS && capeS.joints) cloth(capeS, S.onTorso([TJ.neck[0] + CAPE_AT[0], TJ.neck[1] + CAPE_AT[1]]), 'top', 0.4 * P.lean + 0.25 * spread + 1.15 * sit, 1 + 0.08 * spread, -(capeIt.trail || 0) * (1 - sit), capeIt.wave); // (capeIt.wave: it flutters, waveCloth)
+    // a costume's tail (rig_<the robe's rig>_tail, joint `root`: js/fashion.js): sewn on at the back of the hips, behind
+    // the body; it sways a little on its own, swings with the stride and lifts as the body leans
+    const robeIt = equip.robe && NC.ITEMS[equip.robe], tailS = robeIt && NC.SPR['rig_' + robeIt.rig + '_tail'];
+    const tNow = performance.now() / 1000;
+    if (tailS && tailS.joints) {
+      const at = S.onTorso([TJ.pelvis[0] - TAIL_AT[0], TJ.pelvis[1] - TAIL_AT[1]]), lift = 0.35 * P.lean + 0.15 * (legB - legF) - 0.12 * sit;
+      const F = robeIt.tails;
+      if (F) {
+        // a fan of tails (robe.tails: n, spread [from, to] as turns from pointing back, len [min, max], the pictures): the
+        // upper ones first (furthest back), each swaying on its own, the whole fan breathing a little
+        const fan = Math.sin(tNow * 1.1) * 0.035;
+        for (let i = F.n - 1; i >= 0; i--) {
+          const u = F.n > 1 ? i / (F.n - 1) : 0, ts = NC.SPR[F.sprites[i % F.sprites.length]] || tailS, j = ts.joints.root;
+          const ang = F.spread[0] + (F.spread[1] - F.spread[0]) * u + fan + Math.sin(tNow * 1.6 + i * 0.83) * 0.07 + lift * (1 - 0.6 * u);
+          const len = (F.len[0] + (F.len[1] - F.len[0]) * (0.5 + 0.5 * Math.sin(i * 2.39 + 0.7))) * (1 - (F.shorten || 0) * u); // (the ones round the far side shorter)
+          ctx.save(); ctx.translate(at[0], at[1]); ctx.rotate(ang); ctx.scale(len, len * (1 + Math.sin(tNow * 2.1 + i) * 0.02));
+          paint(ctx, ts, -j[0], -j[1], o);
+          ctx.restore();
+        }
+      } else cloth(tailS, at, 'root', Math.sin(tNow * 2.3) * 0.06 + Math.sin(tNow * 3.9 + 1) * 0.025 + lift, 1);
+    }
+    // fox fires (robe.wisps: [x, y] from the pelvis, the first behind the body, the rest in front): pink flames that float
+    const wisps = robeIt && robeIt.wisps && !o.silhouette && NC.VFX ? robeIt.wisps : null;
+    const wisp = (w, i) => {
+      const V = NC.VFX, ph = i * 2.1, x = S.pel[0] + w[0] + Math.sin(tNow * 1.3 + ph) * 5, y = S.pel[1] + w[1] + Math.sin(tNow * 2 + ph) * 7;
+      V.glow(ctx, x, y - 12, 30, '255,110,170', 0.55, true);
+      V.flame(ctx, x, y, 17, 28, tNow * 8 + ph, WISP_PAL, 0.95);
+    };
+    if (wisps) wisp(wisps[0], 0);
+    if (behind) weapon();
+    // a head from the character creator (js/look.js) keeps its back hair apart: it hangs behind the body (long hair,
+    // tails), in the head's place and turn, cut under a clipping hat like the rest of the hair
+    const HEAD0 = headOf(equip, rig);
+    // (the hat as worn on this hair: js/hatpair.js; a pair may hide the back hair: hideBack)
+    const hat0 = NC.hatWorn ? NC.hatWorn(equip, item(equip, 'hat')) : item(equip, 'hat');
+    if (HEAD0.under && !(hat0 || {}).hood && !(hat0 && hat0.hideBack && NC.SPR[hat0.sprite])) {
+      const b0 = hat0 && hat0.clip && NC.SPR[hat0.sprite] && hatBox(hat0, HEAD0), U = HEAD0.under, hj0 = HEAD0.joints.neck;
+      ctx.save();
+      ctx.translate(S.neck[0], S.neck[1] + (P.headY || 0));
+      ctx.rotate(P.lean * 0.45 + (P.head || 0));
+      ctx.translate(-hj0[0], -hj0[1]);
+      if (b0) {
+        const cut = hatCut(hat0, b0);
+        paintCut(ctx, U, cut, pic(U, o), b0);
+        if (o.tint && o.tint[1] > 0) { const a = ctx.globalAlpha; ctx.globalAlpha = a * o.tint[1]; paintCut(ctx, U, cut, NC.tinted(U.name, o.tint[0]), b0); ctx.globalAlpha = a; }
+      } else paint(ctx, U, 0, 0, o);
+      ctx.restore();
+    }
+    const farArm = () => {
+      drawLimb(ctx, S.aB, S.armFar, o);
+      if (NC.drawOffhand && !o.noWeapon) NC.drawOffhand(ctx, equip, S, P, o); // a shield in the far hand (js/jobs3.js)
+      if (W && W.dual && !o.noWeapon && P.tuck < 0.5 && !S.farW && hide < 0.99) {
+        // the second of a pair (daggers) in the far fist, pointing the way that fist faces
+        const f = S.armFar, fa = Math.atan2(f.end[1] - f.J[1], f.end[0] - f.J[0]);
+        // (P.w2a: a stance that sets the second weapon's own angle, a reverse grip or a crossed guard: js/holds.js)
+        NC.drawWeapon(ctx, W, f.end[0], f.end[1], P.w2a !== undefined ? P.w2a : fa - 1.35, Object.assign({}, o, { scale: 1 }));
+      }
+    };
+    if (!front) farArm();
+    leg(S.lB, S.legFar, 'legB');
+    leg(S.lF, S.legN, 'legF');
+    // a long outfit drawn as one garment (rig.P.body): the torso and its skirt in one picture, the skirt part bending
+    // with the stride. Otherwise a long robe (item.skirtUp): its skirt starts right under the belt, over the torso's hips
+    // (drawn after the torso below); a tabard hangs under the torso
+    const body = rig.P.body, swing = 0.25 * P.lean - 0.4 * stride - 0.75 * sit, flare = 1 + 0.22 * spread;
+    const topIt = item(equip, 'top'), robeSk = !body && rig.P.skirt && topIt && topIt.skirtUp;
+    const skirt = () => cloth(rig.P.skirt, S.onTorso([TJ.pelvis[0], TJ.pelvis[1] - (robeSk || SKIRT_UP)]), 'waist', swing, flare);
+    if (rig.P.skirt && !body && !robeSk) skirt();
+    if (body) drawBody(ctx, body, S, P, swing, flare, o);
+    else {
+      // torso (breathing stretches it upwards from the pelvis)
+      const T = rig.P.torso;
+      ctx.save();
+      ctx.translate(S.pel[0], S.pel[1]);
+      ctx.rotate(P.lean);
+      ctx.scale((chub && chub.body) || 1, P.breathe);
+      paint(ctx, T, -S.pel0[0], -S.pel0[1], o);
+      ctx.restore();
+    }
+    if (robeSk) skirt();
+    // a katana's scabbard stays at the hip while the sword is out (W.saya: at, ang; it holds the sword the rest of the time)
+    if (W && W.saya && !o.noWeapon && !o.silhouette && hide < 0.99 && !((P.hk || 0) > 0.5) && !(P.tuck > 0.5) && !(P.wSheath > 0.5)) {
+      const at = S.onTorso([S.pel0[0] + W.saya.at[0], S.pel0[1] + W.saya.at[1]]);
+      NC.drawWeapon(ctx, W, at[0], at[1], W.saya.ang + 0.3 * (P.lean || 0), Object.assign({}, o, { grip: W.grip, scale: 1, sheath: 1, sayaOnly: true }));
+    }
+    if (front) { if (farHeld) weapon(); farArm(); }
+    const mid = !behind && !(front && farHeld) && P.wz > 0.5;
+    if (mid) weapon(); // in front of the body but behind the head
+    // the near arm raised overhead goes behind the head, with what it holds (anim.js aBack: the chibi's short arm can't
+    // clear its big head, and in front of it the fist covers the face)
+    const armBack = (P.aBack || 0) > 0.5, nearArm = () => {
+      const g = S.gripN; // (a grip hand: the palm, then the weapon, the forearm, then the fingers over the handle)
+      if (g) gripPiece(ctx, S.aF, S.armN, o, g.back);
+      if (!behind && !mid && !(front && farHeld)) weapon();
+      drawLimb(ctx, S.aF, S.armN, o);
+      if (g) gripPiece(ctx, S.aF, S.armN, o, g.front);
+    };
+    if (armBack) nearArm();
+    // head (the hairstyle) + hat
+    const HEAD = headOf(equip, rig), hj = HEAD.joints.neck, HP = HEAD.over || HEAD; // (a creator head: its back hair is drawn)
+    const hat = hat0, hatS = hat && NC.SPR[hat.sprite]; // (as worn on this hair: js/hatpair.js)
+    ctx.save();
+    ctx.translate(S.neck[0], S.neck[1] + (P.headY || 0));
+    ctx.rotate(P.lean * 0.45 + (P.head || 0));
+    ctx.translate(-hj[0], -hj[1]); // head-piece coordinates from here on
+    if (hatS) {
+      const b = hatBox(hat, HEAD);
+      if (NC.hatFx && !o.silhouette) { ctx.save(); hatTurn(ctx, b); NC.hatFx(ctx, hat, b, o, 0); ctx.restore(); } // (js/hatfx.js: what glows behind the head and the hat)
+      if (hat.back) hatPart(ctx, hat, b, 'body', P, o); // a crown's back half: behind the head
+      if (hat.rimBehind) hatPart(ctx, hat, b, 'rim', P, o); // a hood: its sides and back hang behind the face
+      const fill = hat.hood && NC.SPR[hat.sprite + '_fill'];
+      if (fill) {
+        // a hood (fashion.js skins): the head shows only inside the hood's outline, the face through its opening
+        paintMasked(ctx, HP, fill, b, pic(HP, o));
+        if (o.tint && o.tint[1] > 0) { const a = ctx.globalAlpha; ctx.globalAlpha = a * o.tint[1]; paintMasked(ctx, HP, fill, b, NC.tinted(HP.name, o.tint[0])); ctx.globalAlpha = a; }
+      } else if (hat.clip) {
+        // worn: the hair above the hat's band is squashed under the hat, so it can't poke out around it
+        const cut = hatCut(hat, b);
+        paintCut(ctx, HP, cut, pic(HP, o), b);
+        if (o.tint && o.tint[1] > 0) { const a = ctx.globalAlpha; ctx.globalAlpha = a * o.tint[1]; paintCut(ctx, HP, cut, NC.tinted(HP.name, o.tint[0]), b); ctx.globalAlpha = a; }
+      } else paint(ctx, HP, 0, 0, o);
+      if (NC.drawGlasses) NC.drawGlasses(ctx, HEAD, equip, o); // glasses (js/glasses.js): on the eyes, under the hat
+      if (!hat.back) hatPart(ctx, hat, b, 'body', P, o);
+      if (!hat.rimBehind) hatPart(ctx, hat, b, 'rim', P, o);
+      const fs = hat.front && NC.SPR[hat.front];
+      if (fs) hatPart(ctx, Object.assign({}, hat, { rim: null }), Object.assign({}, b, { hs: fs }), 'body', P, o);
+      if (NC.hatFx && !o.silhouette) { ctx.save(); hatTurn(ctx, b); NC.hatFx(ctx, hat, b, o, 1); ctx.restore(); } // (js/hatfx.js: the hat's shine, sparkles, embers...)
+    } else {
+      paint(ctx, HP, 0, 0, o);
+      if (NC.drawGlasses) NC.drawGlasses(ctx, HEAD, equip, o);
+    }
+    ctx.restore();
+    if (!armBack) nearArm();
+    if (wisps) for (let i = 1; i < wisps.length; i++) wisp(wisps[i], i);
+
+    if (o.bones) drawBones(ctx, S, P, W, spot, k);
+    ctx.restore();
+  };
+
+  // a bow's string (tied at W.bow.top / bottom, W.bow.x across the picture) and, while drawn, the arrow on it: the
+  // string's middle follows the near hand (P.pull), the arrow lies from that hand through the bow's grip
+  function bowString(ctx, W, spot, S, P, o) {
+    const s = NC.SPR[W.sprite];
+    if (!s) return;
+    const k = 0.95, w = s.w * k, h = s.h * k, len = P.wLen || 1, g = spot.grip;
+    const r = spot.ang + Math.PI / 2, c = Math.cos(r), sn = Math.sin(r);
+    const at = (fx, fy) => { const lx = (fx - s.ax) * w, ly = (-h * (1 - g) + fy * h) * len; return [spot.x + lx * c - ly * sn, spot.y + lx * sn + ly * c]; };
+    const top = at(W.bow.x, W.bow.top), bot = at(W.bow.x, W.bow.bottom);
+    const u = NC.clamp(P.pull || 0, 0, 1), hand = S.armN.end;
+    const mid = [NC.lerp((top[0] + bot[0]) / 2, hand[0], u), NC.lerp((top[1] + bot[1]) / 2, hand[1], u)];
+    ctx.save();
+    ctx.lineCap = 'round';
+    const line = (col, lw) => { ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(top[0], top[1]); ctx.lineTo(mid[0], mid[1]); ctx.lineTo(bot[0], bot[1]); ctx.stroke(); };
+    if (!o.silhouette) { line('#231a33', 2.6); line(W.string || '#efe3c4', 1.1); } else line(o.silhouette, 2); // (W.string: a bow's own string colour, js/voidcomet.js)
+    if (u > 0.05 && NC.nockHook && NC.nockHook(ctx, W, mid, spot, u, o)) { ctx.restore(); return; }   // (a bow's own arrow on the string: js/voidcomet.js)
+    if (u > 0.05 && !o.silhouette) {
+      // the arrow: from the string through the grip and a little past it
+      const dx = spot.x - mid[0], dy = spot.y - mid[1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, tip = [mid[0] + ux * (L + 12), mid[1] + uy * (L + 12)];
+      ctx.strokeStyle = '#231a33'; ctx.lineWidth = 3.4; ctx.beginPath(); ctx.moveTo(mid[0], mid[1]); ctx.lineTo(tip[0], tip[1]); ctx.stroke();
+      ctx.strokeStyle = '#8a5a34'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(mid[0], mid[1]); ctx.lineTo(tip[0], tip[1]); ctx.stroke();
+      ctx.fillStyle = '#dfe6ef'; ctx.strokeStyle = '#231a33'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(tip[0] + ux * 6, tip[1] + uy * 6); ctx.lineTo(tip[0] - uy * 3, tip[1] + ux * 3); ctx.lineTo(tip[0] + uy * 3, tip[1] - ux * 3); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#c94a3a';
+      ctx.beginPath(); ctx.moveTo(mid[0] + ux * 9, mid[1] + uy * 9); ctx.lineTo(mid[0] + ux * 2 - uy * 3.5, mid[1] + uy * 2 + ux * 3.5); ctx.lineTo(mid[0] + ux * 2 + uy * 3.5, mid[1] + uy * 2 - ux * 3.5); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // the skeleton drawn over the character (animation lab)
+  function drawBones(ctx, S, P, W, spot, k) {
+    const lw = 2.2 / k;
+    const bone = (a, b, col) => {
+      ctx.strokeStyle = col; ctx.lineWidth = lw * 2.2; ctx.globalAlpha = 0.9;
+      ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+    };
+    const joint = (p, col) => {
+      ctx.fillStyle = col; ctx.strokeStyle = '#1b1726'; ctx.lineWidth = lw;
+      ctx.beginPath(); ctx.arc(p[0], p[1], 3.2 / k, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    };
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    const headTop = add(S.neck, rotV([0, -34], P.lean * 0.45 + (P.head || 0)));
+    const s = NC.SPR[W.sprite], tip = add([spot.x, spot.y], dirV(spot.ang, (s ? s.h * 0.95 : 60) * (1 - spot.grip) * (P.wLen || 1)));
+    const far = '#6fd6ff', near = '#ffb347', spine = '#ffffff', wpn = '#ffe066';
+    bone(S.legFar.at, S.legFar.J, far); bone(S.legFar.J, S.legFar.end, far);
+    bone(S.armFar.at, S.armFar.J, far); bone(S.armFar.J, S.armFar.end, far);
+    bone(S.pel, S.neck, spine); bone(S.neck, headTop, spine);
+    bone(S.legN.at, S.legN.J, near); bone(S.legN.J, S.legN.end, near);
+    bone(S.armN.at, S.armN.J, near); bone(S.armN.J, S.armN.end, near);
+    bone([spot.x, spot.y], tip, wpn);
+    for (const p of [S.legFar.at, S.legFar.J, S.legFar.end, S.armFar.at, S.armFar.J, S.armFar.end]) joint(p, far);
+    for (const p of [S.legN.at, S.legN.J, S.legN.end, S.armN.at, S.armN.J, S.armN.end]) joint(p, near);
+    joint(S.pel, spine); joint(S.neck, spine); joint(headTop, spine); joint(tip, wpn);
+    ctx.restore();
+  }
+
+  // whole-body fallback (a top without rig pieces): its body sprite with the hat and weapon on top
+  function drawFlat(ctx, equip, P, x, y, o) {
+    const top = item(equip, 'top'), s = NC.SPR['body_' + (top ? top.rig : 'traveler')], W = NC.ITEMS[equip.weapon];
+    if (!s) return;
+    ctx.save();
+    ctx.translate(x, y);
+    const k = o.scale || 1;
+    ctx.scale(P.face < 0 ? -k : k, k);
+    if (o.alpha !== undefined) ctx.globalAlpha *= o.alpha;
+    const weapon = () => {
+      if (o.noWeapon) return;
+      if (W.tuck && P.tuck > 0.5) NC.drawWeapon(ctx, W, s.w * 0.08, -s.h * 0.28, W.tuck.ang, Object.assign({}, o, { grip: W.tuck.grip }));
+      else NC.drawWeapon(ctx, W, -s.w * 0.2, -s.h * 0.4, P.wAng, o);
+    };
+    if (P.wBehind) weapon();
+    ctx.save();
+    ctx.rotate(P.lean * 0.3);
+    paint(ctx, s, -s.ax * s.w, -s.ay * s.h, o);
+    const hat = item(equip, 'hat');
+    if (hat && NC.SPR[hat.sprite]) { const b = hatBox(hat, s); ctx.drawImage(b.hs.img, b.x - s.ax * s.w, b.y - s.ay * s.h, b.w, b.h); }
+    ctx.restore();
+    if (!P.wBehind) weapon();
+    ctx.restore();
+  }
+
+  NC.drawHero = function (ctx, equip, P, x, y, o) {
+    o = o || {};
+    const rig = topRig(equip);
+    if (rig) NC.drawRig(ctx, rig, equip, P, x, y, o);
+    else drawFlat(ctx, equip, P, x, y, o);
+  };
+
+  // standing (breathing) pose, for the equipment screen and the minimap marker
+  NC.drawAvatar = function (ctx, equip, x, y, scale, face, o) {
+    o = o || {};
+    const P = NC.Anim.sample(o.idle || 'idle', o.t || 0, NC.animCtx(equip));
+    P.face = face || 1;
+    NC.drawHero(ctx, equip, P, x, y, { scale, noWeapon: o.noWeapon });
+  };
+
+  // where the face is (for the minimap marker): centre and head width, relative to the feet, facing right, scale 1
+  // where the body's anchor points are for a pose (rig frame, scale 1, feet at 0): for tools fitting clothes to the rig
+  NC.rigAnchors = function (equip, P) {
+    const rig = topRig(equip);
+    if (!rig) return null;
+    const S = solve(rig, equip, P, NC.ITEMS[equip.weapon]);
+    return { pel: S.pel, neck: S.neck, soles: Math.max(S.legN.end[1], S.legFar.end[1]), onTorso: S.onTorso, pel0: S.pel0 };
+  };
+
+  // every joint of a pose in world space (feet at x, y), for the pose studio's drag handles (studio/studio.js)
+  NC.rigJoints = function (equip, P, x, y, scale) {
+    const rig = topRig(equip);
+    if (!rig) return null;
+    const W = NC.ITEMS[equip.weapon], S = solve(rig, equip, P, W), spot = weaponSpot(S, P, W), toW = rootXf(P, x, y, scale);
+    const s = W && NC.SPR[W.sprite], tip = add([spot.x, spot.y], dirV(spot.ang, (s ? s.h * 0.95 : 60) * (1 - spot.grip) * (P.wLen || 1)));
+    const headTop = add(S.neck, rotV([0, -34], P.lean * 0.45 + (P.head || 0)));
+    return {
+      pel: toW(S.pel), neck: toW(S.neck), headTop: toW(headTop),
+      shN: toW(S.armN.at), elN: toW(S.armN.J), haN: toW(S.armN.end), shF: toW(S.armFar.at), elF: toW(S.armFar.J), haF: toW(S.armFar.end),
+      hipN: toW(S.legN.at), knN: toW(S.legN.J), ftN: toW(S.legN.end), hipF: toW(S.legFar.at), knF: toW(S.legFar.J), ftF: toW(S.legFar.end),
+      wHand: toW([spot.x, spot.y]), wTip: toW(tip),
+    };
+  };
+
+  NC.headSpot = function (equip) {
+    const rig = topRig(equip);
+    if (!rig) return { x: 0, y: -90, w: 70 };
+    const P = NC.Anim.sample('idle', 0, NC.animCtx(equip));
+    const S = solve(rig, equip, P, NC.ITEMS[equip.weapon]);
+    const HEAD = headOf(equip, rig), hj = HEAD.joints.neck, hb = HEAD.head || [0.5, 0, 0.8];
+    const hw = hb[2] * HEAD.w, k = RIG_SCALE;
+    return { x: (S.neck[0] - hj[0] + hb[0] * HEAD.w) * k, y: (S.neck[1] - hj[1] + hb[1] * HEAD.h + 0.55 * hw) * k, w: hw * k };
+  };
+})();
