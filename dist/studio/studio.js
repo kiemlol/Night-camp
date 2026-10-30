@@ -3,6 +3,8 @@ import {connectSource} from './source.mjs';
 import {mountLibrary} from './library.mjs';
 import {LIMBS,wrap,ensureMiddleJoints,resizeSprite,validLimb,solveEndpoint,bendFromDrag} from './rig-edit.mjs';
 import {mountSheetImporter} from './sheet-import.mjs';
+import {blankClip,appendInheritedFrame,copyPoseToFrames} from './timeline.mjs';
+import {mountTimelineTools} from './timeline-ui.mjs';
 const $=id=>document.getElementById(id), NC=window.NC;
 let source, libraryUI;
 const status=msg=>$('status').textContent=msg;
@@ -36,8 +38,9 @@ syncRig.seq=0;
 function animationContext(t){return NC.animCtx(state.equip,{walk:t*Math.PI*2,moving:true})}
 function setPose(){state.pose=sample(state.project.clip,state.time);renderChannels()}
 function renderChannels(){for(const k of Object.keys(channels)){const n=$('ch_'+k);n.value=Number(((state.pose[k]||0)*(angular(k)?180/Math.PI:1)).toFixed(2))}}
-function renderKeys(){const c=state.project.clip;$('keys').replaceChildren(...c.keys.map((k,i)=>{const b=document.createElement('button');b.textContent='◆ '+k.t.toFixed(2)+'s';b.classList.toggle('selected',i===state.key);b.onclick=()=>selectKey(i);return b}));$('scrub').max=c.dur;$('scrub').value=state.time;$('keyTime').value=c.keys[state.key]?.t??0;$('curve').value=c.keys[state.key]?.curve||'inout';$('clock').textContent=state.time.toFixed(2)+' s'}
-function selectKey(i){state.playing=false;state.key=i;state.time=state.project.clip.keys[i].t;setPose();renderKeys()}
+function renderKeys(){const c=state.project.clip;$('keys').replaceChildren(...c.keys.map((k,i)=>{const b=document.createElement('button');b.textContent=(i+1)+' · '+k.t.toFixed(2)+'s';b.classList.toggle('selected',i===state.key);b.setAttribute('aria-pressed',String(i===state.key));b.title='Frame '+(i+1);b.onclick=()=>selectKey(i);return b}));$('scrub').max=c.dur;$('scrub').value=state.time;$('keyTime').value=c.keys[state.key]?.t??0;$('curve').value=c.keys[state.key]?.curve||'inout';$('clock').textContent=state.time.toFixed(2)+' s'}
+function pausePlayback(){state.playing=false;$('play').textContent='▶ Phát'}
+function selectKey(i){pausePlayback();state.key=i;state.time=state.project.clip.keys[i].t;setPose();renderKeys()}
 function renderMeta(){const c=state.project.clip;$('clipName').value=c.name;$('kind').value=c.kind;$('duration').value=c.dur;$('hit').value=c.hit;renderKeys();renderPart();renderChannels()}
 function renderPart(){const s=state.project.parts[state.part];$('part').value=state.part;$('sw').value=s.w;$('sh').value=s.h;$('overlap').value=s.overlap??0;$('overlap').disabled=!/^(arm|leg)/.test(state.part);options($('joint'),Object.keys(s.joints).map(k=>[k,k]));jointInputs();const re=new RegExp('_'+state.part+'(?:_v[0-9]+)?$');const candidates=Object.entries(catalog.sprites).filter(([n])=>re.test(n)).map(([n])=>[n,n]);options($('sprite'),[['','— Chọn ảnh thay thế —'],...candidates]);$('resources').textContent='▦ Tài nguyên đã cắt ('+(state.project.resources?.length||0)+')';}
 function jointInputs(){const j=state.project.parts[state.part].joints[$('joint').value];if(j){$('jx').value=j[0];$('jy').value=j[1]}}
@@ -47,6 +50,22 @@ function record(){checkpoint();const c=state.project.clip;const t=Math.round(sta
 function download(name,content,type='application/json'){const a=document.createElement('a');const url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)}
 async function preset(){checkpoint();const c=state.project.clip,name=$('preset').value,definition=NC.Anim.CLIPS[name];if(definition){c.dur=definition.dur;c.kind='attack';c.hit=definition.ev?.find(e=>e[1]==='hit')?.[0]??c.dur*.4}else{c.kind=/walk|run/i.test(name)?'walk':'loop';c.hit=Math.min(c.hit,c.dur)}const dur=c.dur,count=Math.max(9,Math.ceil(dur*30)+1);c.keys=Array.from({length:count},(_,i)=>{const t=i*dur/(count-1);return {t,curve:'lin',P:NC.Anim.sample(name,t,animationContext(t/dur))}});if(c.kind==='walk'||c.kind==='loop')c.keys.at(-1).P=structuredClone(c.keys[0].P);selectKey(0);renderMeta();persist()}
 function event(id,type,fn){$(id).addEventListener(type,safe(fn))}
+mountTimelineTools({
+ ready:()=>!!state.project&&!!state.pose,
+ error:message=>status('Lỗi: '+message),
+ create:({name,kind,dur,seed})=>{
+  const pose=seed==='rest'?NC.Anim.setup(animationContext(0)):state.pose;
+  const clip=blankClip({name,kind,dur,pose});checkpoint();state.project.clip=clip;selectKey(0);renderMeta();persist();status('Đã tạo animation mới với đúng 1 frame. Chỉnh pose rồi bấm Thêm frame kế tiếp.');
+ },
+ add:step=>{
+  const result=appendInheritedFrame(state.project.clip,state.key,state.pose,step);checkpoint();state.project.clip=result.clip;selectKey(result.index);renderMeta();persist();status('Đã thêm frame '+(result.index+1)+' giống tư thế vừa chỉnh; pose frame trước cũng đã lưu.');
+ },
+ capture:()=>{pausePlayback();return {index:state.key,clip:structuredClone(state.project.clip),pose:structuredClone(state.pose),identity:state.project.clip}},
+ copy:(captured,targets)=>{
+  if(state.project.clip!==captured.identity)throw Error('Clip đã thay đổi. Mở lại hộp sao chép.');
+  const result=copyPoseToFrames(state.project.clip,captured.index,targets,captured.pose);checkpoint();state.project.clip=result.clip;selectKey(captured.index);renderMeta();persist();status('Đã sao chép tư thế frame '+(captured.index+1)+' sang '+result.count+' frame; giữ nguyên thời điểm và đường cong.');
+ },
+});
 for(const [k,label] of Object.entries(channels)){const row=document.createElement('div');row.className='channel';const l=document.createElement('label');l.htmlFor='ch_'+k;l.textContent=label;const n=document.createElement('input');n.type='number';n.step=angular(k)?1:.5;n.id='ch_'+k;row.append(l,n);$('channels').append(row);n.onchange=()=>{if(!Number.isFinite(n.valueAsNumber))return;state.playing=false;state.pose[k]=n.valueAsNumber*(angular(k)?Math.PI/180:1);status('Pose chưa ghi — bấm Ghi pose để lưu vào clip')}}
 options($('part'),PARTS.map(p=>[p,labels[p]]));
 $('partList').replaceChildren(...PARTS.map(part=>{const b=document.createElement('button');b.textContent=labels[part];b.onclick=()=>{state.part=part;renderPart()};return b}));

@@ -58,6 +58,19 @@ nhập còn hợp lệ sau restart. Không chạy nhiều replica dùng chung fi
 
 ## Cutout Studio v1
 
+Tạo animation từ đầu và kế thừa pose:
+
+- **Animation mới** tạo đúng một frame ở 0 giây, giữ rig/ảnh/tài nguyên. Chọn
+  bắt đầu bằng tư thế đang chỉnh hoặc tư thế mặc định. Clip cũ có thể hoàn tác.
+- **Thêm frame kế tiếp** tự lưu pose đang chỉnh của frame nguồn và tạo một
+  bản sao độc lập ngay phía sau. Bước thời gian mặc định 0.1 giây, có thể đổi.
+  Nếu chèn giữa clip, các frame phía sau dịch thêm một bước, không bị ghi đè.
+- **Sao chép pose → nhiều frame** lấy tư thế đang hiển thị ở frame nguồn,
+  cho chọn một/nhiều/tất cả frame đích. Chỉ pose thay đổi, giữ thời điểm và
+  đường cong. Nguồn và từng bản sao không dùng chung tham chiếu dữ liệu.
+- Các thao tác hỗ trợ undo/redo, lưu project và xuất bundle như trước. Vẫn có
+  thể bấm **Ghi pose** để lưu riêng một frame mà không thêm frame mới.
+
 Sửa thao tác rig và nhập ảnh tách mảnh:
 
 - Kéo bàn tay/bàn chân để đặt đầu mút bằng IK; vòng màu cam ở khuỷu/gối chỉnh độ
