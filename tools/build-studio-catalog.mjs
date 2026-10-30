@@ -19,6 +19,19 @@ function walk(dir,origin,storage){for(const e of fs.readdirSync(dir,{withFileTyp
 walk(base,base,'dist-full');
 const compact=path.join(root,'dist/game-20261025-1758');
 walk(compact,compact,'dist');
+const allSprites=Object.assign({},...Object.entries(NC).filter(([key])=>key.startsWith('ASSET_MANIFEST')).map(([,value])=>value));
+const items=JSON.parse(fs.readFileSync(path.join(root,'server/data-catalog/catalog.json'),'utf8')).ITEMS;
+const itemBySprite=new Map(Object.values(items).filter(i=>i.sprite).map(i=>[i.sprite,i]));
+const accessories=[];
+for(const [id,s]of Object.entries(allSprites)){
+ if(!s?.src||!seen.has(s.src)||!Number.isFinite(s.w)||!Number.isFinite(s.h))continue;
+ const item=itemBySprite.get(id),category=item?.slot==='weapon'||Number.isFinite(s.grip)?'weapon':item?.slot==='glasses'||/^glasses_/.test(id)?'glasses':item?.slot==='hat'||/^hat_/.test(id)?'hat':null;
+ if(!category)continue;
+ if(category==='hat'&&/_(fill|rim|front|back|mask|vein|glow)$/.test(id))continue;
+ accessories.push({id,name:item?.name||id,category,sprite:s,fit:item?.fit??s.wear?.fit??1.3,seat:item?.seat??s.wear?.seat??0,dx:item?.dx??0,grip:item?.grip??s.grip??.2,wtype:item?.wtype||'sword'});
+}
+fs.writeFileSync(path.join(root,'dist/studio/accessories.json'),JSON.stringify(accessories));
+console.log('Accessories: '+accessories.length+' (includes headphones: '+accessories.some(a=>/headphones/.test(a.id))+')');
 vm.runInContext(fs.readFileSync(path.join(base,'js/poselib_data.js'),'utf8'),context);
 const spine=[];
 for(const [file,key] of [['herospine.rig.js','HERO_SPINE'],['petspine.rig.js','PET_SPINE'],['baphspine.rig.js','BAPH_SPINE']]){
@@ -26,6 +39,6 @@ for(const [file,key] of [['herospine.rig.js','HERO_SPINE'],['petspine.rig.js','P
  for(const [name,data] of Object.entries(NC[key]||{}))spine.push({name,path:'assets/'+file,bones:data.bones.length,animations:Object.keys(data.anims||{})});
 }
 fs.writeFileSync(path.join(root,'dist/studio/poses.json'),JSON.stringify(NC.POSE_LIB));
-fs.writeFileSync(path.join(root,'dist/studio/library-index.json'),JSON.stringify({build:'game-20261025-1758',generatedAt:new Date().toISOString(),files,spine,spriteManifest:NC.ASSET_MANIFEST}));
+fs.writeFileSync(path.join(root,'dist/studio/library-index.json'),JSON.stringify({build:'game-20261025-1758',generatedAt:new Date().toISOString(),files,spine,spriteManifest:allSprites}));
 console.log(`Library: ${files.length} files, ${spine.length} Spine rigs, ${Object.keys(NC.POSE_LIB).length} Pose Studio clips`);
 console.log(`Studio: ${rigs.length} complete rigs, ${Object.keys(sprites).length} sprite parts`);

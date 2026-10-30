@@ -27,6 +27,7 @@ const sword=NC.ASSET_MANIFEST.sword;
 for(const s of [...Object.values(parts),sword])fs.copyFileSync(path.join(source,s.src),path.join(target,s.src));
 fs.copyFileSync(path.join(source,'js/avatar.js'),path.join(target,'runtime/avatar.js'));
 fs.copyFileSync(path.join(root,'dist/studio/model.mjs'),path.join(target,'runtime/model.mjs'));
+fs.copyFileSync(path.join(root,'dist/studio/attachments.mjs'),path.join(target,'runtime/attachments.mjs'));
 fs.writeFileSync(path.join(target,'traveler.character.json'),JSON.stringify({format:'cutout-character-v1',rig:'traveler',parts,weapon:{...weapon,spriteData:sword},clips}));
 console.log('Built independent traveler demo: 6 cutout parts, sword, 4 baked clips, local renderer.');
 await import('./build-cutout-runtime.mjs');

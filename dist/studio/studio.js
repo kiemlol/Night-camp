@@ -5,6 +5,8 @@ import {LIMBS,wrap,ensureMiddleJoints,resizeSprite,validLimb,solveEndpoint,bendF
 import {mountSheetImporter} from './sheet-import.mjs';
 import {blankClip,appendInheritedFrame,copyPoseToFrames} from './timeline.mjs';
 import {mountTimelineTools} from './timeline-ui.mjs';
+import {mountAccessories} from './accessory-ui.mjs';
+import {screenDelta} from './attachments.mjs';
 const $=id=>document.getElementById(id), NC=window.NC;
 let source, libraryUI;
 const status=msg=>$('status').textContent=msg;
@@ -22,7 +24,7 @@ function options(el,rows){el.replaceChildren(...rows.map(([value,text])=>{const 
 function checkpoint(){state.undo.push(JSON.stringify(state.project));if(state.undo.length>60)state.undo.shift();state.redo=[]}
 function persist(){try{localStorage.setItem('nightcamp.cutout.v1',JSON.stringify(state.project));status('Đã lưu nháp trong trình duyệt')}catch{status('Bộ nhớ nháp đầy. Bấm Lưu project để tải bản sao.')}}
 async function image(src){if(state.images.has(src))return state.images.get(src);const promise=new Promise((resolve,reject)=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>resolve(im);im.onerror=()=>reject(Error('Không tải được ảnh '+src.slice(0,100)));im.src=source.assetURL(src)});state.images.set(src,promise);try{return await promise}catch(e){state.images.delete(src);throw e}}
-async function portableProject(){const p=structuredClone(state.project);await Promise.all(PARTS.map(async part=>{const s=p.parts[part];if(s.src.startsWith('data:'))return;const img=await image(s.src),canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;canvas.getContext('2d').drawImage(img,0,0);s.src=canvas.toDataURL('image/png')}));return p}
+async function portableProject(){const p=structuredClone(state.project);await Promise.all([...Object.values(p.parts),...(p.attachments||[])].map(async s=>{if(s.src.startsWith('data:'))return;const img=await image(s.src),canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;canvas.getContext('2d').drawImage(img,0,0);s.src=canvas.toDataURL('image/png')}));return p}
 async function syncRig(){
   const p=state.project;
   ensureMiddleJoints(p.parts);
@@ -30,6 +32,7 @@ async function syncRig(){
   // Use a fresh rig name to avoid the original renderer's rig cache after anchor edits.
   const name='studio'+(++syncRig.seq);for(const part of PARTS)NC.SPR[`rig_${name}_${part}`]=NC.SPR['rig_studio_'+part];
   state.equip={top:'studio_top',weapon:'studio_weapon'};NC.ITEMS.studio_top={rig:name};NC.ITEMS.studio_weapon={grip:.12,wtype:'sword',sprite:'studio_sword',restAng:1.2,stance:-.7};
+  NC.ITEMS.studio_top.attachments=await Promise.all((p.attachments||[]).map(async(a,i)=>{const id=name+'_attachment_'+i;NC.SPR[id]={name:id,img:await image(a.src)};return {...a,sprite:id}}));
   state.rig=NC.getRig(name);drawError=false;
   NC.GRIPFIX=false;
   NC.BendCache.on=false;
@@ -41,7 +44,7 @@ function renderChannels(){for(const k of Object.keys(channels)){const n=$('ch_'+
 function renderKeys(){const c=state.project.clip;$('keys').replaceChildren(...c.keys.map((k,i)=>{const b=document.createElement('button');b.textContent=(i+1)+' · '+k.t.toFixed(2)+'s';b.classList.toggle('selected',i===state.key);b.setAttribute('aria-pressed',String(i===state.key));b.title='Frame '+(i+1);b.onclick=()=>selectKey(i);return b}));$('scrub').max=c.dur;$('scrub').value=state.time;$('keyTime').value=c.keys[state.key]?.t??0;$('curve').value=c.keys[state.key]?.curve||'inout';$('clock').textContent=state.time.toFixed(2)+' s'}
 function pausePlayback(){state.playing=false;$('play').textContent='▶ Phát'}
 function selectKey(i){pausePlayback();state.key=i;state.time=state.project.clip.keys[i].t;setPose();renderKeys()}
-function renderMeta(){const c=state.project.clip;$('clipName').value=c.name;$('kind').value=c.kind;$('duration').value=c.dur;$('hit').value=c.hit;renderKeys();renderPart();renderChannels()}
+function renderMeta(){const c=state.project.clip;$('clipName').value=c.name;$('kind').value=c.kind;$('duration').value=c.dur;$('hit').value=c.hit;renderKeys();renderPart();renderChannels();accessoryUI.refresh().catch(e=>status('Lỗi phụ kiện: '+e.message))}
 function renderPart(){const s=state.project.parts[state.part];$('part').value=state.part;$('sw').value=s.w;$('sh').value=s.h;$('overlap').value=s.overlap??0;$('overlap').disabled=!/^(arm|leg)/.test(state.part);options($('joint'),Object.keys(s.joints).map(k=>[k,k]));jointInputs();const re=new RegExp('_'+state.part+'(?:_v[0-9]+)?$');const candidates=Object.entries(catalog.sprites).filter(([n])=>re.test(n)).map(([n])=>[n,n]);options($('sprite'),[['','— Chọn ảnh thay thế —'],...candidates]);$('resources').textContent='▦ Tài nguyên đã cắt ('+(state.project.resources?.length||0)+')';}
 function jointInputs(){const j=state.project.parts[state.part].joints[$('joint').value];if(j){$('jx').value=j[0];$('jy').value=j[1]}}
 async function adopt(p){validate(p);state.project=structuredClone(p);state.playing=false;state.key=0;state.time=0;await syncRig();const defaults=NC.Anim.setup(animationContext(0));for(const key of state.project.clip.keys)key.P={...defaults,...key.P};setPose();renderMeta();persist()}
@@ -50,6 +53,7 @@ function record(){checkpoint();const c=state.project.clip;const t=Math.round(sta
 function download(name,content,type='application/json'){const a=document.createElement('a');const url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)}
 async function preset(){checkpoint();const c=state.project.clip,name=$('preset').value,definition=NC.Anim.CLIPS[name];if(definition){c.dur=definition.dur;c.kind='attack';c.hit=definition.ev?.find(e=>e[1]==='hit')?.[0]??c.dur*.4}else{c.kind=/walk|run/i.test(name)?'walk':'loop';c.hit=Math.min(c.hit,c.dur)}const dur=c.dur,count=Math.max(9,Math.ceil(dur*30)+1);c.keys=Array.from({length:count},(_,i)=>{const t=i*dur/(count-1);return {t,curve:'lin',P:NC.Anim.sample(name,t,animationContext(t/dur))}});if(c.kind==='walk'||c.kind==='loop')c.keys.at(-1).P=structuredClone(c.keys[0].P);selectKey(0);renderMeta();persist()}
 function event(id,type,fn){$(id).addEventListener(type,safe(fn))}
+const accessoryUI=mountAccessories({project:()=>state.project,image,headWidth:()=>{const s=state.rig.P.head;return s.w*(s.head?.[2]||.8)},message:status,set:async items=>{checkpoint();state.project.attachments=items;await syncRig();persist()}});
 mountTimelineTools({
  ready:()=>!!state.project&&!!state.pose,
  error:message=>status('Lỗi: '+message),
@@ -96,13 +100,13 @@ event('anchor','pointerdown',e=>{e.preventDefault();if(!anchorRect||!state.proje
 function updateAnchor(e){const box=$('anchor').getBoundingClientRect(),candidate=structuredClone(state.project.parts[state.part]),j=candidate.joints[$('joint').value];j[0]=+(((e.clientX-box.left)*270/box.width-anchorRect.x)/anchorRect.scale).toFixed(2);j[1]=+(((e.clientY-box.top)*230/box.height-anchorRect.y)/anchorRect.scale).toFixed(2);if(!validLimb(candidate,state.part))return;state.project.parts[state.part].joints=candidate.joints;NC.SPR['rig_studio_'+state.part].joints=candidate.joints;state.rig.P[state.part].joints=candidate.joints;jointInputs();}
 event('anchor','pointermove',e=>{if(anchorDrag)updateAnchor(e)});for(const name of ['pointerup','pointercancel'])event('anchor',name,async()=>{if(anchorDrag){anchorDrag=false;await syncRig();persist()}});
 const chains=[['pel','neck','headTop'],['shN','elN','haN'],['shF','elF','haF'],['hipN','knN','ftN'],['hipF','knF','ftF']];
-let drag=null;
+let drag=null,accessoryDrag=null;
 function measure(pose){const r=$('stage').getBoundingClientRect();return NC.rigJoints(state.equip,{...pose,face:state.face},r.width/2,r.height*.78,state.zoom)}
-event('stage','pointerdown',e=>{e.preventDefault();if(!$('bones').checked||!state.pose)return;const r=$('stage').getBoundingClientRect(),point=[e.clientX-r.left,e.clientY-r.top],joints=measure(state.pose);let nearest=null,dist=24;const handles=Object.values(LIMBS).flatMap(l=>[l.end,l.middle,l.root]).concat('headTop');for(const name of handles){const p=joints[name],d=Math.hypot(point[0]-p[0],point[1]-p[1]);if(d<dist){dist=d;nearest=name}}if(!nearest)return;state.playing=false;$('play').textContent='▶ Phát';drag={name:nearest,point,joints,pose:structuredClone(state.pose)};$('stage').setPointerCapture(e.pointerId);document.body.classList.add('rig-dragging');window.getSelection()?.removeAllRanges()});
-event('stage','pointermove',e=>{if(!drag)return;e.preventDefault();const r=$('stage').getBoundingClientRect(),delta=[e.clientX-r.left-drag.point[0],e.clientY-r.top-drag.point[1]],limb=Object.values(LIMBS).find(l=>[l.end,l.middle,l.root].includes(drag.name));
+event('stage','pointerdown',e=>{e.preventDefault();if(!state.pose)return;const r=$('stage').getBoundingClientRect();if(accessoryUI.dragEnabled()){const a=accessoryUI.selected();checkpoint();pausePlayback();const matrix=NC.attachmentMatrix(state.equip,{...state.pose,face:state.face},{...a,x:0,y:0,rotation:0,scale:1},r.width/2,r.height*.78,state.zoom);accessoryDrag={id:a.id,x:a.x,y:a.y,pointer:[e.clientX,e.clientY],matrix};$('stage').setPointerCapture(e.pointerId);document.body.classList.add('rig-dragging');return}if(!$('bones').checked)return;const point=[e.clientX-r.left,e.clientY-r.top],joints=measure(state.pose);let nearest=null,dist=24;const handles=Object.values(LIMBS).flatMap(l=>[l.end,l.middle,l.root]).concat('headTop');for(const name of handles){const p=joints[name],d=Math.hypot(point[0]-p[0],point[1]-p[1]);if(d<dist){dist=d;nearest=name}}if(!nearest)return;state.playing=false;$('play').textContent='▶ Phát';drag={name:nearest,point,joints,pose:structuredClone(state.pose)};$('stage').setPointerCapture(e.pointerId);document.body.classList.add('rig-dragging');window.getSelection()?.removeAllRanges()});
+event('stage','pointermove',e=>{if(accessoryDrag){e.preventDefault();const a=state.project.attachments.find(a=>a.id===accessoryDrag.id),delta=screenDelta(accessoryDrag.matrix,e.clientX-accessoryDrag.pointer[0],e.clientY-accessoryDrag.pointer[1]);a.x=Math.max(-2000,Math.min(2000,accessoryDrag.x+delta[0]));a.y=Math.max(-2000,Math.min(2000,accessoryDrag.y+delta[1]));const live=NC.ITEMS.studio_top.attachments.find(item=>item.id===a.id);live.x=a.x;live.y=a.y;accessoryUI.updatePosition();return}if(!drag)return;e.preventDefault();const r=$('stage').getBoundingClientRect(),delta=[e.clientX-r.left-drag.point[0],e.clientY-r.top-drag.point[1]],limb=Object.values(LIMBS).find(l=>[l.end,l.middle,l.root].includes(drag.name));
  if(limb){state.part=limb.part;if(drag.name===limb.end&&!e.shiftKey)state.pose=solveEndpoint(drag.pose,limb,[drag.joints[limb.end][0]+delta[0],drag.joints[limb.end][1]+delta[1]],measure);else if(drag.name===limb.middle||e.shiftKey)state.pose=bendFromDrag(drag.pose,limb,drag.joints,delta,measure);else{const pivot=drag.joints[limb.root],end=drag.joints[limb.end],a=Math.atan2(end[1]-pivot[1],end[0]-pivot[0]),b=Math.atan2(end[1]+delta[1]-pivot[1],end[0]+delta[0]-pivot[0]);state.pose={...drag.pose,hk:0,bk:0,ik:0,plant:0};const joint=measure({...state.pose,[limb.angle]:state.pose[limb.angle]+.01}),next=Math.atan2(joint[limb.end][1]-joint[limb.root][1],joint[limb.end][0]-joint[limb.root][0]);state.pose[limb.angle]+=(Math.sign(wrap(next-a))||1)*wrap(b-a)}}else{const pivot=drag.joints.neck,end=drag.joints.headTop;state.pose={...drag.pose,head:drag.pose.head+state.face*wrap(Math.atan2(end[1]+delta[1]-pivot[1],end[0]+delta[0]-pivot[0])-Math.atan2(end[1]-pivot[1],end[0]-pivot[0]))}}
  renderChannels();status('Đang chỉnh '+(limb?labels[limb.part]:'đầu')+'. Kéo vòng khuỷu/gối để gập; bấm Ghi pose khi xong.');});
-for(const name of ['pointerup','pointercancel','lostpointercapture'])event('stage',name,()=>{if(drag){drag=null;renderPart()}document.body.classList.remove('rig-dragging')});
+for(const name of ['pointerup','pointercancel','lostpointercapture'])event('stage',name,async()=>{if(accessoryDrag){accessoryDrag=null;persist();await accessoryUI.refresh()}if(drag){drag=null;renderPart()}document.body.classList.remove('rig-dragging')});
 for(const id of ['stage','anchor'])for(const name of ['contextmenu','selectstart','dragstart'])$(id).addEventListener(name,e=>e.preventDefault());
 function render(){
  const canvas=$('stage'),r=canvas.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
@@ -121,6 +125,7 @@ let last=0;function frame(now){const dt=Math.min(.1,(now-last)/1000);last=now;if
 async function reloadSource(){
   status('Đang đọc thư viện…');
   const next=await connectSource();source=next;catalog=next.catalog;NC.POSE_LIB=next.poses;state.images.clear();
+  accessoryUI.setCatalog(next.accessories);
   options($('rig'),catalog.rigs.map(n=>[n,n]));
   options($('existing'),Object.entries(NC.POSE_LIB||{}).map(([id,c])=>[id,c.name+' · '+c.kind]));
   const current=$('preset').value;

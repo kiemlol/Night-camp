@@ -58,6 +58,17 @@ nhập còn hợp lệ sau restart. Không chạy nhiều replica dùng chung fi
 
 ## Cutout Studio v1
 
+**Phụ kiện & vũ khí** trong cột trái: tìm/chọn mũ, tai nghe, kính hoặc vũ khí
+từ các manifest public; bấm Gắn. Có thể tải PNG/WebP riêng. Chọn socket đỉnh
+đầu/mặt/tay gần/tay xa, lớp trước/sau đầu hoặc bàn tay, kích thước, tỷ lệ, góc
+và độ lệch. Bấm ảnh preview để đặt neo vành mũ/điểm cầm; bật Kéo phụ kiện để
+dịch trực tiếp trên nhân vật. Mỗi project tối đa 32 phụ kiện. Vị trí mặc định
+dựa theo metadata đeo/cầm có sẵn, không dùng AI suy đoán hình dạng. Bộ socket
+đi theo rig khi xoay đầu, đổi pose, lật, scale và phát animation. Ảnh/dữ liệu
+phụ kiện đi kèm project và bundle; demo đọc lại được. Khi tích hợp ở engine
+khác, dùng renderer đi kèm để giữ socket và lớp vẽ; các clip tư thế và góc vũ
+khí vẫn do người dùng chọn/chỉnh, không tự tạo animation cầm hai tay mới.
+
 Tạo animation từ đầu và kế thừa pose:
 
 - **Animation mới** tạo đúng một frame ở 0 giây, giữ rig/ảnh/tài nguyên. Chọn

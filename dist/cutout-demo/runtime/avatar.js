@@ -744,10 +744,41 @@
     return { hand: toW(h), base: toW(add(h, dirV(spot.ang, len * 0.3))), tip: toW(add(h, dirV(spot.ang, len * 0.98))) };
   };
 
+
+  function attachmentLocal(S,rig,equip,P,a) {
+    let origin,angle;
+    if(a.socket==='head'||a.socket==='face'){
+      const head=headOf(equip,rig),j=head.joints.neck,hb=head.head||[.5,0,.8];
+      const target=a.socket==='face'?[head.w*.5,head.h*.55]:[head.w*hb[0],head.h*hb[1]];
+      angle=P.lean*.45+(P.head||0);
+      origin=add([S.neck[0],S.neck[1]+(P.headY||0)],rotV(sub(target,j),angle));
+    }else{
+      const arm=a.socket==='handB'?S.armFar:S.armN;origin=arm.grip||arm.end;
+      angle=(P.wAng||0)+Math.PI/2;
+    }
+    origin=add(origin,rotV([a.x||0,a.y||0],angle));
+    return {origin,angle:angle+(a.rotation||0)};
+  }
+  NC.attachmentMatrix=function(equip,P,a,x,y,scale){
+    const rig=topRig(equip),S=solve(rig,equip,P,NC.ITEMS[equip.weapon]);
+    const at=attachmentLocal(S,rig,equip,P,a),toW=rootXf(P,x,y,scale),k=a.scale??1;
+    const origin=toW(at.origin),u=toW(add(at.origin,rotV([k,0],at.angle))),v=toW(add(at.origin,rotV([0,k],at.angle)));
+    return {a:u[0]-origin[0],b:u[1]-origin[1],c:v[0]-origin[0],d:v[1]-origin[1],e:origin[0],f:origin[1]};
+  };
+
   NC.drawRig = function (ctx, rig, equip, P, x, y, o) {
     o = o || {};
     const W = NC.ITEMS[equip.weapon];
     const S = solve(rig, equip, P, W);
+    const drawAttached=(socket,layer)=>{
+      for(const a of (NC.ITEMS[equip.top]?.attachments||NC.RIG_ATTACHMENTS?.[rig.name]||[])){
+        if(a.visible===false||a.socket!==socket||a.layer!==layer||(o.hideAttachedWeapons&&socket.startsWith('hand')))continue;
+        const sprite=NC.SPR[a.sprite];if(!sprite?.img)continue;
+        const at=attachmentLocal(S,rig,equip,P,a);
+        ctx.save();ctx.translate(...at.origin);ctx.rotate(at.angle);ctx.scale(a.scale??1,a.scale??1);
+        ctx.drawImage(sprite.img,-a.anchor[0]*a.w,-a.anchor[1]*a.h,a.w,a.h);ctx.restore();
+      }
+    };
     ctx.save();
     ctx.translate(x, y);
     const k = (o.scale || 1) * RIG_SCALE;
@@ -863,7 +894,9 @@
       ctx.restore();
     }
     const farArm = () => {
+      drawAttached('handB','back');
       drawLimb(ctx, S.aB, S.armFar, o);
+      drawAttached('handB','front');
       if (NC.drawOffhand && !o.noWeapon) NC.drawOffhand(ctx, equip, S, P, o); // a shield in the far hand (js/jobs3.js)
       if (W && W.dual && !o.noWeapon && P.tuck < 0.5 && !S.farW && hide < 0.99) {
         // the second of a pair (daggers) in the far fist, pointing the way that fist faces
@@ -905,13 +938,16 @@
     // the near arm raised overhead goes behind the head, with what it holds (anim.js aBack: the chibi's short arm can't
     // clear its big head, and in front of it the fist covers the face)
     const armBack = (P.aBack || 0) > 0.5, nearArm = () => {
+      drawAttached('handF','back');
       const g = S.gripN; // (a grip hand: the palm, then the weapon, the forearm, then the fingers over the handle)
       if (g) gripPiece(ctx, S.aF, S.armN, o, g.back);
       if (!behind && !mid && !(front && farHeld)) weapon();
       drawLimb(ctx, S.aF, S.armN, o);
       if (g) gripPiece(ctx, S.aF, S.armN, o, g.front);
+      drawAttached('handF','front');
     };
     if (armBack) nearArm();
+    drawAttached('head','back');drawAttached('face','back');
     // head (the hairstyle) + hat
     const HEAD = headOf(equip, rig), hj = HEAD.joints.neck, HP = HEAD.over || HEAD; // (a creator head: its back hair is drawn)
     const hat = hat0, hatS = hat && NC.SPR[hat.sprite]; // (as worn on this hair: js/hatpair.js)
@@ -946,6 +982,7 @@
       if (NC.drawGlasses) NC.drawGlasses(ctx, HEAD, equip, o);
     }
     ctx.restore();
+    drawAttached('head','front');drawAttached('face','front');
     if (!armBack) nearArm();
     if (wisps) for (let i = 1; i < wisps.length; i++) wisp(wisps[i], i);
 
