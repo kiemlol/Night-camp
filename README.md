@@ -58,6 +58,23 @@ nhập còn hợp lệ sau restart. Không chạy nhiều replica dùng chung fi
 
 ## Cutout Studio v1
 
+Sửa thao tác rig và nhập ảnh tách mảnh:
+
+- Kéo bàn tay/bàn chân để đặt đầu mút bằng IK; vòng màu cam ở khuỷu/gối chỉnh độ
+  gập trực tiếp, không cần Shift. Vai/hông quay cả chi. Góc tính từ tư thế đầu
+  thao tác, không cộng dồn theo sự kiện chạm. Canvas chặn chọn chữ/menu giữ chạm.
+- Editor tắt hiệu chỉnh cầm kiếm tự động khi chỉnh tay. Khớp chân đi theo thân
+  nghiêng; renderer hỗ trợ `overlap` để chồng mép ở vai/hông, cùng các điểm
+  `elbow`/`knee` tùy chỉnh. Đổi kích thước ảnh đồng thời co giãn các điểm khớp.
+- Tải ảnh PNG/WebP và bật **Tự cắt các mảnh rời**: Studio tìm các vùng tách nhau
+  bằng alpha hoặc nền phẳng. Xem trước, lọc bụi/gộp vùng, chọn vai trò cho mảnh
+  rồi lưu vào tài nguyên project hoặc gán cho đầu/thân/tay/chân. Không tự suy
+  đoán giải phẫu hay cắt bộ phận còn dính liền. Ảnh phân tích thu về tối đa
+  2048 px cạnh dài; chọn Trong suốt để giữ vùng trắng của hình khi cần.
+- Bộ renderer riêng được tạo bởi `node tools/build-cutout-runtime.mjs`; dùng
+  cùng renderer cho Studio và demo. Công cụ giải nén bundle kèm runtime này để
+  các khớp và độ chồng mép được giữ khi tích hợp vào game khác.
+
 Studio hỗ trợ đọc dữ liệu trực tiếp từ GitHub khi `window.STUDIO_GITHUB=true`.
 Nút **Toàn bộ thư viện** duyệt hợp nhất file trong `dist-full/<build>` và
 `dist/<build>`; tìm ảnh/map, nghe âm thanh, tải mã nguồn/rig, xem tên clip Spine.

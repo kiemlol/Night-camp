@@ -20,6 +20,7 @@ export function validate(p) {
   const seen=new Set();
   for(const k of c.keys){if(!Number.isFinite(k.t)||k.t<0||k.t>c.dur||seen.has(k.t)||!CURVES[k.curve]||!k.P||Object.values(k.P).some(v=>typeof v!=='boolean'&&!Number.isFinite(v)))fail('Keyframe không hợp lệ hoặc trùng thời điểm');seen.add(k.t)}
   const joints={head:['neck'],torso:['pelvis','neck','shoulderL','shoulderR','hipL','hipR'],armF:['shoulder','hand'],armB:['shoulder','hand'],legF:['hip','foot'],legB:['hip','foot']};
+  for(const s of Object.values(p.parts||{})){if(s.overlap!==undefined&&(!Number.isFinite(s.overlap)||s.overlap<0||s.overlap>40))fail('Độ chồng mép không hợp lệ');for(const key of ['elbow','knee'])if(s.joints?.[key]&&(!Array.isArray(s.joints[key])||s.joints[key].length!==2||!s.joints[key].every(Number.isFinite)))fail('Khớp giữa không hợp lệ')}
   for(const part of PARTS){const s=p.parts?.[part];if(!s||![s.w,s.h].every(v=>Number.isFinite(v)&&v>0&&v<=1000)||typeof s.src!=='string'||!(/^assets\/[\w./-]+\.(png|webp)$/.test(s.src)||/^data:image\/(png|webp);base64,[A-Za-z0-9+/=]+$/.test(s.src)))fail('Sprite không hợp lệ: '+part);for(const j of joints[part])if(!Array.isArray(s.joints?.[j])||s.joints[j].length!==2||!s.joints[j].every(Number.isFinite))fail('Thiếu khớp '+part+'.'+j)}
   return p;
 }
