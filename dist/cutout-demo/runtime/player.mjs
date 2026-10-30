@@ -4,6 +4,8 @@ let serial=0;
 const loadImage=src=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(Error('Không tìm được ảnh: '+src.slice(0,100)));img.src=src});
 export class CutoutPlayer {
   static async load(spec, base=new URL('../',import.meta.url)){
+    // Authored poses must not be overwritten by automatic weapon-grip correction.
+    NC.GRIPFIX=false;
     if(spec.format!=='cutout-character-v1')throw Error('Không đúng định dạng nhân vật');
     for(const clip of Object.values(spec.clips))validate({format:'nightcamp-cutout-v1',rig:spec.rig,parts:spec.parts,clip});
     for(const id of ['idle','walk','run','attack'])if(!spec.clips[id])throw Error('Thiếu clip '+id);
