@@ -1,6 +1,7 @@
 import {connectSource} from '../source.mjs';
 import {blankClip,appendInheritedFrame,copyPoseToFrames} from '../timeline.mjs';
-import {validatePet,samplePet,boneMatrices,activeSprite,poseBounds,drawPet,inversePoint} from './runtime.mjs';
+import {validatePet,samplePet,poseBounds,drawPet} from './runtime.mjs';
+import {petHandles,pickPetHandle,beginPetDrag,dragPetBone,restoreBoneOffsets} from './rig-controls.mjs';
 const $=id=>document.getElementById(id),clone=v=>structuredClone(v),message=text=>$('status').textContent=text;
 const safe=fn=>async(...args)=>{try{return await fn(...args)}catch(e){message('Lỗi: '+e.message);console.error(e)}};
 const on=(id,event,fn)=>$(id).addEventListener(event,safe(fn));
@@ -10,6 +11,9 @@ const label=b=>names[b.id]||b.id;
 const state={project:null,pose:null,bone:null,key:0,time:0,playing:false,images:new Map(),undo:[],redo:[],bounds:null};
 const cache=new Map();let source,catalog,adoption=0,drag=null,anchorRect=null,copySource=null;
 const ctx=$('stage').getContext('2d'),anchorCtx=$('anchor').getContext('2d');
+document.querySelector('.viewbar').insertAdjacentHTML('beforeend','<label class="drag-mode">Kéo<select id="dragMode" aria-label="Chế độ kéo pet"><option value="rotate">Tạo pose · giữ khớp nối</option><option value="translate">Dịch / tách bộ phận</option></select></label>');
+$('poseHide').closest('label').insertAdjacentHTML('afterend','<button id="restoreJoint">Nối lại khớp bộ phận (frame này)</button><button id="restoreAllJoints">Nối lại mọi khớp lệch (frame này)</button><p class="hint">Khôi phục độ dịch từ mẫu gốc, giữ góc đang chỉnh. Chỉ thay pose hiện tại; bấm Ghi pose để lưu. Không xóa animation.</p>');
+$('stageHint').textContent='Kéo vòng ở bàn chân / đầu / đuôi để tạo pose, giữ khớp nối · Ghi pose để lưu';
 function checkpoint(){state.undo.push(JSON.stringify(state.project));if(state.undo.length>50)state.undo.shift();state.redo=[]}
 function stash(){state.project.clips||={};state.project.clips[state.project.activeClipId||'custom']=clone(state.project.clip)}
 function persist(){stash();try{localStorage.setItem('nightcamp.pet.cutout.v1',JSON.stringify(state.project))}catch{message('Bộ nhớ nháp pet đầy. Bấm Lưu project để tải bản sao.')}}
@@ -63,6 +67,13 @@ on('play','click',()=>{state.playing=!state.playing;if(state.time>=state.project
 on('scrub','input',()=>{pause();state.time=Number($('scrub').value);state.key=state.project.clip.keys.reduce((best,k,i)=>Math.abs(k.t-state.time)<Math.abs(state.project.clip.keys[best].t-state.time)?i:best,0);state.pose=samplePet(state.project.clip,state.time);renderKeys();renderPose()});
 for(const [field,ch]of [['rotation','rot'],['dx','dx'],['dy','dy'],['sx','sx'],['sy','sy']])on(field,'change',()=>{const n=$(field).valueAsNumber;if(!Number.isFinite(n)||((ch==='sx'||ch==='sy')&&Math.abs(n)>10))throw Error('Giá trị pose không hợp lệ');pause();state.pose[state.bone+':'+ch]=ch==='rot'?n*Math.PI/180:n;message('Pose chưa ghi — bấm Ghi pose hoặc thêm frame để lưu')});
 on('variant','change',()=>{pause();state.pose[state.bone+':img']=Number($('variant').value);message('Biến thể chưa ghi — bấm Ghi pose')});on('poseHide','change',()=>{pause();state.pose[state.bone+':hide']=$('poseHide').checked;message('Thay đổi chưa ghi — bấm Ghi pose')});
+function repairOffsets(all){
+ pause();const original=catalog.rigs[state.project.id],clip=original?.clips[state.project.activeClipId]||original?.clips.idle;
+ const reference=clip?samplePet(clip,Math.min(state.time,clip.dur)):state.project.clips?.idle?samplePet(state.project.clips.idle,Math.min(state.time,state.project.clips.idle.dur)):{};
+ const ids=all?state.project.bones.filter(b=>b.parent!==null).map(b=>b.id):[state.bone];state.pose=restoreBoneOffsets(state.pose,ids,reference);renderPose();message('Đã nối lại '+ids.length+' khớp ở pose hiện tại, giữ góc xoay · Bấm Ghi pose để lưu');
+}
+on('restoreJoint','click',()=>repairOffsets(false));on('restoreAllJoints','click',()=>repairOffsets(true));
+on('dragMode','change',()=>{drag=null;const move=$('dragMode').value==='translate';document.querySelector('.viewbar').dataset.dragMode=$('dragMode').value;$('stageHint').textContent=move?'Chế độ dịch / tách bộ phận — kéo có thể làm rời khớp':'Kéo vòng ở bàn chân / đầu / đuôi để tạo pose, giữ khớp nối · Ghi pose để lưu';message(move?'Đang bật dịch / tách bộ phận. Đổi về Tạo pose để giữ khớp.':'Đang tạo pose: kéo xoay, giữ nguyên điểm nối.')});
 for(const [field,target,index]of [['pivotX','pivot',0],['pivotY','pivot',1],['atX','at',0],['atY','at',1]])on(field,'change',()=>mutate(p=>{p.bones.find(b=>b.id===state.bone)[target][index]=$(field).valueAsNumber}));
 on('boneScale','change',()=>mutate(p=>{p.bones.find(b=>b.id===state.bone).scale=$('boneScale').valueAsNumber}));
 on('parent','change',()=>mutate(p=>{p.bones.find(b=>b.id===state.bone).parent=$('parent').value||null}));
@@ -95,16 +106,16 @@ for(const [id,key]of [['petName','name'],['petId','id']])on(id,'change',()=>muta
 on('anchor','pointerdown',e=>{e.preventDefault();if(!anchorRect)return;const r=$('anchor').getBoundingClientRect(),x=(e.clientX-r.left)*280/r.width,y=(e.clientY-r.top)*220/r.height;mutate(p=>{p.bones.find(b=>b.id===state.bone).pivot=[Math.max(0,Math.min(1,(x-anchorRect.x)/anchorRect.w)),Math.max(0,Math.min(1,(y-anchorRect.y)/anchorRect.h))]})});
 on('stage','pointerdown',e=>{
  e.preventDefault();if(!state.project||!$('bones').checked)return;
- const r=$('stage').getBoundingClientRect(),xy=[e.clientX-r.left,e.clientY-r.top],base=view(),M=boneMatrices(state.project,state.pose,base);let id=null,d=22;
- for(const b of state.project.bones){const dist=Math.hypot(M[b.id][4]-xy[0],M[b.id][5]-xy[1]);if(dist<d){d=dist;id=b.id}}if(!id)return;
- pause();checkpoint();state.bone=id;const b=selected(),parent=b.parent?M[b.parent]:base;drag={id,parent,start:inversePoint(parent,...xy),dx:state.pose[id+':dx']||0,dy:state.pose[id+':dy']||0};$('stage').setPointerCapture(e.pointerId);renderBone();
+ const r=$('stage').getBoundingClientRect(),xy=[e.clientX-r.left,e.clientY-r.top],base=view(),handle=pickPetHandle(petHandles(state.project,state.pose,base),xy,state.bone);if(!handle)return;
+ pause();checkpoint();state.bone=handle.id;drag=beginPetDrag(state.project,state.pose,handle,xy,base,$('dragMode').value);$('stage').setPointerCapture(e.pointerId);renderBone();
 });
-on('stage','pointermove',e=>{if(!drag)return;e.preventDefault();const r=$('stage').getBoundingClientRect(),p=inversePoint(drag.parent,e.clientX-r.left,e.clientY-r.top);state.pose[drag.id+':dx']=drag.dx+p[0]-drag.start[0];state.pose[drag.id+':dy']=drag.dy+p[1]-drag.start[1];renderPose();message('Đang chỉnh khớp '+label(selected())+' · Bấm Ghi pose để lưu')});
+on('stage','pointermove',e=>{if(!drag)return;e.preventDefault();const r=$('stage').getBoundingClientRect();state.pose=dragPetBone(drag,[e.clientX-r.left,e.clientY-r.top]);renderPose();message((drag.mode==='translate'?'Đang dịch bộ phận ':'Đang tạo pose, giữ khớp · ')+label(selected())+' · Bấm Ghi pose để lưu')});
 for(const event of ['pointerup','pointercancel','lostpointercapture'])on('stage',event,()=>{drag=null});
 for(const id of ['stage','anchor'])for(const event of ['contextmenu','selectstart','dragstart'])$(id).addEventListener(event,e=>e.preventDefault());
 function draw(){
  const r=$('stage').getBoundingClientRect(),dpr=devicePixelRatio||1,canvas=$('stage');if(canvas.width!==Math.round(r.width*dpr)||canvas.height!==Math.round(r.height*dpr)){canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr)}ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,r.width,r.height);ctx.strokeStyle='#364759';ctx.lineWidth=1;for(let x=r.width/2%40;x<r.width;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,r.height);ctx.stroke()}if(!state.project)return;
  drawPet(ctx,state.project,state.pose,state.images,view(),{bones:$('bones').checked,selected:state.bone});
+ if($('bones').checked){ctx.save();ctx.lineWidth=2;for(const h of petHandles(state.project,state.pose,view())){if(h.kind!=='tip')continue;ctx.strokeStyle=h.id===state.bone?'#ffbd80':'#d3ed92';ctx.beginPath();ctx.arc(h.xy[0],h.xy[1],h.id===state.bone?7:5,0,Math.PI*2);ctx.stroke()}ctx.restore()}
  const b=selected(),s=state.project.sprites[b.sprite],img=state.images.get(b.sprite);anchorCtx.clearRect(0,0,280,220);anchorRect=null;if(!s||!img)return;
  const k=Math.min(250/s.w,185/s.h),w=s.w*k,h=s.h*k;anchorRect={x:(280-w)/2,y:(220-h)/2,w,h};anchorCtx.drawImage(img,anchorRect.x,anchorRect.y,w,h);const x=anchorRect.x+b.pivot[0]*w,y=anchorRect.y+b.pivot[1]*h;anchorCtx.strokeStyle='#d3ed92';anchorCtx.lineWidth=2;anchorCtx.beginPath();anchorCtx.arc(x,y,6,0,Math.PI*2);anchorCtx.moveTo(x-12,y);anchorCtx.lineTo(x+12,y);anchorCtx.moveTo(x,y-12);anchorCtx.lineTo(x,y+12);anchorCtx.stroke();
 }

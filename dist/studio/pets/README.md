@@ -11,9 +11,18 @@ Seven presets: wolf, falcon, wyvern, lantern, axe/shield/crossbow battle puppets
 There are 29 baked clips, derived from the original `js/petrig.js` pose equations
 with deterministic preview states. This is not a recovery of the full procedural
 AI/spring simulation, combat, summons or online server. Only rigid cutout images
-and parented transforms are edited; no Spine, weighted meshes, strip deformation
-or automatic IK. Parts rotate and translate as rigid pieces, so very large edits
+and parented transforms are edited; no Spine, weighted meshes or strip deformation
+of the images. Parts rotate and translate as rigid pieces, so very large edits
 can expose joins; adjust attachment/pivot/overlap by moving the pieces.
+
+Preview dragging defaults to **Tạo pose · giữ khớp nối**: drag a hollow ring on
+the paw/head/tail to rotate around its pinned attachment. Existing puppet elbows
+and knees use two-segment rotational IK. Dragging a pivot uses a virtual lever;
+translation requires **Dịch / tách bộ phận** in the always-visible drag selector.
+In **Tư thế**, **Nối lại khớp** restores displaced offsets in the current pose from
+the original preset (or a custom rig's saved idle), retaining angles and leaving
+other frames untouched. Press **Ghi pose** to commit. Single-image legs remain
+rigid cutouts, not newly split knee rigs or weighted meshes.
 
 Select a bone on Preview, the part buttons, or the selectors in **Khớp & ảnh**
 and **Tư thế**. Edit its parent, local attachment offset, image pivot (0–1), image
