@@ -146,6 +146,11 @@ Các clip nguồn chỉ có một pose tĩnh được ghi rõ trong danh sách, 
 thành động tác đi/chạy không có trong dữ liệu. Có thể tắt **Phát ngay sau khi nạp**.
 
 **Thú cưng cutout:** bấm nút ở thanh công cụ hoặc mục cùng tên trong menu ☰.
+**Tạo pet trống** bắt đầu với một gốc trống và một frame trung tính, không kế thừa
+mẫu. Chế độ **Dựng rig** cho thêm/xóa/đổi tên xương, nối cha–con, đặt khớp trên
+preview, gán ảnh, chỉnh góc gốc và lớp. Chế độ **Animation** khóa khung gốc để
+kéo tạo pose không đổi cấu trúc. Đổi ID/xóa xương cập nhật các clip liên quan;
+lưu bundle hoặc HTML mang theo rig mới và bộ phát tương thích.
 Có 7 rig (sói, chim ưng, wyvern, đèn lồng, ba dạng rối) và 29 clip mẫu; chỉnh
 xương cha/con, điểm neo, ảnh, thứ tự lớp, pose và keyframe. Project/nháp pet tách
 riêng với nhân vật; có thể tạo pet mới từ rig có sẵn và tải ảnh riêng.

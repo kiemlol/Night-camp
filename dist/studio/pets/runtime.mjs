@@ -11,6 +11,7 @@ export function validatePet(p){
  for(const id of p.spriteOrder){const s=p.sprites[id];if(typeof id!=='string'||!/^[a-zA-Z0-9_-]{1,100}$/.test(id)||reserved.has(id)||!s||![s.w,s.h].every(v=>Number.isFinite(v)&&v>0&&v<=2000)||typeof s.src!=='string'||!(/^assets\/[\w./-]+\.(png|webp)$/.test(s.src)&&!s.src.split('/').includes('..')||/^data:image\/(png|webp);base64,[A-Za-z0-9+/=]+$/.test(s.src)))fail('Ảnh pet không hợp lệ: '+id)}
  const ids=new Set(p.bones.map(b=>b.id));if(ids.size!==p.bones.length)fail('Trùng ID xương');
  for(const b of p.bones){
+  if(b.name!==undefined&&(typeof b.name!=='string'||!b.name.trim()||b.name.length>100)||b.rotation!==undefined&&(!Number.isFinite(b.rotation)||Math.abs(b.rotation)>Math.PI*20))fail('Tên / góc gốc của xương không hợp lệ');
   if(typeof b.id!=='string'||!/^[a-zA-Z0-9_-]{1,60}$/.test(b.id)||reserved.has(b.id)||b.parent!==null&&!ids.has(b.parent)||b.sprite!==null&&!p.spriteOrder.includes(b.sprite))fail('Liên kết xương / ảnh không hợp lệ');
   if(![b.at,b.pivot].every(a=>Array.isArray(a)&&a.length===2&&a.every(v=>Number.isFinite(v)&&Math.abs(v)<=2000))||b.pivot.some(v=>v<0||v>1)||!Number.isFinite(b.scale)||b.scale<=0||b.scale>10)fail('Điểm neo / tỷ lệ không hợp lệ');
   for(const [id,pivot]of Object.entries(b.variantPivots||{}))if(!p.spriteOrder.includes(id)||!Array.isArray(pivot)||pivot.length!==2||!pivot.every(v=>Number.isFinite(v)&&v>=0&&v<=1))fail('Điểm neo biến thể không hợp lệ');
@@ -32,7 +33,7 @@ export const point=(m,x,y)=>[m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]];
 export function inversePoint(m,x,y){const d=m[0]*m[3]-m[1]*m[2];if(Math.abs(d)<1e-8)throw Error('Xương đang có tỷ lệ 0; tăng tỷ lệ trước khi kéo');return [(m[3]*(x-m[4])-m[2]*(y-m[5]))/d,(-m[1]*(x-m[4])+m[0]*(y-m[5]))/d]}
 export function boneMatrices(p,pose,base=[1,0,0,1,0,0]){
  const result=Object.create(null),byId=Object.fromEntries(p.bones.map(b=>[b.id,b]));
- const get=id=>{if(result[id])return result[id];const b=byId[id],a=pose[id+':rot']||0,c=Math.cos(a),s=Math.sin(a),sx=(pose[id+':sx']??1)*b.scale,sy=(pose[id+':sy']??1)*b.scale;return result[id]=multiply(b.parent?get(b.parent):base,[c*sx,s*sx,-s*sy,c*sy,b.at[0]+(pose[id+':dx']||0),b.at[1]+(pose[id+':dy']||0)])};
+ const get=id=>{if(result[id])return result[id];const b=byId[id],a=(b.rotation||0)+(pose[id+':rot']||0),c=Math.cos(a),s=Math.sin(a),sx=(pose[id+':sx']??1)*b.scale,sy=(pose[id+':sy']??1)*b.scale;return result[id]=multiply(b.parent?get(b.parent):base,[c*sx,s*sx,-s*sy,c*sy,b.at[0]+(pose[id+':dx']||0),b.at[1]+(pose[id+':dy']||0)])};
  for(const b of p.bones)get(b.id);return result;
 }
 export function activeSprite(p,pose,b){const index=pose[b.id+':img']??-1;return index>=0?p.spriteOrder[index]:b.sprite}

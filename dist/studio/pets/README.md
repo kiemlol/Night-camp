@@ -5,7 +5,43 @@ the main Studio menu. Mobile starts on Preview; ☰ switches tools without a lon
 document scroll. **← Nhân vật** returns to the character editor without resetting
 either project. Pet drafts use their own `nightcamp.pet.cutout.v1` storage key.
 
-## Included
+## Build a new species from scratch
+
+Choose **Tạo pet trống** under **Chọn pet & chuyển động**. It creates just one
+empty root and one neutral idle key: no preset images, skeleton or motion is copied.
+The always-visible **Chế độ** selector separates two workflows:
+
+- **Dựng rig** shows the neutral rest skeleton. Add child or independent root
+  bones, rename labels/IDs, delete one bone or a whole branch, assign uploaded
+  PNG/WebP or existing images, edit rest rotation/size/attachment and front/back
+  layer order. Changes apply to the skeleton shared by all animations.
+- **Animation** locks structural controls. Dragging or editing pose channels only
+  changes the current pose; **Ghi pose** commits it to a frame. Entering Rig does
+  not bake the displayed animation pose into the rest skeleton.
+
+In Rig, **Thêm xương tại chỗ chạm** adds a child of the selected bone at the
+clicked position. **Nối xương đang chọn → cha** links the selected child to a
+clicked parent; a cycle is rejected. Detach with **Gốc / không có cha**.
+Reparenting preserves world position/rotation/scale at rest, not the world-space
+trajectory of every existing animation: changing hierarchy can require retuning clips.
+**Đặt khớp trên ảnh · giữ ảnh** places/drags the pivot directly on the preview;
+the picture and child joints stay fixed at rest. The image-anchor panel and pivot
+number fields have the same behavior. **Dịch bộ phận / khớp** moves the piece and
+its descendants. All these operations support Undo/Redo.
+
+Renaming an ID migrates child links and pose channels in every saved clip. Deleting
+one bone promotes its children, preserving rest placement; deleting a branch removes
+its channels from all clips. Both retain the images in the project library. Keep at
+least one root; use a blank project to start over. Limits: 100 bones, 300 images.
+Images must be prepared as separate cutout pieces; uploading a flat illustration
+does not automatically infer anatomy or generate hidden art. Mesh/weights are not added.
+
+Saved projects, game bundles, standalone HTML previews and the downloadable runtime
+include custom bone labels and additive rest `rotation` in radians. Use the newly
+exported pet runtime when moving a custom rig to a game; older runtime versions do
+not understand the new rest rotation. Existing preset projects remain compatible.
+
+## Presets and animation
 
 Seven presets: wolf, falcon, wyvern, lantern, axe/shield/crossbow battle puppets.
 There are 29 baked clips, derived from the original `js/petrig.js` pose equations
