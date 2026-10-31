@@ -6,6 +6,7 @@ export function validateAttachments(list=[]){
   if(typeof a.src!=='string'||!(/^assets\/[\w./-]+\.(png|webp|jpg)$/.test(a.src)||/^data:image\/(png|webp);base64,[A-Za-z0-9+/=]+$/.test(a.src)))throw Error('Ảnh phụ kiện không hợp lệ');
   if(![a.w,a.h,a.scale,a.x,a.y,a.rotation].every(Number.isFinite)||a.w<1||a.h<1||a.w>2000||a.h>2000||a.scale<.05||a.scale>10||Math.abs(a.x)>2000||Math.abs(a.y)>2000||Math.abs(a.rotation)>Math.PI*20)throw Error('Kích thước / góc phụ kiện không hợp lệ');
   if(!Array.isArray(a.anchor)||a.anchor.length!==2||!a.anchor.every(v=>Number.isFinite(v)&&v>=0&&v<=1))throw Error('Điểm neo phải nằm trong ảnh');
+  if(a.headFit!==undefined){const f=a.headFit,points=(ps,min,max)=>Array.isArray(ps)&&ps.length===3&&ps.every(p=>Array.isArray(p)&&p.length===2&&p.every(v=>Number.isFinite(v)&&v>=min&&v<=max));if(!f||f.version!==1||!['silhouette-core','manual'].includes(f.method)||!points(f.points,0,1)||!points(f.target,-2,3)||!Number.isFinite(f.confidence)||f.confidence<0||f.confidence>1)throw Error('Mốc ôm đầu không hợp lệ')}
  }
  return list;
 }

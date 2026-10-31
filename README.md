@@ -138,6 +138,19 @@ khớp cỡ mặc định 0,45 của bản lỗi trước, bỏ qua cỡ đã ch
 có thể Hoàn tác. Với kính có trang trí lệch, chỉnh neo tới cầu kính rồi tinh chỉnh
 Lệch X/Y. Project cũ không tự bị cắt ảnh hay ghi đè điểm neo đã chỉnh.
 
+**Tự căn mũ ôm đầu:** khi tải ảnh loại Mũ, có thể bật tự căn theo ba mốc ước
+lượng (trán/gáy/cằm). Bộ phân tích silhouette chạy trong trình duyệt, tìm vùng
+thân đặc để giảm ảnh hưởng tai/sừng/cánh; không dùng dịch vụ AI và không thể
+hiểu chính xác mọi thiết kế. Ảnh đục nền hoặc vùng thân quá dẹt sẽ được báo
+chỉnh tay, chưa tự đổi cỡ. Dành cho mũ giáp/ôm đầu; tắt cho mũ vành, tai nghe.
+Mũ đã nhập dùng nút **Nhận diện mốc & tự căn mũ**. Có thể căn theo ảnh đầu hoặc
+mũ khác đã chỉnh chuẩn (kể cả mũ mẫu đã ẩn, nếu chọn rõ trong danh sách).
+Mở **Kiểm tra / chỉnh ba mốc ôm đầu**, kéo mốc trên mũ/đầu rồi **Áp dụng**.
+Phép căn giữ tỷ lệ gốc của ảnh, tính cỡ/góc/neo/độ lệch; không bóp méo hình vẽ,
+không chỉnh các phụ kiện khác hoặc animation. Hỗ trợ Hoàn tác; không tự sửa
+project cũ khi mở lại. Các mốc và kết quả được lưu trong project/bundle;
+kết quả là các trường transform sẵn có nên bộ phát không cần thuật toán nhận diện.
+
 Khi nạp clip Pose Studio, Studio giữ đường cong `snap/back`, bổ sung đoạn nối
 cuối chu kỳ và giữ cả các key gốc nằm ngoài thời lượng bị khai báo thiếu.
 24 clip `shot`/`loop` được chuyển từ pose sống của engine gốc sang chu kỳ thở/lắc
