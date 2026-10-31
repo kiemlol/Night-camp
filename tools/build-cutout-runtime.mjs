@@ -15,7 +15,10 @@ const attachmentHelpers=`
     let origin,angle;
     if(a.socket==='head'||a.socket==='face'){
       const head=headOf(equip,rig),j=head.joints.neck,hb=head.head||[.5,0,.8];
-      const target=a.socket==='face'?[head.w*.5,head.h*.55]:[head.w*hb[0],head.h*hb[1]];
+      // Creator heads share measured eye positions relative to the neck (glasses.js).
+      // The image midpoint is hair/forehead, NOT the bridge of the glasses.
+      const eyes=NC.eyesOf?NC.eyesOf(head):[[j[0]+4.07,j[1]-11.22],[j[0]+20.08,j[1]-12.23]];
+      const target=a.socket==='face'?[(eyes[0][0]+eyes[1][0])/2,(eyes[0][1]+eyes[1][1])/2]:[head.w*hb[0],head.h*hb[1]];
       angle=P.lean*.45+(P.head||0);
       origin=add([S.neck[0],S.neck[1]+(P.headY||0)],rotV(sub(target,j),angle));
     }else{

@@ -128,6 +128,13 @@ Preview và nút Phát/Ghi pose luôn hiện khi chỉnh; chỉ vùng công cụ
 Xoay ngang đặt preview bên trái, công cụ bên phải. Máy tính giữ bố cục ba cột.
 Tab **Điểm neo & xương** có bộ chọn sáu bộ phận riêng, đồng bộ với tab nhân vật.
 
+Phụ kiện: chọn loại **Kính** trước khi tải ảnh để gắn đúng vào mắt. Ảnh tải mới
+được bỏ viền trong suốt; có thể kéo điểm neo trực tiếp tới cầu kính và xem ngay
+trên nhân vật. Nút **Căn kính vào mắt** sửa cả ảnh cũ còn viền trong suốt:
+đặt lại điểm gắn, neo giữa phần ảnh có nội dung, tỷ lệ, góc và độ lệch; không
+thay ảnh gốc. Với kính có trang trí lệch, chỉnh neo tới cầu kính rồi tinh chỉnh
+Lệch X/Y. Project cũ không tự bị cắt ảnh hay ghi đè điểm neo đã chỉnh.
+
 Khi nạp clip Pose Studio, Studio giữ đường cong `snap/back`, bổ sung đoạn nối
 cuối chu kỳ và giữ cả các key gốc nằm ngoài thời lượng bị khai báo thiếu.
 24 clip `shot`/`loop` được chuyển từ pose sống của engine gốc sang chu kỳ thở/lắc
