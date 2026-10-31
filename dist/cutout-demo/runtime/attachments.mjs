@@ -11,7 +11,7 @@ export function validateAttachments(list=[]){
 }
 let sequence=0;
 export function makeAttachment(entry,headWidth=72){
- const s=entry.sprite,isWeapon=entry.category==='weapon',glasses=entry.category==='glasses',w=isWeapon?s.w*.95:headWidth*(glasses ? .45 : entry.fit||1.3),h=w*s.h/s.w;
+ const s=entry.sprite,isWeapon=entry.category==='weapon',glasses=entry.category==='glasses',w=isWeapon?s.w*.95:headWidth*(glasses ? .85 : entry.fit||1.3),h=w*s.h/s.w;
  const lens=glasses&&s.lens,raw=lens?[(lens[0][0]+lens[1][0])/2,(lens[0][1]+lens[1][1])/2]:[s.ax??.5,isWeapon?1-(entry.grip??.2):glasses ? .5 : s.brim??1],anchor=raw.map(v=>Math.max(0,Math.min(1,v)));
  return {id:'attachment_'+Date.now()+'_'+ ++sequence,name:entry.name||entry.id,sourceId:entry.id,src:s.src,socket:isWeapon?'handF':glasses?'face':'head',layer:isWeapon?'back':'front',w,h,scale:1,x:(isWeapon?0:(entry.dx||0)*headWidth)+(anchor[0]-raw[0])*w,y:(isWeapon||glasses?0:(entry.seat||0)*headWidth)+(anchor[1]-raw[1])*h,rotation:0,anchor,visible:true};
 }

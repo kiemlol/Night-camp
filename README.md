@@ -131,8 +131,11 @@ Tab **Điểm neo & xương** có bộ chọn sáu bộ phận riêng, đồng b
 Phụ kiện: chọn loại **Kính** trước khi tải ảnh để gắn đúng vào mắt. Ảnh tải mới
 được bỏ viền trong suốt; có thể kéo điểm neo trực tiếp tới cầu kính và xem ngay
 trên nhân vật. Nút **Căn kính vào mắt** sửa cả ảnh cũ còn viền trong suốt:
-đặt lại điểm gắn, neo giữa phần ảnh có nội dung, tỷ lệ, góc và độ lệch; không
-thay ảnh gốc. Với kính có trang trí lệch, chỉnh neo tới cầu kính rồi tinh chỉnh
+đặt lại điểm gắn, neo giữa phần ảnh có nội dung và độ lệch; không thay đổi
+kích thước, tỷ lệ, góc hoặc ảnh gốc. Kính mới giữ cỡ mặc định cũ (0,85 lần
+bề rộng đầu). Nút **Khôi phục cỡ kính bị thu nhỏ** sửa hàng loạt kính còn
+khớp cỡ mặc định 0,45 của bản lỗi trước, bỏ qua cỡ đã chỉnh hoặc đổi tỷ lệ;
+có thể Hoàn tác. Với kính có trang trí lệch, chỉnh neo tới cầu kính rồi tinh chỉnh
 Lệch X/Y. Project cũ không tự bị cắt ảnh hay ghi đè điểm neo đã chỉnh.
 
 Khi nạp clip Pose Studio, Studio giữ đường cong `snap/back`, bổ sung đoạn nối
